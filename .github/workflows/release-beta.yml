@@ -31,7 +31,7 @@ jobs:
     environment: AsyncAPI 
     strategy:
       matrix:
-        package-name: [ "LEGO.AsyncAPI", "LEGO.AsyncAPI.Readers", "LEGO.AsyncAPI.Bindings" ]
+        package-name: [ "ByteBard.AsyncAPI", "ByteBard.AsyncAPI.Readers", "ByteBard.AsyncAPI.Bindings" ]
     steps:
       - name: Checkout repository
         uses: actions/checkout@v1
