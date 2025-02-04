@@ -3,11 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.32126.317
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ByteBard.AsyncAPI.Tests", "test\ByteBard.AsyncAPI.Tests\ByteBard.AsyncAPI.Tests.csproj", "{32C4357C-F664-4C6C-B87B-AEF1759EC060}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LEGO.AsyncAPI.Tests", "test\LEGO.AsyncAPI.Tests\LEGO.AsyncAPI.Tests.csproj", "{32C4357C-F664-4C6C-B87B-AEF1759EC060}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ByteBard.AsyncAPI", "src\ByteBard.AsyncAPI\ByteBard.AsyncAPI.csproj", "{D4559946-300D-4C6F-B92B-4376414D19C9}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LEGO.AsyncAPI", "src\LEGO.AsyncAPI\LEGO.AsyncAPI.csproj", "{D4559946-300D-4C6F-B92B-4376414D19C9}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ByteBard.AsyncAPI.Readers", "src\ByteBard.AsyncAPI.Readers\ByteBard.AsyncAPI.Readers.csproj", "{7D9C6FBA-4B6F-48A0-B3F5-E7357021F8F9}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LEGO.AsyncAPI.Readers", "src\LEGO.AsyncAPI.Readers\LEGO.AsyncAPI.Readers.csproj", "{7D9C6FBA-4B6F-48A0-B3F5-E7357021F8F9}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{DE167614-5BCB-4046-BD4C-ABB70E9F3462}"
 	ProjectSection(SolutionItems) = preProject
@@ -15,7 +15,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		Common.Build.props = Common.Build.props
 	EndProjectSection
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ByteBard.AsyncAPI.Bindings", "src\ByteBard.AsyncAPI.Bindings\ByteBard.AsyncAPI.Bindings.csproj", "{33CA31F4-ECFE-4227-BFE9-F49783DD29A0}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LEGO.AsyncAPI.Bindings", "src\LEGO.AsyncAPI.Bindings\LEGO.AsyncAPI.Bindings.csproj", "{33CA31F4-ECFE-4227-BFE9-F49783DD29A0}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
