@@ -4,6 +4,7 @@ namespace LEGO.AsyncAPI.Models
 {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
     using LEGO.AsyncAPI.Models.Interfaces;
     using LEGO.AsyncAPI.Writers;
 
@@ -42,24 +43,19 @@ namespace LEGO.AsyncAPI.Models
         public string DefaultContentType { get; set; }
 
         /// <summary>
-        /// REQUIRED. The available channels and messages for the API.
+        /// The channels used by this application.
         /// </summary>
         public IDictionary<string, AsyncApiChannel> Channels { get; set; } = new Dictionary<string, AsyncApiChannel>();
+
+        /// <summary>
+        /// The operations this application MUST implement.
+        /// </summary>
+        public IDictionary<string, AsyncApiOperation> Operations { get; set; } = new Dictionary<string, AsyncApiOperation>();
 
         /// <summary>
         /// an element to hold various schemas for the specification.
         /// </summary>
         public AsyncApiComponents Components { get; set; }
-
-        /// <summary>
-        /// a list of tags used by the specification with additional metadata. Each tag name in the list MUST be unique.
-        /// </summary>
-        public IList<AsyncApiTag> Tags { get; set; } = new List<AsyncApiTag>();
-
-        /// <summary>
-        /// additional external documentation.
-        /// </summary>
-        public AsyncApiExternalDocumentation ExternalDocs { get; set; }
 
         /// <inheritdoc/>
         public IDictionary<string, IAsyncApiExtension> Extensions { get; set; } = new Dictionary<string, IAsyncApiExtension>();
@@ -71,6 +67,7 @@ namespace LEGO.AsyncAPI.Models
                 throw new ArgumentNullException(nameof(writer));
             }
 
+            writer.Workspace.SetRootDocument(this);
             writer.Workspace.RegisterComponents(this);
 
             writer.WriteStartObject();
@@ -97,10 +94,52 @@ namespace LEGO.AsyncAPI.Models
             writer.WriteOptionalObject(AsyncApiConstants.Components, this.Components, (w, c) => c.SerializeV2(w));
 
             // tags
-            writer.WriteOptionalCollection(AsyncApiConstants.Tags, this.Tags, (w, t) => t.SerializeV2(w));
+            writer.WriteOptionalCollection(AsyncApiConstants.Tags, this.Info.Tags, (w, t) => t.SerializeV2(w));
 
             // external docs
-            writer.WriteOptionalObject(AsyncApiConstants.ExternalDocs, this.ExternalDocs, (w, e) => e.SerializeV2(w));
+            writer.WriteOptionalObject(AsyncApiConstants.ExternalDocs, this.Info.ExternalDocs, (w, e) => e.SerializeV2(w));
+
+            // extensions
+            writer.WriteExtensions(this.Extensions);
+
+            writer.WriteEndObject();
+        }
+
+        public void SerializeV3(IAsyncApiWriter writer)
+        {
+            if (writer is null)
+            {
+                throw new ArgumentNullException(nameof(writer));
+            }
+
+            writer.Workspace.SetRootDocument(this);
+            writer.Workspace.RegisterComponents(this);
+
+            writer.WriteStartObject();
+
+            // asyncApi
+            writer.WriteRequiredProperty(AsyncApiConstants.AsyncApi, "3.0.0");
+
+            // info
+            writer.WriteRequiredObject(AsyncApiConstants.Info, this.Info, (w, i) => i.SerializeV3(w));
+
+            // id
+            writer.WriteOptionalProperty(AsyncApiConstants.Id, this.Id);
+
+            // servers
+            writer.WriteOptionalMap(AsyncApiConstants.Servers, this.Servers, (writer, key, server) => server.SerializeV3(writer));
+
+            // content type
+            writer.WriteOptionalProperty(AsyncApiConstants.DefaultContentType, this.DefaultContentType);
+
+            // channels
+            writer.WriteOptionalMap(AsyncApiConstants.Channels, this.Channels, (writer, key, channel) => channel.SerializeV3(writer));
+
+            // operations
+            writer.WriteOptionalMap(AsyncApiConstants.Operations, this.Operations, (writer, key, operation) => operation.SerializeV3(writer));
+
+            // components
+            writer.WriteOptionalObject(AsyncApiConstants.Components, this.Components, (w, component) => component.SerializeV3(w));
 
             // extensions
             writer.WriteExtensions(this.Extensions);

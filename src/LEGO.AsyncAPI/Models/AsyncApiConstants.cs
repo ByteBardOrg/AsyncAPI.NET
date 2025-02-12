@@ -9,6 +9,7 @@ namespace LEGO.AsyncAPI.Models
         public const string Info = "info";
         public const string Servers = "servers";
         public const string Channels = "channels";
+        public const string Operations = "operations";
         public const string Components = "components";
         public const string Tags = "tags";
         public const string ExternalDocs = "externalDocs";
@@ -22,6 +23,8 @@ namespace LEGO.AsyncAPI.Models
         public const string Url = "url";
         public const string Email = "email";
         public const string Protocol = "protocol";
+        public const string Host = "host";
+        public const string PathName = "pathname";
         public const string ProtocolVersion = "protocolVersion";
         public const string Variables = "variables";
         public const string Security = "security";
@@ -41,6 +44,7 @@ namespace LEGO.AsyncAPI.Models
         public const string AuthorizationUrl = "authorizationUrl";
         public const string TokenUrl = "tokenUrl";
         public const string Scopes = "scopes";
+        public const string AvailableScopes = "availableScopes";
         public const string Application = "application";
         public const string AccessCode = "accessCode";
         public const string Enum = "enum";

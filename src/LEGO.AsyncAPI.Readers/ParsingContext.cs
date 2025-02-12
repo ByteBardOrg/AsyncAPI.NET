@@ -14,6 +14,7 @@ namespace LEGO.AsyncAPI.Readers
     using LEGO.AsyncAPI.Readers.Interface;
     using LEGO.AsyncAPI.Readers.ParseNodes;
     using LEGO.AsyncAPI.Readers.V2;
+    using LEGO.AsyncAPI.Readers.V3;
 
     public class ParsingContext
     {
@@ -85,11 +86,21 @@ namespace LEGO.AsyncAPI.Readers
                     doc = this.VersionService.LoadDocument(this.RootNode);
 
                     // Register components
+                    this.Workspace.SetRootDocument(doc);
                     this.Workspace.RegisterComponents(doc); // pre-register components.
                     this.Workspace.RegisterComponent(string.Empty, this.ParseToStream(jsonNode)); // register root document.
                     this.Diagnostic.SpecificationVersion = AsyncApiVersion.AsyncApi2_0;
                     break;
+                case string version when version.StartsWith("3"):
+                    this.VersionService = new AsyncApiV3VersionService(this.Diagnostic);
+                    doc = this.VersionService.LoadDocument(this.RootNode);
 
+                    // Register components
+                    this.Workspace.SetRootDocument(doc);
+                    this.Workspace.RegisterComponents(doc); // pre-register components.
+                    this.Workspace.RegisterComponent(string.Empty, this.ParseToStream(jsonNode)); // register root document.
+                    this.Diagnostic.SpecificationVersion = AsyncApiVersion.AsyncApi3_0;
+                    break;
                 default:
                     throw new AsyncApiUnsupportedSpecVersionException(inputVersion);
             }
@@ -120,6 +131,10 @@ namespace LEGO.AsyncAPI.Readers
             {
                 case AsyncApiVersion.AsyncApi2_0:
                     this.VersionService = new AsyncApiV2VersionService(this.Diagnostic);
+                    element = this.VersionService.LoadElement<T>(node);
+                    break;
+                case AsyncApiVersion.AsyncApi3_0:
+                    this.VersionService = new AsyncApiV3VersionService(this.Diagnostic);
                     element = this.VersionService.LoadElement<T>(node);
                     break;
             }

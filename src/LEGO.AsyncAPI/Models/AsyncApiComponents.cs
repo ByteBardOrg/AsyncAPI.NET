@@ -26,15 +26,16 @@ namespace LEGO.AsyncAPI.Models
         /// </summary>
         public IDictionary<string, AsyncApiServer> Servers { get; set; } = new Dictionary<string, AsyncApiServer>();
 
-        /// <summary>
-        /// An object to hold reusable Server Variable Objects.
-        /// </summary>
-        public IDictionary<string, AsyncApiServerVariable> ServerVariables { get; set; } = new Dictionary<string, AsyncApiServerVariable>();
 
         /// <summary>
         /// An object to hold reusable Channel Item Objects.
         /// </summary>
         public IDictionary<string, AsyncApiChannel> Channels { get; set; } = new Dictionary<string, AsyncApiChannel>();
+
+        /// <summary>
+        /// An object to hold reusable Operation Objects.
+        /// </summary>
+        public IDictionary<string, AsyncApiOperation> Operations { get; set; } = new Dictionary<string, AsyncApiOperation>();
 
         /// <summary>
         /// An object to hold reusable Message Objects.
@@ -46,6 +47,12 @@ namespace LEGO.AsyncAPI.Models
         /// </summary>
         public IDictionary<string, AsyncApiSecurityScheme> SecuritySchemes { get; set; } = new Dictionary<string, AsyncApiSecurityScheme>();
 
+
+        /// <summary>
+        /// An object to hold reusable Server Variable Objects.
+        /// </summary>
+        public IDictionary<string, AsyncApiServerVariable> ServerVariables { get; set; } = new Dictionary<string, AsyncApiServerVariable>();
+
         /// <summary>
         /// An object to hold reusable Parameter Objects.
         /// </summary>
@@ -55,6 +62,26 @@ namespace LEGO.AsyncAPI.Models
         /// An object to hold reusable Correlation ID Objects.
         /// </summary>
         public IDictionary<string, AsyncApiCorrelationId> CorrelationIds { get; set; } = new Dictionary<string, AsyncApiCorrelationId>();
+
+        /// <summary>
+        /// An object to hold reusable Operation Reply Objects.
+        /// </summary>
+        public IDictionary<string, AsyncApiReply> Replies { get; set; } = new Dictionary<string, AsyncApiReply>();
+
+        /// <summary>
+        /// An object to hold reusable Operation Reply Address Objects.
+        /// </summary>
+        public IDictionary<string, AsyncApiReplyAddress> ReplyAddresses { get; set; } = new Dictionary<string, AsyncApiReplyAddress>();
+
+        /// <summary>
+        /// An object to hold reusable External Documentation Objects.
+        /// </summary>
+        public IDictionary<string, AsyncApiExternalDocumentation> ExternalDocs { get; set; } = new Dictionary<string, AsyncApiExternalDocumentation>();
+
+        /// <summary>
+        /// An object to hold reusable Tag Objects.
+        /// </summary>
+        public IDictionary<string, AsyncApiTag> Tags { get; set; } = new Dictionary<string, AsyncApiTag>();
 
         /// <summary>
         /// An object to hold reusable Operation Trait Objects.

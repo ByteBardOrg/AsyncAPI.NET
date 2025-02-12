@@ -13,6 +13,8 @@ namespace LEGO.AsyncAPI
         private readonly Dictionary<Uri, Stream> artifactsRegistry = new();
         private readonly Dictionary<Uri, IAsyncApiSerializable> resolvedReferenceRegistry = new();
 
+        public AsyncApiDocument RootDocument { get; private set; }
+
         public void RegisterComponents(AsyncApiDocument document)
         {
             if (document?.Components == null)
@@ -187,6 +189,11 @@ namespace LEGO.AsyncAPI
         private Uri ToLocationUrl(string location)
         {
             return new(location, UriKind.RelativeOrAbsolute);
+        }
+
+        public void SetRootDocument(AsyncApiDocument doc)
+        {
+            this.RootDocument = doc;
         }
     }
 }

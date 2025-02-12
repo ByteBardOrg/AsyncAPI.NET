@@ -34,6 +34,8 @@ namespace LEGO.AsyncAPI.Models
 
         public override ICollection<TBinding> Values => this.Target.Values;
 
+        public override IDictionary<string, IAsyncApiExtension> Extensions => this.target.Extensions;
+
         public override int Count => this.Target.Count;
 
         public override bool IsReadOnly => this.Target.IsReadOnly;
@@ -80,6 +82,22 @@ namespace LEGO.AsyncAPI.Models
             }
 
             this.Target.SerializeV2(writer);
+        }
+
+        public override void SerializeV3(IAsyncApiWriter writer)
+        {
+            if (writer is null)
+            {
+                throw new ArgumentNullException(nameof(writer));
+            }
+
+            if (this.Reference != null && !writer.GetSettings().ShouldInlineReference(this.Reference))
+            {
+                this.Reference.SerializeV3(writer);
+                return;
+            }
+
+            this.Target.SerializeV3(writer);
         }
 
         public override void Add(string key, TBinding value)

@@ -32,8 +32,6 @@ namespace LEGO.AsyncAPI.Services
             this.Walk(AsyncApiConstants.Servers, () => this.Walk(doc.Servers));
             this.Walk(AsyncApiConstants.Channels, () => this.Walk(doc.Channels));
             this.Walk(AsyncApiConstants.Components, () => this.Walk(doc.Components));
-            this.Walk(AsyncApiConstants.Tags, () => this.Walk(doc.Tags));
-            this.Walk(AsyncApiConstants.ExternalDocs, () => this.Walk(doc.ExternalDocs));
             this.Walk(doc as IAsyncApiExtensible);
         }
 
@@ -261,6 +259,12 @@ namespace LEGO.AsyncAPI.Services
         {
             if (externalDocs == null)
             {
+                return;
+            }
+
+            if (externalDocs is AsyncApiExternalDocumentationReference)
+            {
+                this.Walk(externalDocs as IAsyncApiReferenceable);
                 return;
             }
 
@@ -818,6 +822,12 @@ namespace LEGO.AsyncAPI.Services
                 return;
             }
 
+            if (tag is AsyncApiTag)
+            {
+                this.Walk(tag as IAsyncApiReferenceable);
+                return;
+            }
+
             this.visitor.Visit(tag);
             this.visitor.Visit(tag.ExternalDocs);
             this.visitor.Visit(tag as IAsyncApiExtensible);
@@ -855,6 +865,8 @@ namespace LEGO.AsyncAPI.Services
             {
                 this.Walk(AsyncApiConstants.Contact, () => this.Walk(info.Contact));
                 this.Walk(AsyncApiConstants.License, () => this.Walk(info.License));
+                this.Walk(AsyncApiConstants.Tags, () => this.Walk(info.Tags));
+                this.Walk(AsyncApiConstants.ExternalDocs, () => this.Walk(info.ExternalDocs));
             }
 
             this.Walk(info as IAsyncApiExtensible);
@@ -875,39 +887,40 @@ namespace LEGO.AsyncAPI.Services
             this.visitor.Visit(server as IAsyncApiExtensible);
         }
 
-        internal void Walk(IList<AsyncApiSecurityRequirement> securityRequirements)
+        internal void Walk(IList<AsyncApiSecurityScheme> securitySchemes)
         {
-            if (securityRequirements == null)
+            if (securitySchemes == null)
             {
                 return;
             }
 
-            this.visitor.Visit(securityRequirements);
+            this.visitor.Visit(securitySchemes);
 
-            // Visit Examples
-            if (securityRequirements != null)
+            // Visit traits
+            if (securitySchemes != null)
             {
-                for (int i = 0; i < securityRequirements.Count; i++)
+                for (int i = 0; i < securitySchemes.Count; i++)
                 {
-                    this.Walk(i.ToString(), () => this.Walk(securityRequirements[i]));
+                    this.Walk(i.ToString(), () => this.Walk(securitySchemes[i]));
                 }
             }
         }
 
-        internal void Walk(AsyncApiSecurityRequirement securityRequirement)
+        internal void Walk(AsyncApiSecurityScheme securityScheme)
         {
-            if (securityRequirement is null)
+            if (securityScheme is null)
             {
                 return;
             }
 
-            this.visitor.Visit(securityRequirement);
-            foreach (var item in securityRequirement.Keys)
+            if (securityScheme is AsyncApiSecuritySchemeReference reference)
             {
-                this.Walk(item as IAsyncApiReferenceable);
+                this.Walk(reference as IAsyncApiReferenceable);
+                return;
             }
 
-            this.Walk(securityRequirement as IAsyncApiExtensible);
+            this.visitor.Visit(securityScheme);
+            this.Walk(securityScheme as IAsyncApiExtensible);
         }
 
         internal void Walk(IList<AsyncApiMessage> messages)
@@ -1090,7 +1103,6 @@ namespace LEGO.AsyncAPI.Services
                 case AsyncApiParameter e: this.Walk(e); break;
                 case AsyncApiJsonSchema e: this.Walk(e); break;
                 case AsyncApiAvroSchema e: this.Walk(e); break;
-                case AsyncApiSecurityRequirement e: this.Walk(e); break;
                 case AsyncApiSecurityScheme e: this.Walk(e); break;
                 case AsyncApiServer e: this.Walk(e); break;
                 case AsyncApiServerVariable e: this.Walk(e); break;

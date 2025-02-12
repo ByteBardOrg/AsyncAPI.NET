@@ -149,14 +149,19 @@ namespace LEGO.AsyncAPI.Models
             writer.WriteEndObject();
         }
 
-        private string GetExternalReferenceV2()
+        public void SerializeV3(IAsyncApiWriter writer)
         {
-            return this.ExternalResource + (this.FragmentId != null ? "#" + this.FragmentId : string.Empty);
-        }
+            if (writer is null)
+            {
+                throw new ArgumentNullException(nameof(writer));
+            }
 
-        public void Write(IAsyncApiWriter writer)
-        {
-            this.SerializeV2(writer);
+            writer.WriteStartObject();
+
+            // $ref
+            writer.WriteOptionalProperty(AsyncApiConstants.DollarRef, this.Reference);
+
+            writer.WriteEndObject();
         }
     }
 }

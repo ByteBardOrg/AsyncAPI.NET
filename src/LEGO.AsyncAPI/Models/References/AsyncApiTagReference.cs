@@ -1,39 +1,35 @@
-// Copyright (c) The LEGO Group. All rights reserved.
+﻿// Copyright (c) The LEGO Group. All rights reserved.
 
 namespace LEGO.AsyncAPI.Models
 {
+    using System;
     using System.Collections.Generic;
     using LEGO.AsyncAPI.Models.Interfaces;
     using LEGO.AsyncAPI.Writers;
 
-    /// <summary>
-    /// The definition of a server variable this application MAY use.
-    /// </summary>
-    public class AsyncApiServerVariableReference : AsyncApiServerVariable, IAsyncApiReferenceable
+    public class AsyncApiTagReference : AsyncApiTag, IAsyncApiReferenceable
     {
-        private AsyncApiServerVariable target;
+        private AsyncApiTag target;
 
-        private AsyncApiServerVariable Target
+        private AsyncApiTag Target
         {
             get
             {
-                this.target ??= this.Reference.Workspace?.ResolveReference<AsyncApiServerVariable>(this.Reference);
+                this.target ??= this.Reference.Workspace?.ResolveReference<AsyncApiTag>(this.Reference.Reference);
                 return this.target;
             }
         }
 
-        public AsyncApiServerVariableReference(string reference)
+        public AsyncApiTagReference(string reference)
         {
-            this.Reference = new AsyncApiReference(reference, ReferenceType.ServerVariable);
+            this.Reference = new AsyncApiReference(reference, ReferenceType.Tag);
         }
 
-        public override IList<string> Enum { get => this.Target?.Enum; set => this.Target.Enum = value; }
-
-        public override string Default { get => this.Target?.Default; set => this.Target.Default = value; }
+        public override string Name { get => this.Target?.Name; set => this.Target.Name = value; }
 
         public override string Description { get => this.Target?.Description; set => this.Target.Description = value; }
 
-        public override IList<string> Examples { get => this.Target?.Examples; set => this.Target.Examples = value; }
+        public override AsyncApiExternalDocumentation ExternalDocs { get => this.Target?.ExternalDocs; set => this.Target.ExternalDocs = value; }
 
         public override IDictionary<string, IAsyncApiExtension> Extensions { get => this.Target?.Extensions; set => this.Target.Extensions = value; }
 
@@ -41,11 +37,18 @@ namespace LEGO.AsyncAPI.Models
 
         public bool UnresolvedReference { get { return this.Target == null; } }
 
+        /// <summary>
+        /// Serializes the v2.
+        /// </summary>
+        /// <remarks>
+        /// If <see cref="ReferenceInlineSetting.InlineReferences"/> serialization of the referenced tag will be skipped.
+        /// </remarks>
+        /// <param name="writer">The writer.</param>
         public override void SerializeV2(IAsyncApiWriter writer)
         {
             if (!writer.GetSettings().ShouldInlineReference(this.Reference))
             {
-                this.Reference.SerializeV2(writer);
+                // We cannot serialize the Tag as a reference under V2.
                 return;
             }
             else

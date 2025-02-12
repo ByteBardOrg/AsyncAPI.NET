@@ -156,6 +156,9 @@ namespace LEGO.AsyncAPI.Models
                 case AsyncApiVersion.AsyncApi2_0:
                     element.SerializeV2(writer);
                     break;
+                case AsyncApiVersion.AsyncApi3_0:
+                    element.SerializeV3(writer);
+                    break;
                 default:
                     throw new AsyncApiException($"specification version '{specificationVersion}' is not supported.");
             }

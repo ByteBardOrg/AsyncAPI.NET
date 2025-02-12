@@ -53,6 +53,11 @@ namespace LEGO.AsyncAPI.Models
         public virtual Uri OpenIdConnectUrl { get; set; }
 
         /// <summary>
+        /// List of the needed scope names. An empty array means no scopes are needed.
+        /// </summary>
+        public virtual IList<string> Scopes { get; set; }
+
+        /// <summary>
         /// Specification Extensions.
         /// </summary>
         public virtual IDictionary<string, IAsyncApiExtension> Extensions { get; set; } = new Dictionary<string, IAsyncApiExtension>();
@@ -96,6 +101,63 @@ namespace LEGO.AsyncAPI.Models
                     break;
                 case SecuritySchemeType.OpenIdConnect:
                     writer.WriteOptionalProperty(AsyncApiConstants.OpenIdConnectUrl, this.OpenIdConnectUrl?.ToString());
+                    break;
+                case SecuritySchemeType.Plain:
+                    break;
+                case SecuritySchemeType.ScramSha256:
+                    break;
+                case SecuritySchemeType.ScramSha512:
+                    break;
+                case SecuritySchemeType.Gssapi:
+                    break;
+                default:
+                    break;
+            }
+
+            // extensions
+            writer.WriteExtensions(this.Extensions);
+
+            writer.WriteEndObject();
+        }
+
+        public virtual void SerializeV3(IAsyncApiWriter writer)
+        {
+            writer.WriteStartObject();
+
+            // type
+            writer.WriteRequiredProperty(AsyncApiConstants.Type, this.Type.GetDisplayName());
+
+            // description
+            writer.WriteOptionalProperty(AsyncApiConstants.Description, this.Description);
+
+            switch (this.Type)
+            {
+                case SecuritySchemeType.UserPassword:
+                    break;
+                case SecuritySchemeType.ApiKey:
+                    writer.WriteOptionalProperty(AsyncApiConstants.In, this.In.GetDisplayName());
+                    break;
+                case SecuritySchemeType.X509:
+                    break;
+                case SecuritySchemeType.SymmetricEncryption:
+                    break;
+                case SecuritySchemeType.AsymmetricEncryption:
+                    break;
+                case SecuritySchemeType.HttpApiKey:
+                    writer.WriteOptionalProperty(AsyncApiConstants.Name, this.Name);
+                    writer.WriteOptionalProperty(AsyncApiConstants.In, this.In.GetDisplayName());
+                    break;
+                case SecuritySchemeType.Http:
+                    writer.WriteOptionalProperty(AsyncApiConstants.Scheme, this.Scheme);
+                    writer.WriteOptionalProperty(AsyncApiConstants.BearerFormat, this.BearerFormat);
+                    break;
+                case SecuritySchemeType.OAuth2:
+                    writer.WriteRequiredObject(AsyncApiConstants.Flows, this.Flows, (w, o) => o.SerializeV2(w));
+                    writer.WriteOptionalCollection(AsyncApiConstants.Scopes, this.Scopes, (writer, s) => writer.WriteValue(s));
+                    break;
+                case SecuritySchemeType.OpenIdConnect:
+                    writer.WriteOptionalProperty(AsyncApiConstants.OpenIdConnectUrl, this.OpenIdConnectUrl?.ToString());
+                    writer.WriteOptionalCollection(AsyncApiConstants.Scopes, this.Scopes, (writer, s) => writer.WriteValue(s));
                     break;
                 case SecuritySchemeType.Plain:
                     break;

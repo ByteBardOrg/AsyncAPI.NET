@@ -44,6 +44,8 @@ namespace LEGO.AsyncAPI.Models
 
         public override Uri OpenIdConnectUrl { get => this.Target?.OpenIdConnectUrl; set => this.Target.OpenIdConnectUrl = value; }
 
+        public override IList<string> Scopes { get => this.Target?.Scopes; set => this.Target.Scopes = value; }
+
         public override IDictionary<string, IAsyncApiExtension> Extensions { get => this.Target?.Extensions; set => this.Target.Extensions = value; }
 
         public AsyncApiReference Reference { get; set; }
@@ -61,6 +63,20 @@ namespace LEGO.AsyncAPI.Models
             {
                 this.Reference.Workspace = writer.Workspace;
                 this.Target.SerializeV2(writer);
+            }
+        }
+
+        public override void SerializeV3(IAsyncApiWriter writer)
+        {
+            if (!writer.GetSettings().ShouldInlineReference(this.Reference))
+            {
+                this.Reference.SerializeV3(writer);
+                return;
+            }
+            else
+            {
+                this.Reference.Workspace = writer.Workspace;
+                this.Target.SerializeV3(writer);
             }
         }
     }

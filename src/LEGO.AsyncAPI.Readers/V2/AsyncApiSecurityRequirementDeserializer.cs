@@ -4,6 +4,7 @@ namespace LEGO.AsyncAPI.Readers
 {
     using LEGO.AsyncAPI.Models;
     using LEGO.AsyncAPI.Readers.ParseNodes;
+    using System.Collections.Generic;
 
     /// <summary>
     /// Class containing logic to deserialize AsyncApi document into
@@ -11,11 +12,11 @@ namespace LEGO.AsyncAPI.Readers
     /// </summary>
     internal static partial class AsyncApiV2Deserializer
     {
-        public static AsyncApiSecurityRequirement LoadSecurityRequirement(ParseNode node)
+        public static IList<AsyncApiSecurityScheme> LoadSecurityRequirement(ParseNode node)
         {
             var mapNode = node.CheckMapNode("security");
 
-            var securityRequirement = new AsyncApiSecurityRequirement();
+            var securityRequirements = new List<AsyncApiSecurityScheme>();
 
             foreach (var property in mapNode)
             {
@@ -24,7 +25,8 @@ namespace LEGO.AsyncAPI.Readers
 
                 if (scheme != null)
                 {
-                    securityRequirement.Add(scheme, scopes);
+                    scheme.Scopes = scopes;
+                    securityRequirements.Add(scheme);
                 }
                 else
                 {
@@ -33,7 +35,7 @@ namespace LEGO.AsyncAPI.Readers
                 }
             }
 
-            return securityRequirement;
+            return securityRequirements;
         }
 
         private static AsyncApiSecuritySchemeReference LoadSecuritySchemeByReference(

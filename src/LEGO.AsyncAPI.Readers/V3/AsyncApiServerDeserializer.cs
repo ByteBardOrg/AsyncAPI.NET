@@ -5,18 +5,29 @@ namespace LEGO.AsyncAPI.Readers
     using LEGO.AsyncAPI.Extensions;
     using LEGO.AsyncAPI.Models;
     using LEGO.AsyncAPI.Readers.ParseNodes;
-    using System;
 
     /// <summary>
     /// Class containing logic to deserialize AsyncApi document into
     /// runtime AsyncApi object model.
     /// </summary>
-    internal static partial class AsyncApiV2Deserializer
+    internal static partial class AsyncApiV3Deserializer
     {
         private static readonly FixedFieldMap<AsyncApiServer> serverFixedFields = new()
         {
             {
-                "url", (a, n) => { SetHostAndPathname(a, n); }
+                "host", (a, n) => { a.Host = n.GetScalarValue(); }
+            },
+            {
+                "pathname", (a, n) => { a.PathName = n.GetScalarValue(); }
+            },
+            {
+                "title", (a, n) => { a.Title = n.GetScalarValue(); }
+            },
+            {
+                "summary", (a, n) => { a.Summary = n.GetScalarValue(); }
+            },
+            {
+                "externalDocs", (a, n) => { a.ExternalDocs = LoadExternalDocs(n); }
             },
             {
                 "description", (a, n) => { a.Description = n.GetScalarValue(); }
@@ -25,7 +36,7 @@ namespace LEGO.AsyncAPI.Readers
                 "variables", (a, n) => { a.Variables = n.CreateMap(LoadServerVariable); }
             },
             {
-                "security", (a, n) => { a.Security = LoadSecurityRequirement(n); }
+                "security", (a, n) => { a.Security = n.CreateList(LoadSecurityScheme); }
             },
             {
                 "tags", (a, n) => { a.Tags = n.CreateList(LoadTag); }
@@ -40,21 +51,6 @@ namespace LEGO.AsyncAPI.Readers
                 "protocol", (a, n) => { a.Protocol = n.GetScalarValue(); }
             },
         };
-
-        private static void SetHostAndPathname(AsyncApiServer a, ParseNode n)
-        {
-            var value = n.GetScalarValue();
-            if (!value.Contains("://"))
-            {
-                // Set arbitrary protocol.
-                value = "unknown://" + value;
-            }
-
-            var uri = new Uri(value);
-
-            a.Host = uri.Host;
-            a.PathName = uri.LocalPath;
-        }
 
         private static readonly PatternFieldMap<AsyncApiServer> serverPatternFields =
             new()

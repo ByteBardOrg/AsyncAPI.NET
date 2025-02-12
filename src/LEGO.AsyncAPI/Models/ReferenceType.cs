@@ -87,5 +87,10 @@ namespace LEGO.AsyncAPI.Models
         /// The server variable.
         /// </summary>
         [Display("serverVariable")] ServerVariable,
+
+        /// <summary>
+        /// The tag.
+        /// </summary>
+        [Display("tag")] Tag,
     }
 }

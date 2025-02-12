@@ -17,6 +17,16 @@ namespace LEGO.AsyncAPI.Bindings
 
         public void SerializeV2(IAsyncApiWriter writer)
         {
+            this.SerializeCore(writer);
+        }
+
+        public void SerializeV3(IAsyncApiWriter writer)
+        {
+            this.SerializeCore(writer);
+        }
+
+        private void SerializeCore(IAsyncApiWriter writer)
+        {
             if (writer is null)
             {
                 throw new ArgumentNullException(nameof(writer));

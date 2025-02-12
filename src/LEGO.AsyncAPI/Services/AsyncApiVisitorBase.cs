@@ -75,6 +75,10 @@ namespace LEGO.AsyncAPI.Services
         {
         }
 
+        public virtual void Visit(IList<AsyncApiSecurityScheme> traits)
+        {
+        }
+
         /// <summary>
         /// Visits <see cref="AsyncApiInfo"/>.
         /// </summary>
@@ -179,13 +183,6 @@ namespace LEGO.AsyncAPI.Services
         }
 
         /// <summary>
-        /// Visits <see cref="AsyncApiSecurityRequirement"/>.
-        /// </summary>
-        public virtual void Visit(AsyncApiSecurityRequirement securityRequirement)
-        {
-        }
-
-        /// <summary>
         /// Visits <see cref="AsyncApiSecurityScheme"/>.
         /// </summary>
         public virtual void Visit(AsyncApiSecurityScheme securityScheme)
@@ -199,12 +196,6 @@ namespace LEGO.AsyncAPI.Services
         {
         }
 
-        /// <summary>
-        /// Visits list of <see cref="AsyncApiSecurityRequirement"/>.
-        /// </summary>
-        public virtual void Visit(IList<AsyncApiSecurityRequirement> asyncApiSecurityRequirements)
-        {
-        }
 
         /// <summary>
         /// Visits <see cref="IAsyncApiExtensible"/>.
