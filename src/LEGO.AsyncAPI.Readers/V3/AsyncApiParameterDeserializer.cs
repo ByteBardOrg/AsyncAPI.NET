@@ -7,12 +7,14 @@ namespace LEGO.AsyncAPI.Readers
     using LEGO.AsyncAPI.Readers.ParseNodes;
     using System.Linq;
 
-    internal static partial class AsyncApiV2Deserializer
+    internal static partial class AsyncApiV3Deserializer
     {
         private static FixedFieldMap<AsyncApiParameter> parameterFixedFields = new()
         {
+            { "enum", (a, n) => { a.Enum = n.CreateSimpleList(n2 => n2.GetScalarValue()); } },
+            { "default", (a, n) => { a.Default = n.GetScalarValue(); } },
             { "description", (a, n) => { a.Description = n.GetScalarValue(); } },
-            { "schema", (a, n) => { LoadParameterFromSchema(a, n); } },
+            { "examples", (a, n) => { a.Examples = n.CreateSimpleList(n2 => n2.GetScalarValue()); } },
             { "location", (a, n) => { a.Location = n.GetScalarValue(); } },
         };
 

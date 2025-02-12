@@ -1,4 +1,6 @@
-﻿namespace LEGO.AsyncAPI.Extensions;
+﻿// Copyright (c) The LEGO Group. All rights reserved.
+
+namespace LEGO.AsyncAPI.Extensions;
 
 using LEGO.AsyncAPI.Models.Interfaces;
 using LEGO.AsyncAPI.Writers;

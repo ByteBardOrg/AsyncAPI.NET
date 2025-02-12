@@ -7,7 +7,7 @@ namespace LEGO.AsyncAPI.Models
     using LEGO.AsyncAPI.Models.Interfaces;
     using LEGO.AsyncAPI.Writers;
 
-    public abstract class AsyncApiAvroSchema : IAsyncApiSerializable, IAsyncApiMessagePayload
+    public abstract class AsyncApiAvroSchema : IAsyncApiSerializable, IAsyncApiSchema
     {
         public abstract string Type { get; }
 

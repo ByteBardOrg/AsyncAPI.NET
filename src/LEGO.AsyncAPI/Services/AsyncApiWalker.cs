@@ -322,16 +322,10 @@ namespace LEGO.AsyncAPI.Services
             }
 
             this.visitor.Visit(parameter);
-
-            if (parameter != null)
-            {
-                this.Walk(AsyncApiConstants.Schema, () => this.Walk(parameter.Schema));
-            }
-
             this.Walk(parameter as IAsyncApiExtensible);
         }
 
-        internal void Walk(IAsyncApiMessagePayload payload)
+        internal void Walk(IAsyncApiSchema payload)
         {
             this.visitor.Visit(payload);
             if (payload is AsyncApiJsonSchema jsonSchema)
@@ -550,6 +544,8 @@ namespace LEGO.AsyncAPI.Services
             {
                 this.Walk(message as IAsyncApiReferenceable);
             }
+
+            this.Walk(reply as IAsyncApiExtensible);
         }
 
         private void Walk(AsyncApiOperationReplyAddress replyAddress)
@@ -566,6 +562,7 @@ namespace LEGO.AsyncAPI.Services
             }
 
             this.visitor.Visit(replyAddress);
+            this.Walk(replyAddress as IAsyncApiExtensible);
         }
 
         private void Walk(IList<AsyncApiOperationTrait> traits)
@@ -674,6 +671,18 @@ namespace LEGO.AsyncAPI.Services
             this.Walk(trait as IAsyncApiExtensible);
         }
 
+        internal void Walk(AsyncApiMultiFormatSchema multiFormatSchema)
+        {
+            if (multiFormatSchema == null)
+            {
+                return;
+            }
+
+            this.visitor.Visit(multiFormatSchema);
+            this.Walk(multiFormatSchema.Schema);
+            this.Walk(multiFormatSchema as IAsyncApiExtensible);
+        }
+
         internal void Walk(AsyncApiBindings<IServerBinding> serverBindings, bool isComponent = false)
         {
             if (serverBindings is AsyncApiBindingsReference<IServerBinding> reference)
@@ -692,6 +701,8 @@ namespace LEGO.AsyncAPI.Services
                     this.visitor.CurrentKeys.ServerBinding = null;
                 }
             }
+
+            this.Walk(serverBindings as IAsyncApiExtensible);
         }
 
         internal void Walk(IServerBinding binding)
@@ -722,6 +733,8 @@ namespace LEGO.AsyncAPI.Services
                     this.visitor.CurrentKeys.ChannelBinding = null;
                 }
             }
+
+            this.Walk(channelBindings as IAsyncApiExtensible);
         }
 
         internal void Walk(IChannelBinding binding)
@@ -752,6 +765,8 @@ namespace LEGO.AsyncAPI.Services
                     this.visitor.CurrentKeys.OperationBinding = null;
                 }
             }
+
+            this.Walk(operationBindings as IAsyncApiExtensible);
         }
 
         internal void Walk(IOperationBinding binding)
@@ -782,6 +797,8 @@ namespace LEGO.AsyncAPI.Services
                     this.visitor.CurrentKeys.MessageBinding = null;
                 }
             }
+
+            this.Walk(messageBindings as IAsyncApiExtensible);
         }
 
         internal void Walk(IMessageBinding binding)
@@ -1049,6 +1066,7 @@ namespace LEGO.AsyncAPI.Services
             }
 
             this.visitor.Visit(license);
+            this.Walk(license as IAsyncApiExtensible);
         }
 
         internal void Walk(AsyncApiContact contact)
@@ -1059,6 +1077,7 @@ namespace LEGO.AsyncAPI.Services
             }
 
             this.visitor.Visit(contact);
+            this.Walk(contact as IAsyncApiExtensible);
         }
 
         internal void Walk(AsyncApiAny any)

@@ -31,7 +31,7 @@ namespace LEGO.AsyncAPI.Models
 
         public override AsyncApiJsonSchema Headers { get => this.Target?.Headers; set => this.Target.Headers = value; }
 
-        public override IAsyncApiMessagePayload Payload { get => this.Target?.Payload; set => this.Target.Payload = value; }
+        public override IAsyncApiSchema Payload { get => this.Target?.Payload; set => this.Target.Payload = value; }
 
         public override AsyncApiCorrelationId CorrelationId { get => this.Target?.CorrelationId; set => this.Target.CorrelationId = value; }
 

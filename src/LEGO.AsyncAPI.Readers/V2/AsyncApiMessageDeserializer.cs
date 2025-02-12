@@ -65,17 +65,17 @@ namespace LEGO.AsyncAPI.Readers
             },
         };
 
-        public static IAsyncApiMessagePayload LoadJsonSchemaPayload(ParseNode n)
+        public static IAsyncApiSchema LoadJsonSchemaPayload(ParseNode n)
         {
             return LoadPayload(n, null);
         }
 
-        public static IAsyncApiMessagePayload LoadAvroPayload(ParseNode n)
+        public static IAsyncApiSchema LoadAvroPayload(ParseNode n)
         {
             return LoadPayload(n, "application/vnd.apache.avro");
         }
 
-        private static IAsyncApiMessagePayload LoadPayload(ParseNode n, string format)
+        private static IAsyncApiSchema LoadPayload(ParseNode n, string format)
         {
 
             if (n == null)

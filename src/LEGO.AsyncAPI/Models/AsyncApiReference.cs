@@ -10,7 +10,7 @@ namespace LEGO.AsyncAPI.Models
     /// <summary>
     /// A simple object to allow referencing other components in the specification, internally and externally.
     /// </summary>
-    public class AsyncApiReference : IAsyncApiSerializable
+    public class AsyncApiReference : IAsyncApiSerializable, IEquatable<AsyncApiReference>
     {
         private string originalString;
 
@@ -122,6 +122,27 @@ namespace LEGO.AsyncAPI.Models
             {
                 return this.originalString;
             }
+        }
+
+        public static bool operator !=(AsyncApiReference left, AsyncApiReference right) => !(left == right);
+
+        public static bool operator ==(AsyncApiReference left, AsyncApiReference right)
+        {
+            return Equals(left, null) ? Equals(right, null) : left.Equals(right);
+        }
+
+        public bool Equals(AsyncApiReference reference)
+        {
+            return this.Reference == reference.Reference;
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (obj is not AsyncApiReference reference)
+            {
+                return false;
+            }
+            return this.Equals(reference);
         }
 
         /// <summary>

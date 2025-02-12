@@ -42,16 +42,6 @@ namespace LEGO.AsyncAPI.Models
         /// </summary>
         public void SerializeV2(IAsyncApiWriter writer)
         {
-            this.SerializeCore(writer);
-        }
-
-        public void SerializeV3(IAsyncApiWriter writer)
-        {
-            this.SerializeCore(writer);
-        }
-
-        private void SerializeCore(IAsyncApiWriter writer)
-        {
             if (writer is null)
             {
                 throw new ArgumentNullException(nameof(writer));
@@ -76,6 +66,39 @@ namespace LEGO.AsyncAPI.Models
                 AsyncApiConstants.AuthorizationCode,
                 this.AuthorizationCode,
                 (w, o) => o.SerializeV2(w));
+
+            // extensions
+            writer.WriteExtensions(this.Extensions);
+
+            writer.WriteEndObject();
+        }
+
+        public void SerializeV3(IAsyncApiWriter writer)
+        {
+            if (writer is null)
+            {
+                throw new ArgumentNullException(nameof(writer));
+            }
+
+            writer.WriteStartObject();
+
+            // implicit
+            writer.WriteOptionalObject(AsyncApiConstants.Implicit, this.Implicit, (w, o) => o.SerializeV3(w));
+
+            // password
+            writer.WriteOptionalObject(AsyncApiConstants.Password, this.Password, (w, o) => o.SerializeV3(w));
+
+            // clientCredentials
+            writer.WriteOptionalObject(
+                AsyncApiConstants.ClientCredentials,
+                this.ClientCredentials,
+                (w, o) => o.SerializeV3(w));
+
+            // authorizationCode
+            writer.WriteOptionalObject(
+                AsyncApiConstants.AuthorizationCode,
+                this.AuthorizationCode,
+                (w, o) => o.SerializeV3(w));
 
             // extensions
             writer.WriteExtensions(this.Extensions);

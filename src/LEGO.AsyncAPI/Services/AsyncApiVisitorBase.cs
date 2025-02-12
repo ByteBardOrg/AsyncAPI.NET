@@ -55,7 +55,7 @@ namespace LEGO.AsyncAPI.Services
         {
         }
 
-        public virtual void Visit(IAsyncApiMessagePayload payload)
+        public virtual void Visit(IAsyncApiSchema payload)
         {
         }
 

@@ -1,38 +1,40 @@
-﻿namespace LEGO.AsyncAPI.Readers.V3;
+﻿// Copyright (c) The LEGO Group. All rights reserved.
 
-using System;
-using LEGO.AsyncAPI.Extensions;
-using LEGO.AsyncAPI.Models;
-using LEGO.AsyncAPI.Readers.ParseNodes;
-
-internal static partial class AsyncApiV3Deserializer
+namespace LEGO.AsyncAPI.Readers
 {
-    private static FixedFieldMap<AsyncApiOperationReply> replyFixedFields = new()
+    using LEGO.AsyncAPI.Extensions;
+    using LEGO.AsyncAPI.Models;
+    using LEGO.AsyncAPI.Readers.ParseNodes;
+
+    internal static partial class AsyncApiV3Deserializer
+    {
+        private static FixedFieldMap<AsyncApiOperationReply> replyFixedFields = new()
     {
         { "address", (a, n) => { a.Address = LoadOperationReplyAddress(n); } },
         { "channel", (a, n) => { a.Channel = LoadChannelReference(n); } },
         { "messages", (a, n) => { a.Messages = LoadMessageReferences(n); } },
     };
 
-    private static PatternFieldMap<AsyncApiOperationReply> replyPatternFields =
-        new()
-        {
+        private static PatternFieldMap<AsyncApiOperationReply> replyPatternFields =
+            new()
+            {
         { s => s.StartsWith("x-"), (a, p, n) => a.AddExtension(p, LoadExtension(p, n)) },
-        };
+            };
 
-    public static AsyncApiOperationReply LoadReply(ParseNode node)
-    {
-        var mapNode = node.CheckMapNode("reply");
-        var pointer = mapNode.GetReferencePointer();
-        if (pointer != null)
+        public static AsyncApiOperationReply LoadOperationReply(ParseNode node)
         {
-            return new AsyncApiOperationReplyReference(pointer);
+            var mapNode = node.CheckMapNode("reply");
+            var pointer = mapNode.GetReferencePointer();
+            if (pointer != null)
+            {
+                return new AsyncApiOperationReplyReference(pointer);
+            }
+
+            var reply = new AsyncApiOperationReply();
+
+            ParseMap(mapNode, reply, replyFixedFields, replyPatternFields);
+
+            return reply;
         }
-
-        var reply = new AsyncApiOperationReply();
-
-        ParseMap(mapNode, reply, replyFixedFields, replyPatternFields);
-
-        return reply;
     }
 }
