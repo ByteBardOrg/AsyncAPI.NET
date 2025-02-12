@@ -49,12 +49,11 @@ namespace LEGO.AsyncAPI.Models
         public virtual IDictionary<string, AsyncApiServerVariable> Variables { get; set; } = new Dictionary<string, AsyncApiServerVariable>();
 
         /// <summary>
-        /// a declaration of which security mechanisms can be used with this server. The list of values includes alternative security requirement objects that can be used.
+        /// A declaration of which security schemes can be used with this server. The list of values includes alternative security scheme objects that can be used. Only one of the security scheme objects need to be satisfied to authorize a connection or operation.
         /// </summary>
         /// <remarks>
         /// The name used for each property MUST correspond to a security scheme declared in the Security Schemes under the Components Object.
         /// </remarks>
-        /// TODO: how to go from scheme to requirement for V2..
         public virtual IList<AsyncApiSecurityScheme> Security { get; set; } = new List<AsyncApiSecurityScheme>();
 
         /// <summary>

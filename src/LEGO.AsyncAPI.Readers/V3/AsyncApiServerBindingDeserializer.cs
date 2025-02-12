@@ -35,7 +35,7 @@ namespace LEGO.AsyncAPI.Readers
                 }
             }
 
-            // TODO: parse extension to serverBindings object...
+            // #ToFix: parse extension to serverBindings object...
 
             return serverBindings;
         }
