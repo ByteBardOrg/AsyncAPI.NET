@@ -3,55 +3,55 @@
 namespace LEGO.AsyncAPI.Readers
 {
     using LEGO.AsyncAPI.Exceptions;
+    using LEGO.AsyncAPI.Extensions;
     using LEGO.AsyncAPI.Models;
     using LEGO.AsyncAPI.Models.Interfaces;
     using LEGO.AsyncAPI.Readers.ParseNodes;
-    using LEGO.AsyncAPI.Extensions;
 
     internal static partial class AsyncApiV3Deserializer
     {
-        internal static AsyncApiBindings<IServerBinding> LoadServerBindings(ParseNode node)
+        internal static AsyncApiBindings<IOperationBinding> LoadOperationBindings(ParseNode node)
         {
-            var mapNode = node.CheckMapNode("serverBindings");
+            var mapNode = node.CheckMapNode("operationBindings");
             var pointer = mapNode.GetReferencePointer();
             if (pointer != null)
             {
-                return new AsyncApiBindingsReference<IServerBinding>(pointer);
+                return new AsyncApiBindingsReference<IOperationBinding>(pointer);
             }
 
-            var serverBindings = new AsyncApiBindings<IServerBinding>();
+            var operationBindings = new AsyncApiBindings<IOperationBinding>();
             foreach (var property in mapNode)
             {
-                var serverBinding = LoadServerBinding(property);
+                var operationBinding = LoadOperationBinding(property);
 
-                if (serverBinding != null)
+                if (operationBinding != null)
                 {
-                    serverBindings.Add(serverBinding);
+                    operationBindings.Add(operationBinding);
                 }
                 else
                 {
                     mapNode.Context.Diagnostic.Errors.Add(
-                        new AsyncApiError(node.Context.GetLocation(), $"ServerBinding {property.Name} is not found"));
+                        new AsyncApiError(node.Context.GetLocation(), $"OperationBinding {property.Name} is not found"));
                 }
             }
 
             // #ToFix Write test to show that we can still deserialize bindings correctly and still have extensions on the parent.
-            mapNode.ParseFields(serverBindings, null, serverBindingPatternFields);
-            return serverBindings;
+            mapNode.ParseFields(operationBindings, null, operationBindingPatternFields);
+            return operationBindings;
         }
 
-        private static readonly PatternFieldMap<AsyncApiBindings<IServerBinding>> serverBindingPatternFields =
-            new()
-            {
-                { s => s.StartsWith("x-"), (o, p, n) => o.AddExtension(p, LoadExtension(p, n)) },
-            };
+        private static readonly PatternFieldMap<AsyncApiBindings<IOperationBinding>> operationBindingPatternFields =
+    new()
+    {
+        { s => s.StartsWith("x-"), (o, p, n) => o.AddExtension(p, LoadExtension(p, n)) },
+    };
 
-        internal static IServerBinding LoadServerBinding(ParseNode node)
+        internal static IOperationBinding LoadOperationBinding(ParseNode node)
         {
             var property = node as PropertyNode;
             try
             {
-                if (node.Context.ServerBindingParsers.TryGetValue(property.Name, out var parser))
+                if (node.Context.OperationBindingParsers.TryGetValue(property.Name, out var parser))
                 {
                     return parser.LoadBinding(property);
                 }

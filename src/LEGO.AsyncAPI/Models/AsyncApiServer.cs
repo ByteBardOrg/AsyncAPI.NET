@@ -88,7 +88,7 @@ namespace LEGO.AsyncAPI.Models
 
             writer.WriteOptionalMap(AsyncApiConstants.Variables, this.Variables, (w, v) => v.SerializeV2(w));
 
-            writer.WriteOptionalCollection(AsyncApiConstants.Security, this.Security, (w, s) => this.SerializeSecurityRequirements(w, s));
+            writer.WriteOptionalCollection(AsyncApiConstants.Security, this.Security, (w, s) => this.SerializeAsSecurityRequirement(s, w));
 
             writer.WriteOptionalCollection(AsyncApiConstants.Tags, this.Tags, (w, s) => s.SerializeV2(w));
 
@@ -96,6 +96,16 @@ namespace LEGO.AsyncAPI.Models
             writer.WriteExtensions(this.Extensions);
 
             writer.WriteEndObject();
+        }
+
+        private void SerializeAsSecurityRequirement(AsyncApiSecurityScheme scheme, IAsyncApiWriter w)
+        {
+            if (scheme is not AsyncApiSecuritySchemeReference schemeReference)
+            {
+                throw new AsyncApiWriterException("Cannot serialize securityScheme as V2 as it is not a Reference.");
+            }
+
+            schemeReference.SerializeAsSecurityRequirement(w);
         }
 
         public virtual void SerializeV3(IAsyncApiWriter writer)
@@ -128,33 +138,6 @@ namespace LEGO.AsyncAPI.Models
         {
             var baseUri = new Uri($"{this.Protocol}{Uri.SchemeDelimiter}{this.Host}");
             return new Uri(baseUri, this.PathName).ToString();
-        }
-
-        private void SerializeSecurityRequirements(IAsyncApiWriter writer, AsyncApiSecurityScheme scheme)
-        {
-            if (writer is null)
-            {
-                throw new ArgumentNullException(nameof(writer));
-            }
-
-            if (scheme is not AsyncApiSecuritySchemeReference schemeReference)
-            {
-                throw new AsyncApiWriterException("Cannot serialize securityScheme as V2 as it is not a Reference.");
-            }
-
-            writer.WriteStartObject();
-
-            writer.WritePropertyName(schemeReference.Reference.FragmentId);
-            writer.WriteStartArray();
-
-            foreach (var scope in schemeReference.Scopes)
-            {
-                writer.WriteValue(scope);
-            }
-
-            writer.WriteEndArray();
-
-            writer.WriteEndObject();
         }
     }
 }

@@ -79,5 +79,27 @@ namespace LEGO.AsyncAPI.Models
                 this.Target.SerializeV3(writer);
             }
         }
+
+        public void SerializeAsSecurityRequirement(IAsyncApiWriter writer)
+        {
+            if (writer is null)
+            {
+                throw new ArgumentNullException(nameof(writer));
+            }
+
+            writer.WriteStartObject();
+
+            writer.WritePropertyName(this.Reference.FragmentId);
+            writer.WriteStartArray();
+
+            foreach (var scope in this.Scopes)
+            {
+                writer.WriteValue(scope);
+            }
+
+            writer.WriteEndArray();
+
+            writer.WriteEndObject();
+        }
     }
 }

@@ -13,6 +13,8 @@ namespace LEGO.AsyncAPI.Models
         public const string Components = "components";
         public const string Tags = "tags";
         public const string ExternalDocs = "externalDocs";
+        public const string Action = "action";
+        public const string Channel = "channel";
         public const string Title = "title";
         public const string Description = "description";
         public const string TermsOfService = "termsOfService";
@@ -96,6 +98,7 @@ namespace LEGO.AsyncAPI.Models
         public const string Parameters = "parameters";
         public const string Schemas = "schemas";
         public const string Messages = "messages";
+        public const string Reply = "reply";
         public const string SecuritySchemes = "securitySchemes";
         public const string CorrelationIds = "correlationIds";
         public const string OperationTraits = "operationTraits";

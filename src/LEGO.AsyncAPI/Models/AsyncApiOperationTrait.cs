@@ -13,12 +13,9 @@ namespace LEGO.AsyncAPI.Models
     public class AsyncApiOperationTrait : IAsyncApiExtensible, IAsyncApiSerializable
     {
         /// <summary>
-        /// unique string used to identify the operation.
+        /// A human-friendly title for the operation.
         /// </summary>
-        /// <remarks>
-        /// The id MUST be unique among all operations described in the API.
-        /// </remarks>
-        public virtual string OperationId { get; set; }
+        public virtual string Title { get; set; }
 
         /// <summary>
         /// a short summary of what the operation is about.
@@ -57,12 +54,32 @@ namespace LEGO.AsyncAPI.Models
 
             writer.WriteStartObject();
 
-            writer.WriteOptionalProperty(AsyncApiConstants.OperationId, this.OperationId);
+            //writer.WriteOptionalProperty(AsyncApiConstants.OperationId, this.OperationId);
             writer.WriteOptionalProperty(AsyncApiConstants.Summary, this.Summary);
             writer.WriteOptionalProperty(AsyncApiConstants.Description, this.Description);
             writer.WriteOptionalCollection(AsyncApiConstants.Tags, this.Tags, (w, t) => t.SerializeV2(w));
             writer.WriteOptionalObject(AsyncApiConstants.ExternalDocs, this.ExternalDocs, (w, e) => e.SerializeV2(w));
             writer.WriteOptionalObject(AsyncApiConstants.Bindings, this.Bindings, (w, t) => t.SerializeV2(w));
+            writer.WriteExtensions(this.Extensions);
+
+            writer.WriteEndObject();
+        }
+
+        public void SerializeV3(IAsyncApiWriter writer)
+        {
+            if (writer is null)
+            {
+                throw new ArgumentNullException(nameof(writer));
+            }
+
+            writer.WriteStartObject();
+
+            writer.WriteOptionalProperty(AsyncApiConstants.Title, this.Title);
+            writer.WriteOptionalProperty(AsyncApiConstants.Summary, this.Summary);
+            writer.WriteOptionalProperty(AsyncApiConstants.Description, this.Description);
+            writer.WriteOptionalCollection(AsyncApiConstants.Tags, this.Tags, (w, t) => t.SerializeV3(w));
+            writer.WriteOptionalObject(AsyncApiConstants.ExternalDocs, this.ExternalDocs, (w, e) => e.SerializeV3(w));
+            writer.WriteOptionalObject(AsyncApiConstants.Bindings, this.Bindings, (w, t) => t.SerializeV3(w));
             writer.WriteExtensions(this.Extensions);
 
             writer.WriteEndObject();

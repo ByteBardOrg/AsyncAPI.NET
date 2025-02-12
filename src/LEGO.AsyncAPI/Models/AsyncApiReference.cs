@@ -114,7 +114,7 @@ namespace LEGO.AsyncAPI.Models
         public bool IsExternal => this.ExternalResource != null;
 
         /// <summary>
-        /// Gets the full reference string for v2.
+        /// Gets the full reference string;
         /// </summary>
         public string Reference
         {

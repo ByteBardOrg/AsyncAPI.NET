@@ -6,11 +6,11 @@ namespace LEGO.AsyncAPI.Readers
     using LEGO.AsyncAPI.Models;
     using LEGO.AsyncAPI.Readers.ParseNodes;
 
-    internal static partial class AsyncApiV2Deserializer
+    internal static partial class AsyncApiV3Deserializer
     {
         private static FixedFieldMap<AsyncApiOperationTrait> operationTraitFixedFields = new()
         {
-            { "operationId", (a, n) => { a.Title = n.GetScalarValue(); } },
+            { "title", (a, n) => { a.Title = n.GetScalarValue(); } },
             { "summary", (a, n) => { a.Summary = n.GetScalarValue(); } },
             { "description", (a, n) => { a.Description = n.GetScalarValue(); } },
             { "tags", (a, n) => { a.Tags = n.CreateList(LoadTag); } },

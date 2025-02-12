@@ -209,7 +209,7 @@ namespace LEGO.AsyncAPI.Readers.ParseNodes
             return new AsyncApiAny(this.node);
         }
 
-        public void ParseFields<T>(ref T parentInstance, IDictionary<string, Action<T, ParseNode>> fixedFields, IDictionary<Func<string, bool>, Action<T, string, ParseNode>> patternFields)
+        public void ParseFields<T>(T parentInstance, IDictionary<string, Action<T, ParseNode>> fixedFields, IDictionary<Func<string, bool>, Action<T, string, ParseNode>> patternFields)
         {
             foreach (var propertyNode in this)
             {
