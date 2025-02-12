@@ -7,7 +7,6 @@ namespace LEGO.AsyncAPI.Readers
     using LEGO.AsyncAPI.Models.Avro.LogicalTypes;
     using LEGO.AsyncAPI.Readers.Exceptions;
     using LEGO.AsyncAPI.Readers.ParseNodes;
-    using LEGO.AsyncAPI.Writers;
 
     public class AsyncApiAvroSchemaDeserializer
     {

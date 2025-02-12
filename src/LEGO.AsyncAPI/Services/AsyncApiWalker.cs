@@ -511,13 +511,61 @@ namespace LEGO.AsyncAPI.Services
             if (operation != null)
             {
                 this.Walk(AsyncApiConstants.Tags, () => this.Walk(operation.Tags));
+                this.Walk(AsyncApiConstants.Channel, () => this.Walk(operation.Channel as IAsyncApiReferenceable));
                 this.Walk(AsyncApiConstants.ExternalDocs, () => this.Walk(operation.ExternalDocs));
                 this.Walk(AsyncApiConstants.Traits, () => this.Walk(operation.Traits));
-                this.Walk(AsyncApiConstants.Message, () => this.Walk(operation.Message));
+                foreach (var message in operation.Messages)
+                {
+                    this.Walk(message as IAsyncApiReferenceable);
+                }
+
+                this.Walk(operation.Security);
+
                 this.Walk(AsyncApiConstants.Bindings, () => this.Walk(operation.Bindings));
+                this.Walk(AsyncApiConstants.Reply, () => this.Walk(operation.Reply));
             }
 
             this.Walk(operation as IAsyncApiExtensible);
+        }
+
+        private void Walk(AsyncApiOperationReply reply)
+        {
+            if (reply == null)
+            {
+                return;
+            }
+
+            if (reply is AsyncApiOperationReplyReference reference)
+            {
+                this.Walk(reference as IAsyncApiReferenceable);
+                return;
+            }
+
+            this.visitor.Visit(reply);
+
+            this.Walk(reply.Address);
+            this.Walk(reply.Channel as IAsyncApiReferenceable);
+
+            foreach (var message in reply.Messages)
+            {
+                this.Walk(message as IAsyncApiReferenceable);
+            }
+        }
+
+        private void Walk(AsyncApiOperationReplyAddress replyAddress)
+        {
+            if (replyAddress == null)
+            {
+                return;
+            }
+
+            if (replyAddress is AsyncApiOperationReplyAddressReference reference)
+            {
+                this.Walk(reference as IAsyncApiReferenceable);
+                return;
+            }
+
+            this.visitor.Visit(replyAddress);
         }
 
         private void Walk(IList<AsyncApiOperationTrait> traits)

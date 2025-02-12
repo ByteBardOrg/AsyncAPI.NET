@@ -15,6 +15,7 @@ namespace LEGO.AsyncAPI.Models
         public const string ExternalDocs = "externalDocs";
         public const string Action = "action";
         public const string Channel = "channel";
+        public const string Address = "address";
         public const string Title = "title";
         public const string Description = "description";
         public const string TermsOfService = "termsOfService";

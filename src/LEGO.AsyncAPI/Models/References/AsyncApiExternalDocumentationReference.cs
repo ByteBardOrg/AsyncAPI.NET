@@ -22,7 +22,7 @@ namespace LEGO.AsyncAPI.Models
 
         public AsyncApiExternalDocumentationReference(string reference)
         {
-            this.Reference = new AsyncApiReference(reference, ReferenceType.Tag);
+            this.Reference = new AsyncApiReference(reference, ReferenceType.ExternalDocs);
         }
 
         public override string Description { get => this.Target?.Description; set => this.Target.Description = value; }

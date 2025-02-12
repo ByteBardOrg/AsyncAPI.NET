@@ -34,7 +34,7 @@ namespace LEGO.AsyncAPI.Readers
                         o.RefreshUrl = new Uri(n.GetScalarValue(), UriKind.RelativeOrAbsolute);
                     }
                 },
-                { "scopes", (o, n) => o.Scopes = n.CreateSimpleMap(LoadString) },
+                { "scopes", (o, n) => o.AvailableScopes = n.CreateSimpleMap(LoadString) },
             };
 
         private static readonly PatternFieldMap<AsyncApiOAuthFlow> oAuthFlowPatternFields =

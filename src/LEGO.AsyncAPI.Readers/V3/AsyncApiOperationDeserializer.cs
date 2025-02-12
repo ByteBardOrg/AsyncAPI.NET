@@ -7,13 +7,19 @@ namespace LEGO.AsyncAPI.Readers
     using LEGO.AsyncAPI.Models;
     using LEGO.AsyncAPI.Readers.ParseNodes;
 
-    internal static partial class AsyncApiV2Deserializer
+    internal static partial class AsyncApiV3Deserializer
     {
         private static readonly FixedFieldMap<AsyncApiOperation> operationFixedFields =
             new()
             {
                 {
-                    "operationId", (a, n) => { a.Title = n.GetScalarValue(); }
+                    "action", (a, n) => { a.Action = n.GetScalarValue().GetEnumFromDisplayName<AsyncApiAction>(); }
+                },
+                {
+                    "channel", (a, n) => { a.Channel = LoadChannelReference(n); }
+                },
+                {
+                    "title", (a, n) => { a.Title = n.GetScalarValue(); }
                 },
                 {
                     "summary", (a, n) => { a.Summary = n.GetScalarValue(); }
@@ -22,7 +28,7 @@ namespace LEGO.AsyncAPI.Readers
                     "description", (a, n) => { a.Description = n.GetScalarValue(); }
                 },
                 {
-                    "security", (a, n) => { a.Security = LoadSecurityRequirement(n); }
+                    "security", (a, n) => { a.Security = n.CreateList(LoadSecurityScheme); }
                 },
                 {
                     "tags", (a, n) => a.Tags = n.CreateList(LoadTag)
@@ -37,39 +43,12 @@ namespace LEGO.AsyncAPI.Readers
                     "traits", (a, n) => { a.Traits = n.CreateList(LoadOperationTrait); }
                 },
                 {
-                    "message", (a, n) => { a.Messages = LoadMessages(n); }
+                    "messages", (a, n) => { a.Messages = LoadMessageReferences(n); }
+                },
+                {
+                    "reply", (a, n) => { a.Reply = LoadOperationReply(n); }
                 },
             };
-
-        // Convert message to references.
-        private static IList<AsyncApiMessageReference> LoadMessages(ParseNode n)
-        {
-            var mapNode = n.CheckMapNode("message");
-            List<AsyncApiMessage> messages;
-            if (mapNode["oneOf"] != null)
-            {
-                messages = mapNode["oneOf"].Value.CreateList(LoadMessage);
-            }
-
-            messages = new List<AsyncApiMessage> { LoadMessage(n) };
-            var messageReferences = new List<AsyncApiMessageReference>();
-            int counter = 0;
-            foreach (var message in messages)
-            {
-                if (message is not AsyncApiMessageReference messageReference)
-                {
-                    var reference = "#/components/messages/automatedOperationMessage_" + mapNode["operationId"] ?? counter.ToString();
-                    n.Context.Workspace.RegisterComponent(reference, message);
-                    messageReferences.Add(new AsyncApiMessageReference(reference));
-                    counter++;
-                    continue;
-                }
-
-                messageReferences.Add(messageReference);
-            }
-
-            return messageReferences;
-        }
 
         private static readonly PatternFieldMap<AsyncApiOperation> operationPatternFields =
             new()

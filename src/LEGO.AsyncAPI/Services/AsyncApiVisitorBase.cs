@@ -160,6 +160,14 @@ namespace LEGO.AsyncAPI.Services
         {
         }
 
+        public virtual void Visit(AsyncApiOperationReply reply)
+        {
+        }
+
+        public virtual void Visit(AsyncApiOperationReplyAddress replyAddress)
+        {
+        }
+
         public virtual void Visit(AsyncApiMessage message)
         {
         }
