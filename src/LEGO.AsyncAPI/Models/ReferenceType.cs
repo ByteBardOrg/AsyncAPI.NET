@@ -92,5 +92,11 @@ namespace LEGO.AsyncAPI.Models
         /// The tag.
         /// </summary>
         [Display("tag")] Tag,
+
+        [Display("operationReplyAddress")] OperationReplyAddress,
+
+        [Display("externalDocs")] ExternalDocs,
+
+        [Display("operationReply")] OperationReply,
     }
 }
