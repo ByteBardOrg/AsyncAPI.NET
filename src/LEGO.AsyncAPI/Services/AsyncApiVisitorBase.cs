@@ -172,6 +172,10 @@ namespace LEGO.AsyncAPI.Services
         {
         }
 
+        public virtual void Visit(AsyncApiMultiFormatSchema multiFormatSchema)
+        {
+        }
+
         public virtual void Visit(IList<AsyncApiMessage> messages)
         {
         }
