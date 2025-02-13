@@ -13,7 +13,7 @@ namespace LEGO.AsyncAPI.Readers
             new()
             {
                 {
-                    "operationId", (a, n) => { a.Title = n.GetScalarValue(); }
+                    "operationId", (a, n) => { }
                 },
                 {
                     "summary", (a, n) => { a.Summary = n.GetScalarValue(); }
@@ -58,7 +58,7 @@ namespace LEGO.AsyncAPI.Readers
             {
                 if (message is not AsyncApiMessageReference messageReference)
                 {
-                    var reference = "#/components/messages/automatedOperationMessage_" + mapNode["operationId"] ?? counter.ToString();
+                    var reference = "#/components/messages/automatedOperationMessage_" + mapNode["operationId"]?.GetScalarValue() ?? counter.ToString();
                     n.Context.Workspace.RegisterComponent(reference, message);
                     messageReferences.Add(new AsyncApiMessageReference(reference));
                     counter++;

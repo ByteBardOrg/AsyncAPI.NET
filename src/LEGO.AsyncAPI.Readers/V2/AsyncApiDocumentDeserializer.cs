@@ -15,7 +15,7 @@ namespace LEGO.AsyncAPI.Readers
             { "info", (a, n) => a.Info = LoadInfo(n) },
             { "servers", (a, n) => a.Servers = n.CreateMap(LoadServer) },
             { "defaultContentType", (a, n) => a.DefaultContentType = n.GetScalarValue() },
-            { "channels", (a, n) => a.Channels = n.CreateMap(LoadChannel) },
+            { "channels", (a, n) => a.Channels = n.CreateMap((n2, key) => LoadChannel(n2, key)) },
             { "components", (a, n) => a.Components = LoadComponents(n) },
             { "tags", (a, n) => a.Info.Tags = n.CreateList(LoadTag) },
             { "externalDocs", (a, n) => a.Info.ExternalDocs = LoadExternalDocs(n) },

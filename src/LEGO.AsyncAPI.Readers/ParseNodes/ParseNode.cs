@@ -48,6 +48,11 @@ namespace LEGO.AsyncAPI.Readers.ParseNodes
             throw new AsyncApiReaderException("Cannot create list from this type of node.", this.Context);
         }
 
+        public virtual Dictionary<string, T> CreateMap<T>(Func<MapNode, string, T> map)
+        {
+            throw new AsyncApiReaderException("Cannot create map from this type of node.", this.Context);
+        }
+
         public virtual Dictionary<string, T> CreateMap<T>(Func<MapNode, T> map)
         {
             throw new AsyncApiReaderException("Cannot create map from this type of node.", this.Context);

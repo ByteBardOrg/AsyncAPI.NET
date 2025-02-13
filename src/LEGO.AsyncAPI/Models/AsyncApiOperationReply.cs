@@ -33,8 +33,8 @@ namespace LEGO.AsyncAPI.Models
 
             writer.WriteStartObject();
             writer.WriteOptionalObject(AsyncApiConstants.Address, this.Address, (w, a) => a.SerializeV3(w));
-            writer.WriteOptionalProperty(AsyncApiConstants.Channel, this.Channel.SerializeAsDollarRef());
-            writer.WriteOptionalCollection(AsyncApiConstants.Messages, this.Messages, (w, m) => m.SerializeAsDollarRef());
+            writer.WriteOptionalObject(AsyncApiConstants.Channel, this.Channel, (w, c) => c.Reference.SerializeV3(w));
+            writer.WriteOptionalCollection(AsyncApiConstants.Messages, this.Messages, (w, m) => m.Reference.SerializeV3(w));
             writer.WriteExtensions(this.Extensions);
             writer.WriteEndObject();
         }
