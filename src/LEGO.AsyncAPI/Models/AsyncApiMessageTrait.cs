@@ -96,7 +96,6 @@ namespace LEGO.AsyncAPI.Models
 
         public virtual void SerializeV3(IAsyncApiWriter writer)
         {
-
             if (writer is null)
             {
                 throw new ArgumentNullException(nameof(writer));

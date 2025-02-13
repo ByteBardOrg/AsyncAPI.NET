@@ -98,5 +98,7 @@ namespace LEGO.AsyncAPI.Models
         [Display("externalDocs")] ExternalDocs,
 
         [Display("operationReply")] OperationReply,
+
+        [Display("operation")] Operation,
     }
 }
