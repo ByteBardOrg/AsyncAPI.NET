@@ -52,6 +52,41 @@ namespace LEGO.AsyncAPI.Readers.ParseNodes
             }
         }
 
+        public override Dictionary<string, T> CreateMap<T>(Func<MapNode, string, T> map)
+        {
+            var jsonMap = this.node;
+            if (jsonMap == null)
+            {
+                throw new AsyncApiReaderException($"Expected map while parsing {typeof(T).Name}", this.Context);
+            }
+
+            var nodes = jsonMap.Select(
+                n =>
+                {
+                    var key = n.Key;
+                    T value;
+                    try
+                    {
+                        this.Context.StartObject(key);
+                        value = n.Value is JsonObject
+                          ? map(new MapNode(this.Context, n.Value), key)
+                          : default(T);
+                    }
+                    finally
+                    {
+                        this.Context.EndObject();
+                    }
+
+                    return new
+                    {
+                        key,
+                        value,
+                    };
+                });
+
+            return nodes.ToDictionary(k => k.key, v => v.value);
+        }
+
         public override Dictionary<string, T> CreateMap<T>(Func<MapNode, T> map)
         {
             var jsonMap = this.node;

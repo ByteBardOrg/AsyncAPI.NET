@@ -5,6 +5,7 @@ namespace LEGO.AsyncAPI.Models
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using LEGO.AsyncAPI.Extensions;
     using LEGO.AsyncAPI.Models.Interfaces;
     using LEGO.AsyncAPI.Writers;
 
@@ -48,6 +49,7 @@ namespace LEGO.AsyncAPI.Models
 
         /// <summary>
         /// A map of the parameters included in the channel address. It MUST be present only when the address contains Channel Address Expressions.
+        /// </summary>
         public virtual IDictionary<string, AsyncApiParameter> Parameters { get; set; } = new Dictionary<string, AsyncApiParameter>();
 
         /// <summary>
@@ -75,8 +77,6 @@ namespace LEGO.AsyncAPI.Models
                 throw new ArgumentNullException(nameof(writer));
             }
 
-            var operations = writer.Workspace.RootDocument?.Operations.Where(operation => operation.Value.;
-
             writer.WriteStartObject();
 
             // description
@@ -85,11 +85,12 @@ namespace LEGO.AsyncAPI.Models
             // servers
             writer.WriteOptionalCollection(AsyncApiConstants.Servers, this.Servers.Select(s => s.Reference.FragmentId).ToList(), (w, s) => w.WriteValue(s));
 
-            // subscribe
-            writer.WriteOptionalObject(AsyncApiConstants.Subscribe, this.Subscribe, (w, s) => s.SerializeV2(w));
+            var operations = writer.Workspace.RootDocument?.Operations.Values.Where(operation => operation.Channel.Equals(this));
+            // subscribe (Now Send)
+            writer.WriteOptionalObject(AsyncApiConstants.Subscribe, operations.FirstOrDefault(o => o.Action == AsyncApiAction.Send), (w, s) => s?.SerializeV2(w));
 
-            // publish
-            writer.WriteOptionalObject(AsyncApiConstants.Publish, this.Publish, (w, s) => s.SerializeV2(w));
+            // publish (Now Receive)
+            writer.WriteOptionalObject(AsyncApiConstants.Publish, operations.FirstOrDefault(o => o.Action == AsyncApiAction.Receive), (w, s) => s?.SerializeV2(w));
 
             // parameters
             writer.WriteOptionalMap(AsyncApiConstants.Parameters, this.Parameters, (writer, key, component) =>
@@ -107,6 +108,34 @@ namespace LEGO.AsyncAPI.Models
             writer.WriteOptionalObject(AsyncApiConstants.Bindings, this.Bindings, (w, t) => t.SerializeV2(w));
 
             // extensions
+            writer.WriteExtensions(this.Extensions);
+
+            writer.WriteEndObject();
+        }
+
+        public virtual void SerializeV3(IAsyncApiWriter writer)
+        {
+            if (writer is null)
+            {
+                throw new ArgumentNullException(nameof(writer));
+            }
+
+            writer.WriteStartObject();
+
+            writer.WriteOptionalProperty(AsyncApiConstants.Address, this.Address);
+            writer.WriteRequiredMap(AsyncApiConstants.Messages, this.Messages, (w, k, m) => m.SerializeV3(w));
+            writer.WriteOptionalProperty(AsyncApiConstants.Title, this.Title);
+            writer.WriteOptionalProperty(AsyncApiConstants.Summary, this.Summary);
+            writer.WriteOptionalProperty(AsyncApiConstants.Description, this.Description);
+            writer.WriteOptionalCollection(AsyncApiConstants.Servers, this.Servers, (w, s) => s.Reference.SerializeV3(w));
+            if (this.Address.IsChannelAddressExpression())
+            {
+                writer.WriteOptionalMap(AsyncApiConstants.Parameters, this.Parameters, (w, key, p) => p.SerializeV3(w));
+            }
+
+            writer.WriteOptionalCollection(AsyncApiConstants.Tags, this.Tags, (w, t) => t.SerializeV3(w));
+            writer.WriteOptionalObject(AsyncApiConstants.ExternalDocs, this.ExternalDocs, (w, s) => s.SerializeV2(w));
+            writer.WriteOptionalObject(AsyncApiConstants.Bindings, this.Bindings, (w, t) => t.SerializeV2(w));
             writer.WriteExtensions(this.Extensions);
 
             writer.WriteEndObject();

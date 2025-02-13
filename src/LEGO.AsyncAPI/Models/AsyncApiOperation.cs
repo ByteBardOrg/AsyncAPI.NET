@@ -115,7 +115,7 @@ namespace LEGO.AsyncAPI.Models
 
             writer.WriteStartObject();
             writer.WriteRequiredProperty(AsyncApiConstants.Action, this.Action.GetDisplayName());
-            writer.WriteRequiredProperty(AsyncApiConstants.Channel, this.Channel.SerializeAsDollarRef());
+            writer.WriteRequiredObject(AsyncApiConstants.Channel, this.Channel, (w, c) => c.Reference.SerializeV3(w));
             writer.WriteOptionalProperty(AsyncApiConstants.Title, this.Title);
             writer.WriteOptionalProperty(AsyncApiConstants.Summary, this.Summary);
             writer.WriteOptionalProperty(AsyncApiConstants.Description, this.Description);
@@ -124,7 +124,7 @@ namespace LEGO.AsyncAPI.Models
             writer.WriteOptionalObject(AsyncApiConstants.ExternalDocs, this.ExternalDocs, (w, e) => e.SerializeV3(w));
             writer.WriteOptionalObject(AsyncApiConstants.Bindings, this.Bindings, (w, t) => t.SerializeV3(w));
             writer.WriteOptionalCollection(AsyncApiConstants.Traits, this.Traits, (w, t) => t.SerializeV3(w));
-            writer.WriteOptionalCollection(AsyncApiConstants.Messages, this.Messages, (w, m) => m.SerializeAsDollarRef());
+            writer.WriteOptionalCollection(AsyncApiConstants.Messages, this.Messages, (w, m) => m.Reference.SerializeV3(w));
             writer.WriteOptionalObject(AsyncApiConstants.Reply, this.Reply, (w, t) => t.SerializeV3(w));
             writer.WriteExtensions(this.Extensions);
             writer.WriteEndObject();
