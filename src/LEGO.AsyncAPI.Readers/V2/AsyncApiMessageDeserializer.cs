@@ -25,7 +25,7 @@ namespace LEGO.AsyncAPI.Readers
                 "headers", (a, n) => { a.Headers = new AsyncApiMultiFormatSchema { Schema = AsyncApiSchemaDeserializer.LoadSchema(n) }; }
             },
             {
-                "payload", (a, n) => { a.Payload = new AsyncApiMultiFormatSchema { Schema = AsyncApiSchemaDeserializer.LoadSchema(n) }; }
+                "payload", (a, n) => { a.Payload = new AsyncApiMultiFormatSchema(); }
             },
             {
                 "correlationId", (a, n) => { a.CorrelationId = LoadCorrelationId(n); }
@@ -64,6 +64,67 @@ namespace LEGO.AsyncAPI.Readers
                 "traits", (a, n) => a.Traits = n.CreateList(LoadMessageTrait)
             },
         };
+        
+        public static IAsyncApiSchema LoadJsonSchemaPayload(ParseNode n)
+        {
+            return LoadPayload(n, null);
+        }
+
+        public static IAsyncApiSchema LoadAvroPayload(ParseNode n)
+        {
+            return LoadPayload(n, "application/vnd.apache.avro");
+        }
+
+        private static IAsyncApiSchema LoadPayload(ParseNode n, string format)
+        {
+
+            if (n == null)
+            {
+                return null;
+            }
+
+            switch (format)
+            {
+                case null:
+                case "":
+                case var _ when SupportedJsonSchemaFormats.Where(s => format.StartsWith(s)).Any():
+                    return AsyncApiSchemaDeserializer.LoadSchema(n);
+                case var _ when SupportedAvroSchemaFormats.Where(s => format.StartsWith(s)).Any():
+                    return AsyncApiAvroSchemaDeserializer.LoadSchema(n);
+                default:
+                    var supportedFormats = SupportedJsonSchemaFormats.Concat(SupportedAvroSchemaFormats);
+                    throw new AsyncApiException($"'Could not deserialize Payload. Supported formats are {string.Join(", ", supportedFormats)}");
+            }
+        }
+
+        static readonly IEnumerable<string> SupportedJsonSchemaFormats = new List<string>
+        {
+            "application/vnd.aai.asyncapi+json",
+            "application/vnd.aai.asyncapi+yaml",
+            "application/vnd.aai.asyncapi",
+            "application/schema+json;version=draft-07",
+            "application/schema+yaml;version=draft-07",
+        };
+
+        static readonly IEnumerable<string> SupportedAvroSchemaFormats = new List<string>
+        {
+            "application/vnd.apache.avro",
+            "application/vnd.apache.avro+json",
+            "application/vnd.apache.avro+yaml",
+            "application/vnd.apache.avro+json;version=1.9.0",
+            "application/vnd.apache.avro+yaml;version=1.9.0",
+        };
+
+        private static string LoadSchemaFormat(string schemaFormat)
+        {
+            var supportedFormats = SupportedJsonSchemaFormats.Concat(SupportedAvroSchemaFormats);
+            if (!supportedFormats.Where(s => schemaFormat.StartsWith(s)).Any())
+            {
+                throw new AsyncApiException($"'{schemaFormat}' is not a supported format. Supported formats are {string.Join(", ", supportedFormats)}");
+            }
+
+            return schemaFormat;
+        }
 
         private static readonly PatternFieldMap<AsyncApiMessage> messagePatternFields = new()
         {
@@ -82,6 +143,7 @@ namespace LEGO.AsyncAPI.Readers
             var message = new AsyncApiMessage();
 
             ParseMap(mapNode, message, messageFixedFields, messagePatternFields);
+            message.Payload.Schema = LoadPayload(mapNode["payload"], message.Payload.SchemaFormat);
 
             return message;
         }
