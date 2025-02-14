@@ -9,15 +9,6 @@ namespace LEGO.AsyncAPI.Models
 
     public class AsyncApiMultiFormatSchema : IAsyncApiSerializable, IAsyncApiExtensible
     {
-        public AsyncApiMultiFormatSchema()
-        {
-        }
-
-        public AsyncApiMultiFormatSchema(IAsyncApiSchema schema)
-        {
-            Schema = schema;
-        }
-
         /// <summary>
         /// Required. A string containing the name of the schema format that is used to define the information. If schemaFormat is missing, it MUST default to application/vnd.aai.asyncapi+json;version={{asyncapi}} where {{asyncapi}} matches the AsyncAPI Version String. In such a case, this would make the Multi Format Schema Object equivalent to the Schema Object. When using Reference Object within the schema, the schemaFormat of the resource being referenced MUST match the schemaFormat of the schema that contains the initial reference. For example, if you reference Avro schema, then schemaFormat of referencing resource and the resource being reference MUST match.
         /// </summary>

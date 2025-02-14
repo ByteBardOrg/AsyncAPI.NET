@@ -43,7 +43,10 @@ namespace LEGO.AsyncAPI.Readers
 
         private static AsyncApiMultiFormatSchema LoadMultiSchemaFormat(ParseNode node)
         {
-            var schemas = new AsyncApiMultiFormatSchema(schema: AsyncApiSchemaDeserializer.LoadSchema(node));
+            var schemas = new AsyncApiMultiFormatSchema
+            {
+                Schema = AsyncApiSchemaDeserializer.LoadSchema(node),
+            };
 
             return schemas;
         }
