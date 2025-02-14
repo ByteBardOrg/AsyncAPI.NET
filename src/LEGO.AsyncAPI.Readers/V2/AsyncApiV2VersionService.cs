@@ -36,6 +36,8 @@ namespace LEGO.AsyncAPI.Readers.V2
             [typeof(AsyncApiParameter)] = AsyncApiV2Deserializer.LoadParameter,
             [typeof(AsyncApiJsonSchema)] = AsyncApiSchemaDeserializer.LoadSchema,
             [typeof(AsyncApiAvroSchema)] = AsyncApiAvroSchemaDeserializer.LoadSchema,
+            [typeof(AsyncApiJsonSchema)] = AsyncApiV2Deserializer.LoadJsonSchemaPayload,	
+            [typeof(AsyncApiAvroSchema)] = AsyncApiV2Deserializer.LoadAvroPayload,
             [typeof(AsyncApiSecurityScheme)] = AsyncApiV2Deserializer.LoadSecurityScheme,
             [typeof(AsyncApiServer)] = AsyncApiV2Deserializer.LoadServer,
             [typeof(AsyncApiServerVariable)] = AsyncApiV2Deserializer.LoadServerVariable,
