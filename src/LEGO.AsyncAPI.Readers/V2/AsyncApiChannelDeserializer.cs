@@ -11,9 +11,9 @@ namespace LEGO.AsyncAPI.Readers
         private static readonly FixedFieldMap<AsyncApiChannel> ChannelFixedFields = new()
         {
             { "description", (a, n) => { a.Description = n.GetScalarValue(); } },
-            { "servers", (a, n) => { a.Servers = n.CreateSimpleList(s => s.GetScalarValue()); } },
-            { "subscribe", (a, n) => { a.Subscribe = LoadOperation(n); } },
-            { "publish", (a, n) => { a.Publish = LoadOperation(n); } },
+            { "servers", (a, n) => { a.Servers = n.CreateSimpleList(s => new AsyncApiServerReference("#/servers/" + s.GetScalarValue())); } },
+            { "subscribe", (a, n) => { /* happens after initial reading */ } },
+            { "publish", (a, n) => { /* happens after initial reading */ } },
             { "parameters", (a, n) => { a.Parameters = n.CreateMap(LoadParameter); } },
             { "bindings", (a, n) => { a.Bindings = LoadChannelBindings(n); } },
         };
@@ -24,7 +24,7 @@ namespace LEGO.AsyncAPI.Readers
                 { s => s.StartsWith("x-"), (a, p, n) => a.AddExtension(p, LoadExtension(p, n)) },
             };
 
-        public static AsyncApiChannel LoadChannel(ParseNode node)
+        public static AsyncApiChannel LoadChannel(ParseNode node, string channelAddress = null)
         {
             var mapNode = node.CheckMapNode("channel");
             var pointer = mapNode.GetReferencePointer();
@@ -33,11 +33,44 @@ namespace LEGO.AsyncAPI.Readers
                 return new AsyncApiChannelReference(pointer);
             }
 
-            var pathItem = new AsyncApiChannel();
+            var channel = new AsyncApiChannel();
 
-            ParseMap(mapNode, pathItem, ChannelFixedFields, ChannelPatternFields);
+            ParseMap(mapNode, channel, ChannelFixedFields, ChannelPatternFields);
+            if (channelAddress != null)
+            {
+                channel.Address = channelAddress;
+                LoadV2Operation(mapNode["subscribe"], channel, AsyncApiAction.Send);
+                LoadV2Operation(mapNode["publish"], channel, AsyncApiAction.Receive);
+            }
 
-            return pathItem;
+            return channel;
+        }
+
+        public static string NormalizeChannelKey(string channelKey)
+        {
+            string newKey = string.Empty;
+            foreach (var character in channelKey)
+            {
+                if (char.IsLetterOrDigit(character))
+                {
+                    newKey += character;
+                }
+            }
+
+            return newKey;
+        }
+
+        private static void LoadV2Operation(ParseNode node, AsyncApiChannel instance, AsyncApiAction action)
+        {
+            var operation = LoadOperation(node);
+            foreach (var message in operation.Messages)
+            {
+                var messageKey = message.Reference.Reference.Split('/')[^1];
+                instance.Messages.Add(messageKey, message);
+            }
+
+            operation.Action = action;
+            operation.Channel = new AsyncApiChannelReference("#/channels/" + NormalizeChannelKey(instance.Address));
         }
     }
 }

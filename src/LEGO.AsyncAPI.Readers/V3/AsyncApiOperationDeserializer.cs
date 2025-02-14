@@ -43,7 +43,7 @@ namespace LEGO.AsyncAPI.Readers
                     "traits", (a, n) => { a.Traits = n.CreateList(LoadOperationTrait); }
                 },
                 {
-                    "messages", (a, n) => { a.Messages = LoadMessageReferences(n); }
+                    "messages", (a, n) => { a.Messages = n.CreateList(LoadMessageReference); }
                 },
                 {
                     "reply", (a, n) => { a.Reply = LoadOperationReply(n); }
