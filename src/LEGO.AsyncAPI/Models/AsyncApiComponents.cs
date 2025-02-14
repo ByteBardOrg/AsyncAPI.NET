@@ -17,9 +17,12 @@ namespace LEGO.AsyncAPI.Models
     public class AsyncApiComponents : IAsyncApiExtensible, IAsyncApiSerializable
     {
         /// <summary>
-        /// An object to hold reusable Schema Objects.
+        /// An object to hold reusable Schema Object.
         /// </summary>
-        public IDictionary<string, AsyncApiJsonSchema> Schemas { get; set; } = new Dictionary<string, AsyncApiJsonSchema>();
+        /// <remarks>
+        /// If this is a Schema Object, then the schemaFormat will be assumed to be "application/vnd.aai.asyncapi+json;version=asyncapi" where the version is equal to the AsyncAPI Version String.
+        /// </remarks>
+        public IDictionary<string, AsyncApiMultiFormatSchema> Schemas { get; set; } = new Dictionary<string, AsyncApiMultiFormatSchema>();
 
         /// <summary>
         /// An object to hold reusable Server Objects.
@@ -157,13 +160,13 @@ namespace LEGO.AsyncAPI.Models
                 this.Schemas,
                 (w, key, component) =>
                 {
-                    if (component is AsyncApiJsonSchemaReference reference)
+                    if (component is AsyncApiMultiFormatSchemaReference reference)
                     {
-                        reference.SerializeV2(w);
+                        reference.Schema.SerializeV2(w);
                     }
                     else
                     {
-                        component.SerializeV2(w);
+                        component.Schema.SerializeV2(w);
                     }
                 });
 
@@ -423,7 +426,7 @@ namespace LEGO.AsyncAPI.Models
                 this.Schemas,
                 (w, key, component) =>
                 {
-                    if (component is AsyncApiJsonSchemaReference reference)
+                    if (component is AsyncApiMultiFormatSchemaReference reference)
                     {
                         reference.SerializeV3(w);
                     }

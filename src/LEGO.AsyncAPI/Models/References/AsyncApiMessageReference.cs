@@ -29,7 +29,7 @@ namespace LEGO.AsyncAPI.Models
 
         public override AsyncApiMultiFormatSchema Headers { get => this.Target?.Headers; set => this.Target.Headers = value; }
 
-        public override IAsyncApiSchema Payload { get => this.Target?.Payload; set => this.Target.Payload = value; }
+        public override AsyncApiMultiFormatSchema Payload { get => this.Target?.Payload; set => this.Target.Payload = value; }
 
         public override AsyncApiCorrelationId CorrelationId { get => this.Target?.CorrelationId; set => this.Target.CorrelationId = value; }
 
@@ -70,6 +70,20 @@ namespace LEGO.AsyncAPI.Models
             {
                 this.Reference.Workspace = writer.Workspace;
                 this.Target.SerializeV2(writer);
+            }
+        }
+
+        public override void SerializeV3(IAsyncApiWriter writer)
+        {
+            if (!writer.GetSettings().ShouldInlineReference(this.Reference))
+            {
+                this.Reference.SerializeV3(writer);
+                return;
+            }
+            else
+            {
+                this.Reference.Workspace = writer.Workspace;
+                this.Target.SerializeV3(writer);
             }
         }
     }

@@ -12,21 +12,21 @@ namespace LEGO.AsyncAPI.Models
         /// <summary>
         /// Required. A string containing the name of the schema format that is used to define the information. If schemaFormat is missing, it MUST default to application/vnd.aai.asyncapi+json;version={{asyncapi}} where {{asyncapi}} matches the AsyncAPI Version String. In such a case, this would make the Multi Format Schema Object equivalent to the Schema Object. When using Reference Object within the schema, the schemaFormat of the resource being referenced MUST match the schemaFormat of the schema that contains the initial reference. For example, if you reference Avro schema, then schemaFormat of referencing resource and the resource being reference MUST match.
         /// </summary>
-        public string SchemaFormat { get; set; }
+        public virtual string SchemaFormat { get; set; }
 
         /// <summary>
         /// Required. Definition of the message payload. It can be of any type but defaults to Schema Object. It MUST match the schema format defined in schemaFormat, including the encoding type. E.g., Avro should be inlined as either a YAML or JSON object instead of as a string to be parsed as YAML or JSON. Non-JSON-based schemas (e.g., Protobuf or XSD) MUST be inlined as a string.
         /// </summary>
-        public IAsyncApiSchema Schema { get; set; }
+        public virtual IAsyncApiSchema Schema { get; set; }
 
         public IDictionary<string, IAsyncApiExtension> Extensions { get; set; } = new Dictionary<string, IAsyncApiExtension>();
 
-        public void SerializeV2(IAsyncApiWriter writer)
+        public virtual void SerializeV2(IAsyncApiWriter writer)
         {
             throw new NotImplementedException();
         }
 
-        public void SerializeV3(IAsyncApiWriter writer)
+        public virtual void SerializeV3(IAsyncApiWriter writer)
         {
             if (writer is null)
             {

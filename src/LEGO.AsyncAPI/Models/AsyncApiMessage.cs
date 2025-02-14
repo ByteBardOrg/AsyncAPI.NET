@@ -18,9 +18,12 @@ namespace LEGO.AsyncAPI.Models
         public virtual AsyncApiMultiFormatSchema Headers { get; set; }
 
         /// <summary>
-        /// definition of the message payload. It can be of any type but defaults to Schema object. It must match the schema format, including encoding type - e.g Avro should be inlined as either a YAML or JSON object NOT a string to be parsed as YAML or JSON.
+        /// definition of the message payload.
         /// </summary>
-        public virtual IAsyncApiSchema Payload { get; set; }
+        /// <remarks>
+        /// If this is a Schema Object, then the schemaFormat will be assumed to be "application/vnd.aai.asyncapi+json;version=asyncapi" where the version is equal to the AsyncAPI Version String.
+        /// </remarks>
+        public virtual AsyncApiMultiFormatSchema Payload { get; set; }
 
         /// <summary>
         /// definition of the correlation ID used for message tracing or matching.
@@ -91,7 +94,7 @@ namespace LEGO.AsyncAPI.Models
             writer.WriteOptionalObject(AsyncApiConstants.Headers, this.Headers, (w, h) => h.Schema.SerializeV2(w));
             writer.WriteOptionalObject(AsyncApiConstants.Payload, this.Payload, (w, p) => p.SerializeV2(w));
             writer.WriteOptionalObject(AsyncApiConstants.CorrelationId, this.CorrelationId, (w, c) => c.SerializeV2(w));
-            writer.WriteOptionalProperty(AsyncApiConstants.SchemaFormat, this.Headers.SchemaFormat);
+            writer.WriteOptionalProperty(AsyncApiConstants.SchemaFormat, this.Payload.SchemaFormat);
             writer.WriteOptionalProperty(AsyncApiConstants.ContentType, this.ContentType);
             writer.WriteOptionalProperty(AsyncApiConstants.Name, this.Name);
             writer.WriteOptionalProperty(AsyncApiConstants.Title, this.Title);

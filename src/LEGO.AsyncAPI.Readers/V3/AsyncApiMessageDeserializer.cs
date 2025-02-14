@@ -14,7 +14,7 @@ namespace LEGO.AsyncAPI.Readers
     /// Class containing logic to deserialize AsyncApi document into
     /// runtime AsyncApi object model.
     /// </summary>
-    internal static partial class AsyncApiV2Deserializer
+    internal static partial class AsyncApiV3Deserializer
     {
         private static readonly FixedFieldMap<AsyncApiMessage> messageFixedFields = new()
         {
@@ -31,7 +31,7 @@ namespace LEGO.AsyncAPI.Readers
                 "correlationId", (a, n) => { a.CorrelationId = LoadCorrelationId(n); }
             },
             {
-                "schemaFormat", (a, n) => { a.Headers.SchemaFormat = n.GetScalarValue(); }
+                "schemaFormat", (a, n) => { /* loaded as part of multiformatschema */ }
             },
             {
                 "contentType", (a, n) => { a.ContentType = n.GetScalarValue(); }

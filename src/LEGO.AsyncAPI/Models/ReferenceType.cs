@@ -100,5 +100,7 @@ namespace LEGO.AsyncAPI.Models
         [Display("operationReply")] OperationReply,
 
         [Display("operation")] Operation,
+
+        [Display("schema")] MultiFormatSchema,
     }
 }
