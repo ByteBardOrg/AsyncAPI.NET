@@ -31,7 +31,7 @@ namespace LEGO.AsyncAPI.Readers
                 "correlationId", (a, n) => { a.CorrelationId = LoadCorrelationId(n); }
             },
             {
-                "schemaFormat", (a, n) => { a.Headers.SchemaFormat = n.GetScalarValue(); }
+                "schemaFormat", (a, n) => { /* loaded as part of multiformatschema */ }
             },
             {
                 "contentType", (a, n) => { a.ContentType = n.GetScalarValue(); }
