@@ -19,19 +19,19 @@ namespace LEGO.AsyncAPI.Readers
         private static readonly FixedFieldMap<AsyncApiMessage> messageFixedFields = new()
         {
             {
-                "messageId", (a, n) => { a.MessageId = n.GetScalarValue(); }
+                "messageId", (a, n) => { }
             },
             {
-                "headers", (a, n) => { a.Headers = AsyncApiSchemaDeserializer.LoadSchema(n); }
+                "headers", (a, n) => { a.Headers = new AsyncApiMultiFormatSchema { Schema = AsyncApiSchemaDeserializer.LoadSchema(n) }; }
             },
             {
-                "payload", (a, n) => { a.Payload = null; /* resolved after the initial run */ }
+                "payload", (a, n) => { a.Payload = new AsyncApiMultiFormatSchema(); }
             },
             {
                 "correlationId", (a, n) => { a.CorrelationId = LoadCorrelationId(n); }
             },
             {
-                "schemaFormat", (a, n) => { a.SchemaFormat = LoadSchemaFormat(n.GetScalarValue()); }
+                "schemaFormat", (a, n) => { a.Payload.SchemaFormat = n.GetScalarValue(); }
             },
             {
                 "contentType", (a, n) => { a.ContentType = n.GetScalarValue(); }
@@ -64,7 +64,7 @@ namespace LEGO.AsyncAPI.Readers
                 "traits", (a, n) => a.Traits = n.CreateList(LoadMessageTrait)
             },
         };
-
+        
         public static IAsyncApiSchema LoadJsonSchemaPayload(ParseNode n)
         {
             return LoadPayload(n, null);
@@ -143,7 +143,7 @@ namespace LEGO.AsyncAPI.Readers
             var message = new AsyncApiMessage();
 
             ParseMap(mapNode, message, messageFixedFields, messagePatternFields);
-            message.Payload = LoadPayload(mapNode["payload"]?.Value, message.SchemaFormat);
+            message.Payload.Schema = LoadPayload(mapNode["payload"], message.Payload.SchemaFormat);
 
             return message;
         }

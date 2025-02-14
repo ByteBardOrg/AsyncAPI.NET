@@ -1,5 +1,7 @@
 // Copyright (c) The LEGO Group. All rights reserved.
 
+using System.Linq;
+
 namespace LEGO.AsyncAPI.Readers
 {
     using System.Collections.Generic;
@@ -52,12 +54,14 @@ namespace LEGO.AsyncAPI.Readers
 
             messages = new List<AsyncApiMessage> { LoadMessage(n) };
             var messageReferences = new List<AsyncApiMessageReference>();
-            int counter = 0;
+            var counter = 0;
+
             foreach (var message in messages)
             {
                 if (message is not AsyncApiMessageReference messageReference)
                 {
                     var reference = "#/components/messages/upgradedOperationMessage_" + (mapNode["operationId"]?.GetScalarValue() + message.Name) ?? counter.ToString();
+
                     n.Context.Workspace.RegisterComponent(reference, message);
                     messageReferences.Add(new AsyncApiMessageReference(reference));
                     counter++;
