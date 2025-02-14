@@ -34,7 +34,7 @@ namespace LEGO.AsyncAPI.Models
 
         public override string Name { get => this.Target?.Name; set => this.Target.Name = value; }
 
-        public override ParameterLocation In { get => this.Target.In; set => this.Target.In = value; }
+        public override ParameterLocation? In { get => this.Target?.In; set => this.Target.In = value; }
 
         public override string Scheme { get => this.Target?.Scheme; set => this.Target.Scheme = value; }
 

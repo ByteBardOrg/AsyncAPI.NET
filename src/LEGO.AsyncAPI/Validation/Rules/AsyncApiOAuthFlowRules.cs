@@ -33,12 +33,12 @@ namespace LEGO.AsyncAPI.Validation.Rules
 
                     context.Exit();
 
-                    context.Enter("scopes");
-                    if (oauthFlow.Scopes == null || !oauthFlow.Scopes.Keys.Any())
+                    context.Enter("availableScopes");
+                    if (oauthFlow.AvailableScopes == null || !oauthFlow.AvailableScopes.Keys.Any())
                     {
                         context.CreateError(
                             nameof(OAuthFlowRequiredFields),
-                            string.Format(Resource.Validation_FieldRequired, "scopes", "flow"));
+                            string.Format(Resource.Validation_FieldRequired, "availableScopes", "flow"));
                     }
 
                     context.Exit();

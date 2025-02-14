@@ -27,7 +27,7 @@ namespace LEGO.AsyncAPI.Models
         /// <summary>
         /// REQUIRED. The location of the API key. Valid values are "user" and "password" for apiKey and "query", "header" or "cookie" for httpApiKey.
         /// </summary>
-        public virtual ParameterLocation In { get; set; }
+        public virtual ParameterLocation? In { get; set; }
 
         /// <summary>
         /// REQUIRED. The name of the HTTP Authorization scheme to be used
