@@ -52,7 +52,7 @@ namespace LEGO.AsyncAPI.Readers.ParseNodes
             }
         }
 
-        public override Dictionary<string, T> CreateMap<T>(Func<MapNode, string, T> map)
+        public override Dictionary<string, T> CreateMap<T>(Func<string, string> keySelector, Func<MapNode, string, T> map)
         {
             var jsonMap = this.node;
             if (jsonMap == null)
@@ -63,13 +63,14 @@ namespace LEGO.AsyncAPI.Readers.ParseNodes
             var nodes = jsonMap.Select(
                 n =>
                 {
-                    var key = n.Key;
+                    var originalKey = n.Key;
+                    var newKey = keySelector(originalKey);
                     T value;
                     try
                     {
-                        this.Context.StartObject(key);
+                        this.Context.StartObject(originalKey);
                         value = n.Value is JsonObject
-                          ? map(new MapNode(this.Context, n.Value), key)
+                          ? map(new MapNode(this.Context, n.Value), originalKey)
                           : default(T);
                     }
                     finally
@@ -79,7 +80,7 @@ namespace LEGO.AsyncAPI.Readers.ParseNodes
 
                     return new
                     {
-                        key,
+                        key = newKey,
                         value,
                     };
                 });

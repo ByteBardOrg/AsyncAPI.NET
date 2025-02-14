@@ -6,7 +6,7 @@
 	  <PackageId>AsyncAPI.NET.Readers</PackageId>
 	  <AssemblyName>LEGO.AsyncAPI.Readers</AssemblyName>
 	  <RootNamespace>LEGO.AsyncAPI.Readers</RootNamespace>
-	  <TargetFrameworks>netstandard2.0;net8</TargetFrameworks>
+	  <TargetFrameworks>netstandard2.1;net8</TargetFrameworks>
   </PropertyGroup>	
 
   <ItemGroup>
