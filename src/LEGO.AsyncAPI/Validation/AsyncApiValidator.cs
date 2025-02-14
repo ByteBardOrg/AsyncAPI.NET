@@ -21,10 +21,13 @@ namespace LEGO.AsyncAPI.Validations
         /// Create a vistor that will validate an AsyncApiDocument.
         /// </summary>
         /// <param name="ruleSet"></param>
-        public AsyncApiValidator(ValidationRuleSet ruleSet)
+        public AsyncApiValidator(ValidationRuleSet ruleSet, AsyncApiDocument rootDocument = null)
         {
             this.ruleSet = ruleSet;
+            this.RootDocument = rootDocument;
         }
+
+        public AsyncApiDocument RootDocument { get; }
 
         /// <summary>
         /// Gets the validation errors.
