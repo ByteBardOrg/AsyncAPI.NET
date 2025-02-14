@@ -10,7 +10,7 @@ namespace LEGO.AsyncAPI.Readers
     {
         private static FixedFieldMap<AsyncApiComponents> componentsFixedFields = new()
         {
-            { "schemas", (a, n) => a.Schemas = n.CreateMap(LoadMultiFormatSchema) },
+            { "schemas", (a, n) => a.Schemas = n.CreateMap(LoadMultiSchemaFormat) },
             { "servers", (a, n) => a.Servers = n.CreateMap(LoadServer) },
             { "channels", (a, n) => a.Channels = n.CreateMap((key) => NormalizeChannelKey(key), (n, key) => LoadChannel(n, channelAddress: NormalizeChannelKey(key), channelKey: key) },
             { "messages", (a, n) => a.Messages = n.CreateMap(LoadMessage) },
@@ -39,6 +39,13 @@ namespace LEGO.AsyncAPI.Readers
             ParseMap(mapNode, components, componentsFixedFields, componentsPatternFields);
 
             return components;
+        }
+
+        private static AsyncApiMultiFormatSchema LoadMultiSchemaFormat(ParseNode node)
+        {
+            var schemas = new AsyncApiMultiFormatSchema(schema: AsyncApiSchemaDeserializer.LoadSchema(node));
+
+            return schemas;
         }
     }
 }

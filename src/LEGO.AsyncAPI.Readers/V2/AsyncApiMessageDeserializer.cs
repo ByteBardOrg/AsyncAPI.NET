@@ -22,16 +22,16 @@ namespace LEGO.AsyncAPI.Readers
                 "messageId", (a, n) => { }
             },
             {
-                "headers", (a, n) => { a.Headers = LoadMultiFormatSchema(n); }
+                "headers", (a, n) => { a.Headers = new AsyncApiMultiFormatSchema { Schema = AsyncApiSchemaDeserializer.LoadSchema(n) }; }
             },
             {
-                "payload", (a, n) => { a.Payload = LoadMultiFormatSchema(n); }
+                "payload", (a, n) => { a.Payload = new AsyncApiMultiFormatSchema { Schema = AsyncApiSchemaDeserializer.LoadSchema(n) }; }
             },
             {
                 "correlationId", (a, n) => { a.CorrelationId = LoadCorrelationId(n); }
             },
             {
-                "schemaFormat", (a, n) => { /* loaded as part of multiformatschema */ }
+                "schemaFormat", (a, n) => { a.Payload.SchemaFormat = n.GetScalarValue(); }
             },
             {
                 "contentType", (a, n) => { a.ContentType = n.GetScalarValue(); }
