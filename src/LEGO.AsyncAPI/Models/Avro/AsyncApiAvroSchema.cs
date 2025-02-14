@@ -23,6 +23,8 @@ namespace LEGO.AsyncAPI.Models
 
         public abstract void SerializeV2(IAsyncApiWriter writer);
 
+        public abstract void SerializeV3(IAsyncApiWriter writer);
+
         public virtual bool TryGetAs<T>(out T result)
             where T : AsyncApiAvroSchema
         {

@@ -43,5 +43,29 @@ namespace LEGO.AsyncAPI.Models
 
             writer.WriteEndObject();
         }
+
+        public override void SerializeV3(IAsyncApiWriter writer)
+        {
+            writer.WriteStartObject();
+            writer.WriteOptionalProperty("type", this.Type);
+            writer.WriteRequiredObject("items", this.Items, (w, f) => f.SerializeV3(w));
+            if (this.Metadata.Any())
+            {
+                foreach (var item in this.Metadata)
+                {
+                    writer.WritePropertyName(item.Key);
+                    if (item.Value == null)
+                    {
+                        writer.WriteNull();
+                    }
+                    else
+                    {
+                        writer.WriteAny(item.Value);
+                    }
+                }
+            }
+
+            writer.WriteEndObject();
+        }
     }
 }

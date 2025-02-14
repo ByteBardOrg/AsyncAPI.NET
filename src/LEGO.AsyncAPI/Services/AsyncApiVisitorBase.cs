@@ -305,5 +305,9 @@ namespace LEGO.AsyncAPI.Services
         public virtual void Visit(IList<AsyncApiMessageExample> messageExamples)
         {
         }
+
+        public virtual void Visit(IDictionary<string, AsyncApiMessage> messages)
+        {
+        }
     }
 }

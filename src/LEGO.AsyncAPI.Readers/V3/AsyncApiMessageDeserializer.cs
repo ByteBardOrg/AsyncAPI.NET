@@ -70,6 +70,18 @@ namespace LEGO.AsyncAPI.Readers
             { s => s.StartsWith("x-"), (a, p, n) => a.AddExtension(p, LoadExtension(p, n)) },
         };
 
+        public static AsyncApiMessageReference LoadMessageReference(ParseNode node)
+        {
+            var mapNode = node.CheckMapNode("message");
+            var pointer = mapNode.GetReferencePointer();
+            if (pointer != null)
+            {
+                return new AsyncApiMessageReference(pointer);
+            }
+
+            return null;
+        }
+
         public static AsyncApiMessage LoadMessage(ParseNode node)
         {
             var mapNode = node.CheckMapNode("message");

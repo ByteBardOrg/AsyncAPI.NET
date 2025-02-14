@@ -12,7 +12,7 @@ namespace LEGO.AsyncAPI.Readers
     {
         { "address", (a, n) => { a.Address = LoadOperationReplyAddress(n); } },
         { "channel", (a, n) => { a.Channel = LoadChannelReference(n); } },
-        { "messages", (a, n) => { a.Messages = LoadMessageReferences(n); } },
+        { "messages", (a, n) => { a.Messages = n.CreateList(LoadMessageReference); } },
     };
 
         private static PatternFieldMap<AsyncApiOperationReply> replyPatternFields =

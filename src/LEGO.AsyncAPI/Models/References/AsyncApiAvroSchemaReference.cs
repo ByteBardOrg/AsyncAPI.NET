@@ -76,5 +76,21 @@ namespace LEGO.AsyncAPI.Models
 
             this.Target.SerializeV2(writer);
         }
+
+        public override void SerializeV3(IAsyncApiWriter writer)
+        {
+            if (writer is null)
+            {
+                throw new ArgumentNullException(nameof(writer));
+            }
+
+            if (this.Reference != null && !writer.GetSettings().ShouldInlineReference(this.Reference))
+            {
+                this.Reference.SerializeV2(writer);
+                return;
+            }
+
+            this.Target.SerializeV3(writer);
+        }
     }
 }
