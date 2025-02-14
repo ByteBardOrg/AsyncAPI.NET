@@ -397,10 +397,10 @@ namespace LEGO.AsyncAPI.Models
             {
                 var loops = writer.GetSettings().LoopDetector.Loops;
                 writer.WriteStartObject();
-                if (loops.TryGetValue(typeof(AsyncApiJsonSchemaReference), out List<object> schemas))
+                if (loops.TryGetValue(typeof(AsyncApiMultiFormatSchemaReference), out List<object> schemas))
                 {
-                    var asyncApiSchemas = schemas.Cast<AsyncApiJsonSchemaReference>().Distinct().ToList()
-                        .ToDictionary<AsyncApiJsonSchemaReference, string>(k => k.Reference.FragmentId);
+                    var asyncApiSchemas = schemas.Cast<AsyncApiMultiFormatSchemaReference>().Distinct().ToList()
+                        .ToDictionary<AsyncApiMultiFormatSchemaReference, string>(k => k.Reference.FragmentId);
 
                     writer.WriteOptionalMap(
                        AsyncApiConstants.Schemas,
