@@ -47,6 +47,15 @@ namespace LEGO.AsyncAPI.Models
 
         public override void SerializeV2(IAsyncApiWriter writer)
         {
+            this.SerializeCore(writer);
+        }
+
+        public override void SerializeV3(IAsyncApiWriter writer)
+        {
+            this.SerializeCore(writer);
+        }
+        public void SerializeCore(IAsyncApiWriter writer)
+        {
             writer.WriteStartObject();
             writer.WriteOptionalProperty("type", this.Type);
             writer.WriteRequiredProperty("name", this.Name);

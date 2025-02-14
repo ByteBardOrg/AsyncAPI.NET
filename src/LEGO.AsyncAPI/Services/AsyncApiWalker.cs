@@ -55,7 +55,7 @@ namespace LEGO.AsyncAPI.Services
                 {
                     foreach (var item in components.Schemas)
                     {
-                        this.Walk(item.Key, () => this.Walk(item.Value, isComponent: true));
+                        this.Walk(item.Key, () => this.Walk(item.Value));
                     }
                 }
             });
@@ -279,18 +279,50 @@ namespace LEGO.AsyncAPI.Services
             {
                 return;
             }
+
             if (channel is AsyncApiChannelReference)
             {
                 this.Walk(channel as IAsyncApiReferenceable);
                 return;
             }
 
-            this.Walk(AsyncApiConstants.Subscribe, () => this.Walk(channel.Subscribe));
-            this.Walk(AsyncApiConstants.Publish, () => this.Walk(channel.Publish));
-
-            this.Walk(AsyncApiConstants.Bindings, () => this.Walk(channel.Bindings));
+            this.Walk(AsyncApiConstants.Messages, () => this.Walk(channel.Messages));
+            this.Walk(AsyncApiConstants.Servers, () => this.Walk(channel.Servers));
             this.Walk(AsyncApiConstants.Parameters, () => this.Walk(channel.Parameters));
+            this.Walk(AsyncApiConstants.Tags, () => this.Walk(channel.Tags));
+            this.Walk(AsyncApiConstants.ExternalDocs, () => this.Walk(channel.ExternalDocs));
+            this.Walk(AsyncApiConstants.Bindings, () => this.Walk(channel.Bindings));
             this.Walk(channel as IAsyncApiExtensible);
+        }
+
+        private void Walk(IList<AsyncApiServerReference> serverReferences)
+        {
+            if (serverReferences == null)
+            {
+                return;
+            }
+
+            foreach (var serverReference in serverReferences)
+            {
+                this.Walk(serverReference as IAsyncApiReferenceable);
+            }
+        }
+
+        private void Walk(IDictionary<string, AsyncApiMessage> messages)
+        {
+            if (messages == null)
+            {
+                return;
+            }
+
+            this.visitor.Visit(messages);
+
+            foreach (var message in messages)
+            {
+                this.visitor.CurrentKeys.Message = message.Key;
+                this.Walk(message.Key, () => this.Walk(message.Value));
+                this.visitor.CurrentKeys.Message = null;
+            }
         }
 
         private void Walk(IDictionary<string, AsyncApiParameter> parameters)
@@ -617,7 +649,7 @@ namespace LEGO.AsyncAPI.Services
             if (message != null)
             {
                 this.Walk(AsyncApiConstants.Headers, () => this.Walk(message.Headers));
-                this.Walk(message.Payload);
+                this.Walk(AsyncApiConstants.Payload, () => this.Walk(message.Payload));
                 this.Walk(AsyncApiConstants.CorrelationId, () => this.Walk(message.CorrelationId));
                 this.Walk(AsyncApiConstants.Tags, () => this.Walk(message.Tags));
                 this.Walk(AsyncApiConstants.Examples, () => this.Walk(message.Examples));
