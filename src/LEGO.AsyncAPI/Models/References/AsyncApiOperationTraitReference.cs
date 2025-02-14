@@ -27,7 +27,7 @@ namespace LEGO.AsyncAPI.Models
             this.Reference = new AsyncApiReference(reference, ReferenceType.OperationTrait);
         }
 
-        public override string OperationId { get => this.Target?.OperationId; set => this.Target.OperationId = value; }
+        public override string Title { get => this.Target?.Title; set => this.Target.Title = value; }
 
         public override string Summary { get => this.Target?.Summary; set => this.Target.Summary = value; }
 
