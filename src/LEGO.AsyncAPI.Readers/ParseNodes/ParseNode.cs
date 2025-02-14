@@ -4,6 +4,7 @@ namespace LEGO.AsyncAPI.Readers.ParseNodes
 {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
     using System.Text.Json.Nodes;
     using LEGO.AsyncAPI.Models;
     using LEGO.AsyncAPI.Models.Interfaces;
@@ -48,7 +49,7 @@ namespace LEGO.AsyncAPI.Readers.ParseNodes
             throw new AsyncApiReaderException("Cannot create list from this type of node.", this.Context);
         }
 
-        public virtual Dictionary<string, T> CreateMap<T>(Func<MapNode, string, T> map)
+        public virtual Dictionary<string, T> CreateMap<T>(Func<string, string> keySelector, Func<MapNode, string, T> map)
         {
             throw new AsyncApiReaderException("Cannot create map from this type of node.", this.Context);
         }

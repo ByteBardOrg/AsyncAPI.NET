@@ -23,7 +23,7 @@ namespace LEGO.AsyncAPI.Models
 
         public virtual void SerializeV2(IAsyncApiWriter writer)
         {
-            throw new NotImplementedException();
+            this.Schema.SerializeV2(writer);
         }
 
         public virtual void SerializeV3(IAsyncApiWriter writer)

@@ -43,7 +43,6 @@ namespace LEGO.AsyncAPI.Readers
                 },
             };
 
-        // Convert message to references.
         private static IList<AsyncApiMessageReference> LoadMessages(ParseNode n)
         {
             var mapNode = n.CheckMapNode("message");
@@ -61,9 +60,7 @@ namespace LEGO.AsyncAPI.Readers
             {
                 if (message is not AsyncApiMessageReference messageReference)
                 {
-                    var operationId = mapNode["operationId"].Value.GetScalarValue() ?? counter.ToString();
-
-                    var reference = "#/components/messages/automatedOperationMessage_" + operationId;
+                    var reference = "#/components/messages/upgradedOperationMessage_" + (mapNode["operationId"]?.GetScalarValue() + message.Name) ?? counter.ToString();
 
                     n.Context.Workspace.RegisterComponent(reference, message);
                     messageReferences.Add(new AsyncApiMessageReference(reference));
