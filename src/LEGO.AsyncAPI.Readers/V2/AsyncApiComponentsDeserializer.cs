@@ -12,7 +12,7 @@ namespace LEGO.AsyncAPI.Readers
         {
             { "schemas", (a, n) => a.Schemas = n.CreateMap(LoadMultiSchemaFormat) },
             { "servers", (a, n) => a.Servers = n.CreateMap(LoadServer) },
-            { "channels", (a, n) => a.Channels = n.CreateMap((key) => NormalizeChannelKey(key), (n, key) => LoadChannel(n, channelAddress: NormalizeChannelKey(key), channelKey: key) },
+            { "channels", (a, n) => a.Channels = n.CreateMap((key) => NormalizeChannelKey(key), (n, key) => LoadChannel(n, channelAddress: NormalizeChannelKey(key))) },
             { "messages", (a, n) => a.Messages = n.CreateMap(LoadMessage) },
             { "securitySchemes", (a, n) => a.SecuritySchemes = n.CreateMap(LoadSecurityScheme) },
             { "parameters", (a, n) => a.Parameters = n.CreateMap(LoadParameter) },
