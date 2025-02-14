@@ -1,4 +1,4 @@
-// Copyright (c) The LEGO Group. All rights reserved.
+﻿// Copyright (c) The LEGO Group. All rights reserved.
 
 namespace LEGO.AsyncAPI.Models
 {
@@ -13,32 +13,22 @@ namespace LEGO.AsyncAPI.Models
     public class AsyncApiMessage : IAsyncApiExtensible, IAsyncApiSerializable
     {
         /// <summary>
-        /// Unique string used to identify the message. The id MUST be unique among all messages described in the API.
-        /// </summary>
-        public virtual string MessageId { get; set; }
-
-        /// <summary>
         /// schema definition of the application headers. Schema MUST be of type "object".
         /// </summary>
-        public virtual AsyncApiJsonSchema Headers { get; set; }
+        public virtual AsyncApiMultiFormatSchema Headers { get; set; }
 
         /// <summary>
-        /// definition of the message payload. It can be of any type but defaults to Schema object. It must match the schema format, including encoding type - e.g Avro should be inlined as either a YAML or JSON object NOT a string to be parsed as YAML or JSON.
+        /// definition of the message payload.
         /// </summary>
-        public virtual IAsyncApiSchema Payload { get; set; }
+        /// <remarks>
+        /// If this is a Schema Object, then the schemaFormat will be assumed to be "application/vnd.aai.asyncapi+json;version=asyncapi" where the version is equal to the AsyncAPI Version String.
+        /// </remarks>
+        public virtual AsyncApiMultiFormatSchema Payload { get; set; }
 
         /// <summary>
         /// definition of the correlation ID used for message tracing or matching.
         /// </summary>
         public virtual AsyncApiCorrelationId CorrelationId { get; set; }
-
-        /// <summary>
-        /// a string containing the name of the schema format used to define the message payload.
-        /// </summary>
-        /// <remarks>
-        /// If omitted, implementations should parse the payload as a Schema object.
-        /// </remarks>
-        public virtual string SchemaFormat { get; set; }
 
         /// <summary>
         /// the content type to use when encoding/decoding a message's payload.
@@ -101,10 +91,10 @@ namespace LEGO.AsyncAPI.Models
             }
 
             writer.WriteStartObject();
-            writer.WriteOptionalObject(AsyncApiConstants.Headers, this.Headers, (w, h) => h.SerializeV2(w));
+            writer.WriteOptionalObject(AsyncApiConstants.Headers, this.Headers, (w, h) => h.Schema.SerializeV2(w));
             writer.WriteOptionalObject(AsyncApiConstants.Payload, this.Payload, (w, p) => p.SerializeV2(w));
             writer.WriteOptionalObject(AsyncApiConstants.CorrelationId, this.CorrelationId, (w, c) => c.SerializeV2(w));
-            writer.WriteOptionalProperty(AsyncApiConstants.SchemaFormat, this.SchemaFormat);
+            writer.WriteOptionalProperty(AsyncApiConstants.SchemaFormat, this.Payload.SchemaFormat);
             writer.WriteOptionalProperty(AsyncApiConstants.ContentType, this.ContentType);
             writer.WriteOptionalProperty(AsyncApiConstants.Name, this.Name);
             writer.WriteOptionalProperty(AsyncApiConstants.Title, this.Title);
@@ -117,6 +107,33 @@ namespace LEGO.AsyncAPI.Models
             writer.WriteOptionalCollection(AsyncApiConstants.Examples, this.Examples, (w, e) => e.SerializeV2(w));
 
             writer.WriteOptionalCollection(AsyncApiConstants.Traits, this.Traits, (w, t) => t.SerializeV2(w));
+            writer.WriteExtensions(this.Extensions);
+            writer.WriteEndObject();
+        }
+
+        public virtual void SerializeV3(IAsyncApiWriter writer)
+        {
+            if (writer is null)
+            {
+                throw new ArgumentNullException(nameof(writer));
+            }
+
+            writer.WriteStartObject();
+            writer.WriteOptionalObject(AsyncApiConstants.Headers, this.Headers, (w, h) => h.SerializeV3(w));
+            writer.WriteOptionalObject(AsyncApiConstants.Payload, this.Payload, (w, p) => p.SerializeV3(w));
+            writer.WriteOptionalObject(AsyncApiConstants.CorrelationId, this.CorrelationId, (w, c) => c.SerializeV3(w));
+            writer.WriteOptionalProperty(AsyncApiConstants.ContentType, this.ContentType);
+            writer.WriteOptionalProperty(AsyncApiConstants.Name, this.Name);
+            writer.WriteOptionalProperty(AsyncApiConstants.Title, this.Title);
+            writer.WriteOptionalProperty(AsyncApiConstants.Summary, this.Summary);
+            writer.WriteOptionalProperty(AsyncApiConstants.Description, this.Description);
+            writer.WriteOptionalCollection(AsyncApiConstants.Tags, this.Tags, (w, t) => t.SerializeV3(w));
+            writer.WriteOptionalObject(AsyncApiConstants.ExternalDocs, this.ExternalDocs, (w, e) => e.SerializeV3(w));
+
+            writer.WriteOptionalObject(AsyncApiConstants.Bindings, this.Bindings, (w, t) => t.SerializeV3(w));
+            writer.WriteOptionalCollection(AsyncApiConstants.Examples, this.Examples, (w, e) => e.SerializeV3(w));
+
+            writer.WriteOptionalCollection(AsyncApiConstants.Traits, this.Traits, (w, t) => t.SerializeV3(w));
             writer.WriteExtensions(this.Extensions);
             writer.WriteEndObject();
         }
