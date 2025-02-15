@@ -29,7 +29,7 @@ namespace LEGO.AsyncAPI.Models
             this.Reference = new AsyncApiReference(reference, ReferenceType.Operation);
         }
 
-        public override AsyncApiAction? Action { get => this.Target?.Action; set => this.Target.Action = value; }
+        public override AsyncApiAction Action { get => this.Target.Action; set => this.Target.Action = value; }
 
         public override AsyncApiChannelReference Channel { get => this.Target?.Channel; set => this.Target.Channel = value; }
 

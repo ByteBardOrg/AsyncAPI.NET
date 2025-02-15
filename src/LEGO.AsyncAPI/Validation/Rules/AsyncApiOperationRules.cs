@@ -16,7 +16,7 @@ namespace LEGO.AsyncAPI.Validation.Rules
                 (context, operation) =>
                 {
                     context.Enter("action");
-                    if (operation.Action is null || !Enum.IsDefined(typeof(AsyncApiAction), operation.Action))
+                    if (!Enum.IsDefined(typeof(AsyncApiAction), operation.Action))
                     {
                         context.CreateError(
                             nameof(OperationRequiredFields),
@@ -26,7 +26,7 @@ namespace LEGO.AsyncAPI.Validation.Rules
                     context.Exit();
 
                     context.Enter("channel");
-                    if (operation.Channel?.Reference is null)
+                    if (operation.Channel is null)
                     {
                         context.CreateError(
                             nameof(OperationRequiredFields),

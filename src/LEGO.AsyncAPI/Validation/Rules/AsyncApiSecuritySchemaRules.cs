@@ -16,6 +16,16 @@ namespace LEGO.AsyncAPI.Validation.Rules
             new ValidationRule<AsyncApiSecurityScheme>(
                 (context, securityScheme) =>
                 {
+                    context.Enter("type");
+                    if (!Enum.IsDefined(typeof(SecuritySchemeType), securityScheme.Type))
+                    {
+                        context.CreateError(
+                            nameof(SecuritySchemeRequiredFields),
+                            string.Format(Resource.Validation_FieldRequired, "type", "securityScheme"));
+                    }
+
+                    context.Exit();
+
                     context.Enter("name");
                     if (securityScheme.Name is null && securityScheme.IsFieldRequired("name"))
                     {
@@ -65,16 +75,6 @@ namespace LEGO.AsyncAPI.Validation.Rules
                     }
 
                     context.Exit();
-
-                    context.Enter("scopes");
-                    if (securityScheme.Scopes is null && securityScheme.IsFieldRequired("scopes"))
-                    {
-                        context.CreateError(
-                            nameof(SecuritySchemeRequiredFields),
-                            string.Format(Resource.Validation_FieldRequired, "scopes", "securityScheme"));
-                    }
-
-                    context.Exit();
                 });
 
         private static bool IsFieldRequired(this AsyncApiSecurityScheme sc, string fieldName)
@@ -89,7 +89,6 @@ namespace LEGO.AsyncAPI.Validation.Rules
             { "scheme", sc => sc.Type is SecuritySchemeType.Http },
             { "flows", sc => sc.Type is SecuritySchemeType.OAuth2 },
             { "openIdConnectUrl", sc => sc.Type is SecuritySchemeType.OpenIdConnect },
-            { "scopes", sc => sc.Type is SecuritySchemeType.OpenIdConnect or SecuritySchemeType.OAuth2 },
         };
     }
 }

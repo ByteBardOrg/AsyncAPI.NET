@@ -9,6 +9,92 @@ namespace LEGO.AsyncAPI.Models
 
     public class AsyncApiSecurityScheme : IAsyncApiSerializable, IAsyncApiExtensible
     {
+        public static AsyncApiSecurityScheme UserPassword(string description = null) => new()
+        {
+            Type = SecuritySchemeType.UserPassword,
+            Description = description,
+        };
+
+        public static AsyncApiSecurityScheme ApiKey(ParameterLocation @in, string description = null) => new()
+        {
+            Type = SecuritySchemeType.ApiKey,
+            Description = description,
+            In = @in,
+        };
+
+        public static AsyncApiSecurityScheme X509(string description = null) => new()
+        {
+            Type = SecuritySchemeType.X509,
+            Description = description,
+        };
+
+        public static AsyncApiSecurityScheme SymmetricEncryption(string description = null) => new()
+        {
+            Type = SecuritySchemeType.SymmetricEncryption,
+            Description = description,
+        };
+
+        public static AsyncApiSecurityScheme AsymmetricEncryption(string description = null) => new()
+        {
+            Type = SecuritySchemeType.AsymmetricEncryption,
+            Description = description,
+        };
+
+        public static AsyncApiSecurityScheme HttpApiKey(string name, ParameterLocation @in, string description = null) => new()
+        {
+            Type = SecuritySchemeType.HttpApiKey,
+            Description = description,
+            Name = name,
+            In = @in,
+        };
+
+        public static AsyncApiSecurityScheme Http(string scheme, string? bearerFormat = null, string description = null) => new()
+        {
+            Type = SecuritySchemeType.Http,
+            Description = description,
+            Scheme = scheme,
+            BearerFormat = bearerFormat,
+        };
+
+        public static AsyncApiSecurityScheme OAuth2(AsyncApiOAuthFlows flows, string[] scopes = null, string description = null) => new()
+        {
+            Type = SecuritySchemeType.OAuth2,
+            Description = description,
+            Flows = flows,
+            Scopes = scopes,
+        };
+
+        public static AsyncApiSecurityScheme OpenIdConnect(string openIdConnectUrl, string description = null) => new()
+        {
+            Type = SecuritySchemeType.OpenIdConnect,
+            Description = description,
+            OpenIdConnectUrl = new Uri(openIdConnectUrl, UriKind.RelativeOrAbsolute),
+        };
+
+        public static AsyncApiSecurityScheme Plain(string description = null) => new()
+        {
+            Type = SecuritySchemeType.Plain,
+            Description = description,
+        };
+
+        public static AsyncApiSecurityScheme ScramSha256(string description = null) => new()
+        {
+            Type = SecuritySchemeType.ScramSha256,
+            Description = description,
+        };
+
+        public static AsyncApiSecurityScheme ScramSha512(string description = null) => new()
+        {
+            Type = SecuritySchemeType.ScramSha512,
+            Description = description,
+        };
+
+        public static AsyncApiSecurityScheme Gssapi(string description = null) => new()
+        {
+            Type = SecuritySchemeType.Gssapi,
+            Description = description,
+        };
+
         /// <summary>
         /// REQUIRED. The type of the security scheme. Valid values are "userPassword", "apiKey", "X509", "symmetricEncryption", "asymmetricEncryption", "httpApiKey", "http", "oauth2", "openIdConnect", "plain", "scramSha256", "scramSha512", and "gssapi".
         /// </summary>

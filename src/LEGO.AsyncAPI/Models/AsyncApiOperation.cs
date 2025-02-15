@@ -16,7 +16,7 @@ namespace LEGO.AsyncAPI.Models
         /// <summary>
         /// Required. Use send when it's expected that the application will send a message to the given channel, and receive when the application should expect receiving messages from the given channel.
         /// </summary>
-        public virtual AsyncApiAction? Action { get; set; }
+        public virtual AsyncApiAction Action { get; set; }
 
         /// <summary>
         /// Required. A $ref pointer to the definition of the channel in which this operation is performed. If the operation is located in the root Operations Object, it MUST point to a channel definition located in the root Channels Object, and MUST NOT point to a channel definition located in the Components Object or anywhere else. If the operation is located in the Components Object, it MAY point to a Channel Object in any location. Please note the channel property value MUST be a Reference Object and, therefore, MUST NOT contain a Channel Object. However, it is RECOMMENDED that parsers (or other software) dereference this property for a better development experience.
