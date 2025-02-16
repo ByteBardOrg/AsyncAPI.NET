@@ -24,12 +24,15 @@ namespace LEGO.AsyncAPI.Validation.Rules
                 (context, components) =>
                 {
                     ValidateKeys(context, components.Channels?.Keys, "channels");
-                    ValidateKeys(context, components.ChannelBindings?.Keys, "channelbindings");
+                    ValidateKeys(context, components.ChannelBindings?.Keys, "channelBindings");
                     ValidateKeys(context, components.CorrelationIds?.Keys, "correlationIds");
+                    ValidateKeys(context, components.Replies?.Keys, "replies");
+                    ValidateKeys(context, components.ReplyAddresses?.Keys, "replyAddresses");
                     ValidateKeys(context, components.MessageBindings?.Keys, "messageBindings");
                     ValidateKeys(context, components.Messages?.Keys, "messages");
                     ValidateKeys(context, components.MessageTraits?.Keys, "messageTraits");
                     ValidateKeys(context, components.OperationBindings?.Keys, "operationBindings");
+                    ValidateKeys(context, components.Operations?.Keys, "operations");
                     ValidateKeys(context, components.OperationTraits?.Keys, "operationTraits");
                     ValidateKeys(context, components.Parameters?.Keys, "parameters");
                     ValidateKeys(context, components.Schemas?.Keys, "schemas");
@@ -37,6 +40,8 @@ namespace LEGO.AsyncAPI.Validation.Rules
                     ValidateKeys(context, components.ServerBindings?.Keys, "serverBindings");
                     ValidateKeys(context, components.Servers?.Keys, "servers");
                     ValidateKeys(context, components.ServerVariables?.Keys, "serverVariables");
+                    ValidateKeys(context, components.ExternalDocs?.Keys, "externalDocs");
+                    ValidateKeys(context, components.Tags?.Keys, "tags");
                 });
 
         private static void ValidateKeys(IValidationContext context, IEnumerable<string> keys, string component)

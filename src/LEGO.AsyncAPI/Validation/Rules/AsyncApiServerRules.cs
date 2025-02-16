@@ -12,12 +12,12 @@ namespace LEGO.AsyncAPI.Validation.Rules
             new ValidationRule<AsyncApiServer>(
                 (context, server) =>
                 {
-                    context.Enter("url");
-                    if (server.Url == null)
+                    context.Enter("host");
+                    if (server.Host == null)
                     {
                         context.CreateError(
                             nameof(ServerRequiredFields),
-                            string.Format(Resource.Validation_FieldRequired, "url", "server"));
+                            string.Format(Resource.Validation_FieldRequired, "host", "server"));
                     }
 
                     context.Exit();
