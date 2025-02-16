@@ -13,7 +13,7 @@ namespace LEGO.AsyncAPI.Tests.Bindings.Pulsar
     internal class PulsarBindings_Should : TestBase
     {
         [Test]
-        public void PulsarChannelBinding_WithFilledObject_SerializesAndDeserializes()
+        public void V2_PulsarChannelBinding_WithFilledObject_SerializesAndDeserializes()
         {
             // Arrange
             var expected =
@@ -69,7 +69,7 @@ namespace LEGO.AsyncAPI.Tests.Bindings.Pulsar
         }
 
         [Test]
-        public void PulsarChannelBindingNamespaceDefaultToNull()
+        public void V2_PulsarChannelBindingNamespaceDefaultToNull()
         {
             // Arrange
             var actual =
@@ -89,12 +89,12 @@ namespace LEGO.AsyncAPI.Tests.Bindings.Pulsar
         }
 
         [Test]
-        public void PulsarServerBinding_WithFilledObject_SerializesAndDeserializes()
+        public void V2_PulsarServerBinding_WithFilledObject_SerializesAndDeserializes()
         {
             // Arrange
             var expected =
                 """
-                url: https://example.com
+                url: example.com
                 protocol: pulsar
                 bindings:
                   pulsar:
@@ -103,7 +103,7 @@ namespace LEGO.AsyncAPI.Tests.Bindings.Pulsar
 
             var server = new AsyncApiServer()
             {
-                Url = "https://example.com",
+                Host = "example.com",
                 Protocol = "pulsar",
             };
 
@@ -125,12 +125,12 @@ namespace LEGO.AsyncAPI.Tests.Bindings.Pulsar
         }
 
         [Test]
-        public void ServerBindingVersionDefaultsToNull()
+        public void V2_ServerBindingVersionDefaultsToNull()
         {
             // Arrange
             var expected =
                 """
-                url: https://example.com
+                url: example.com
                 protocol: pulsar
                 bindings:
                   pulsar:
@@ -139,7 +139,7 @@ namespace LEGO.AsyncAPI.Tests.Bindings.Pulsar
 
             var server = new AsyncApiServer()
             {
-                Url = "https://example.com",
+                Host = "example.com",
                 Protocol = "pulsar",
             };
 
@@ -163,12 +163,12 @@ namespace LEGO.AsyncAPI.Tests.Bindings.Pulsar
         }
 
         [Test]
-        public void ServerTenantDefaultsToNull()
+        public void V2_ServerTenantDefaultsToNull()
         {
             // Arrange
             var expected =
                 """
-                url: https://example.com
+                url: example.com
                 protocol: pulsar
                 bindings:
                   pulsar:
@@ -177,7 +177,7 @@ namespace LEGO.AsyncAPI.Tests.Bindings.Pulsar
 
             var server = new AsyncApiServer()
             {
-                Url = "https://example.com",
+                Host = "example.com",
                 Protocol = "pulsar",
             };
 

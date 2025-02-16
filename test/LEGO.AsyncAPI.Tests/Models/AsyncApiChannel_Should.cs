@@ -15,7 +15,7 @@ namespace LEGO.AsyncAPI.Tests.Models
     public class AsyncApiChannel_Should : TestBase
     {
         [Test]
-        public void AsyncApiChannel_WithInlineParameter_DoesNotCreateReference()
+        public void V2_AsyncApiChannel_WithInlineParameter_DoesNotCreateReference()
         {
             var input =
                 """
@@ -34,7 +34,7 @@ namespace LEGO.AsyncAPI.Tests.Models
         }
 
         [Test]
-        public void AsyncApiChannel_WithWebSocketsBinding_Serializes()
+        public void V2_AsyncApiChannel_WithWebSocketsBinding_Serializes()
         {
             var expected = """
                 bindings:
@@ -97,7 +97,7 @@ namespace LEGO.AsyncAPI.Tests.Models
         }
 
         [Test]
-        public void AsyncApiChannel_WithKafkaBinding_Serializes()
+        public void V2_AsyncApiChannel_WithKafkaBinding_Serializes()
         {
             var expected =
                 """

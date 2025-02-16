@@ -27,7 +27,7 @@ namespace LEGO.AsyncAPI.Tests
     public class AsyncApiDocumentV2Tests : TestBase
     {
         [Test]
-        public void AsyncApiDocument_WithStreetLightsExample_SerializesAndDeserializes()
+        public void V2_AsyncApiDocument_WithStreetLightsExample_SerializesAndDeserializes()
         {
             // Arrange
             var expected =
@@ -541,7 +541,7 @@ namespace LEGO.AsyncAPI.Tests
         }
 
         [Test]
-        public void SerializeV2_WithFullSpec_Serializes()
+        public void V2_SerializeV2_WithFullSpec_Serializes()
         {
             var expected =
                 """
@@ -965,7 +965,7 @@ namespace LEGO.AsyncAPI.Tests
         }
 
         [Test]
-        public void Read_WithAvroSchemaPayload_NoErrors()
+        public void V2_Read_WithAvroSchemaPayload_NoErrors()
         {
             // Arrange
             var yaml =
@@ -1015,7 +1015,7 @@ namespace LEGO.AsyncAPI.Tests
         }
 
         [Test]
-        public void Read_WithJsonSchemaReference_NoErrors()
+        public void V2_Read_WithJsonSchemaReference_NoErrors()
         {
             // Arrange
             var yaml =
@@ -1067,7 +1067,7 @@ namespace LEGO.AsyncAPI.Tests
         }
 
         [Test]
-        public void Serialize_WithBindingReferences_SerializesDeserializes()
+        public void V2_Serialize_WithBindingReferences_SerializesDeserializes()
         {
             var expected =
                 """
@@ -1173,7 +1173,7 @@ namespace LEGO.AsyncAPI.Tests
         }
 
         [Test]
-        public void Serializev2_WithBindings_Serializes()
+        public void V2_Serializev2_WithBindings_Serializes()
         {
             var expected = """
                 asyncapi: 2.6.0

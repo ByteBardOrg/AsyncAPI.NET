@@ -16,7 +16,7 @@ namespace LEGO.AsyncAPI.Tests.Models
     internal class AsyncApiMessage_Should : TestBase
     {
         [Test]
-        public void AsyncApiMessage_WithNoType_DeserializesToDefault()
+        public void V2_AsyncApiMessage_WithNoType_DeserializesToDefault()
         {
             // Arrange
             var expected =
@@ -45,7 +45,7 @@ namespace LEGO.AsyncAPI.Tests.Models
         }
 
         [Test]
-        public void AsyncApiMessage_WithNoSchemaFormat_DeserializesToDefault()
+        public void V2_AsyncApiMessage_WithNoSchemaFormat_DeserializesToDefault()
         {
             // Arrange
             var expected =
@@ -63,11 +63,11 @@ namespace LEGO.AsyncAPI.Tests.Models
 
             // Assert
             diagnostic.Errors.Should().BeEmpty();
-            message.SchemaFormat.Should().BeNull();
+            message.Payload.SchemaFormat.Should().BeNull();
         }
 
         [Test]
-        public void AsyncApiMessage_WithUnsupportedSchemaFormat_DeserializesWithError()
+        public void V2_AsyncApiMessage_WithUnsupportedSchemaFormat_DeserializesWithError()
         {
             // Arrange
             var expected =
@@ -90,7 +90,7 @@ namespace LEGO.AsyncAPI.Tests.Models
         }
 
         [Test]
-        public void AsyncApiMessage_WithNoSchemaFormat_DoesNotSerializeSchemaFormat()
+        public void V2_AsyncApiMessage_WithNoSchemaFormat_DoesNotSerializeSchemaFormat()
         {
             // Arrange
             var expected =
@@ -129,7 +129,7 @@ namespace LEGO.AsyncAPI.Tests.Models
         }
 
         [Test]
-        public void AsyncApiMessage_WithJsonSchemaFormat_Serializes()
+        public void V2_AsyncApiMessage_WithJsonSchemaFormat_Serializes()
         {
             // Arrange
             var expected =
@@ -144,7 +144,6 @@ namespace LEGO.AsyncAPI.Tests.Models
                 """;
 
             var message = new AsyncApiMessage();
-            message.SchemaFormat = "application/vnd.aai.asyncapi+json;version=2.6.0";
             message.Payload = new AsyncApiJsonSchema()
             {
                 Properties = new Dictionary<string, AsyncApiJsonSchema>()
@@ -157,6 +156,7 @@ namespace LEGO.AsyncAPI.Tests.Models
                     },
                 },
             };
+            message.Payload.SchemaFormat = "application/vnd.aai.asyncapi+json;version=2.6.0";
 
             // Act
             var actual = message.SerializeAsYaml(AsyncApiVersion.AsyncApi2_0);
@@ -169,7 +169,7 @@ namespace LEGO.AsyncAPI.Tests.Models
         }
 
         [Test]
-        public void AsyncApiMessage_WithAvroSchemaFormat_Serializes()
+        public void V2_AsyncApiMessage_WithAvroSchemaFormat_Serializes()
         {
             // Arrange
             var expected =
@@ -188,7 +188,6 @@ namespace LEGO.AsyncAPI.Tests.Models
             """;
 
             var message = new AsyncApiMessage();
-            message.SchemaFormat = "application/vnd.apache.avro";
             var schema = new AvroRecord()
             {
                 Name = "User",
@@ -205,7 +204,11 @@ namespace LEGO.AsyncAPI.Tests.Models
                     },
                 },
             };
-            message.Payload = schema;
+            message.Payload = new AsyncApiMultiFormatSchema
+            {
+                Schema = schema,
+                SchemaFormat = "application/vnd.apache.avro",
+            };
 
             // Act
             var actual = message.SerializeAsYaml(AsyncApiVersion.AsyncApi2_0);
@@ -218,7 +221,7 @@ namespace LEGO.AsyncAPI.Tests.Models
         }
 
         [Test]
-        public void AsyncApiMessage_WithAvroAsReference_Deserializes()
+        public void V2_AsyncApiMessage_WithAvroAsReference_Deserializes()
         {
             // Arrange
             var input =
@@ -232,7 +235,7 @@ namespace LEGO.AsyncAPI.Tests.Models
             var deserializedMessage = new AsyncApiStringReader().ReadFragment<AsyncApiMessage>(input, AsyncApiVersion.AsyncApi2_0, out _);
 
             // Assert
-            var payloadReference = deserializedMessage.Payload as AsyncApiAvroSchemaReference;
+            var payloadReference = deserializedMessage.Payload.Schema as AsyncApiAvroSchemaReference;
             payloadReference.UnresolvedReference.Should().BeTrue();
             payloadReference.Reference.Should().NotBeNull();
             payloadReference.Reference.IsExternal.Should().BeTrue();
@@ -241,7 +244,7 @@ namespace LEGO.AsyncAPI.Tests.Models
         }
 
         [Test]
-        public void AsyncApiMessage_WithFilledObject_Serializes()
+        public void V2_AsyncApiMessage_WithFilledObject_Serializes()
         {
             var expected =
                 """

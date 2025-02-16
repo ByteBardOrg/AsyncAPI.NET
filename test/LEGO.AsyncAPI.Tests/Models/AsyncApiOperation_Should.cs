@@ -15,7 +15,7 @@ namespace LEGO.AsyncAPI.Tests.Models
     public class AsyncApiOperation_Should : TestBase
     {
         [Test]
-        public void SerializeV2_WithNullWriter_Throws()
+        public void V2_SerializeV2_WithNullWriter_Throws()
         {
             // Arrange
             var asyncApiOperation = new AsyncApiOperation();
@@ -26,19 +26,19 @@ namespace LEGO.AsyncAPI.Tests.Models
         }
 
         [Test]
-        public void SerializeV2_WithMultipleMessages_SerializesWithOneOf()
+        public void V2_SerializeV2_WithMultipleMessages_SerializesWithOneOf()
         {
-            // Arrange
+            // Arrangpublic void V2_
             var expected = """
                 message:
                   oneOf:
-                    - name: First Message
-                    - name: Second Message
+                    - $ref: #/components/messages/first
+                    - $ref: #/components/messages/second
                 """;
 
             var asyncApiOperation = new AsyncApiOperation();
-            asyncApiOperation.Message.Add(new AsyncApiMessage { Name = "First Message" });
-            asyncApiOperation.Message.Add(new AsyncApiMessage { Name = "Second Message" });
+            asyncApiOperation.Messages.Add(new AsyncApiMessageReference("#/components/messages/first"));
+            asyncApiOperation.Messages.Add(new AsyncApiMessageReference("#/components/messages/second"));
             var outputString = new StringWriter();
             var settings = new AsyncApiWriterSettings();
             var writer = new AsyncApiYamlWriter(outputString, settings);
@@ -54,16 +54,16 @@ namespace LEGO.AsyncAPI.Tests.Models
         }
 
         [Test]
-        public void SerializeV2_WithSingleMessage_Serializes()
+        public void V2_SerializeV2_WithSingleMessage_Serializes()
         {
             // Arrange
             var expected = """
                 message:
-                  name: First Message
+                  $ref: #/components/messages/first
                 """;
 
             var asyncApiOperation = new AsyncApiOperation();
-            asyncApiOperation.Message.Add(new AsyncApiMessage { Name = "First Message" });
+            asyncApiOperation.Messages.Add(new AsyncApiMessageReference("#/components/messages/first"));
             var settings = new AsyncApiWriterSettings();
             var outputString = new StringWriter();
             var writer = new AsyncApiYamlWriter(outputString, settings);
@@ -79,7 +79,7 @@ namespace LEGO.AsyncAPI.Tests.Models
         }
 
         [Test]
-        public void AsyncApiOperation_WithBindings_Serializes()
+        public void V2_AsyncApiOperation_WithBindings_Serializes()
         {
             var expected =
                 """
