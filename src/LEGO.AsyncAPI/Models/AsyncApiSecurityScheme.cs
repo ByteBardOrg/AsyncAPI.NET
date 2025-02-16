@@ -40,7 +40,7 @@ namespace LEGO.AsyncAPI.Models
             Description = description,
         };
 
-        public static AsyncApiSecurityScheme HttpApiKey(string name, ParameterLocation @in, string description = null) => new()
+        public static AsyncApiSecurityScheme HttpApiKey(ParameterLocation @in, string name, string description = null) => new()
         {
             Type = SecuritySchemeType.HttpApiKey,
             Description = description,
