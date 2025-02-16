@@ -40,36 +40,73 @@ namespace LEGO.AsyncAPI.Models
             Description = description,
         };
 
-        public static AsyncApiSecurityScheme HttpApiKey(ParameterLocation @in, string name, string description = null) => new()
+        public static AsyncApiSecurityScheme HttpApiKey(ParameterLocation @in, string name, string description = null)
         {
-            Type = SecuritySchemeType.HttpApiKey,
-            Description = description,
-            Name = name,
-            In = @in,
-        };
+            if (string.IsNullOrWhiteSpace(name))
+            {
+                throw new ArgumentException($"'{nameof(name)}' cannot be null or whitespace.");
+            }
 
-        public static AsyncApiSecurityScheme Http(string scheme, string? bearerFormat = null, string description = null) => new()
-        {
-            Type = SecuritySchemeType.Http,
-            Description = description,
-            Scheme = scheme,
-            BearerFormat = bearerFormat,
-        };
+            return new AsyncApiSecurityScheme
+            {
+                Type = SecuritySchemeType.HttpApiKey,
+                Description = description,
+                Name = name,
+                In = @in,
+            };
+        }
 
-        public static AsyncApiSecurityScheme OAuth2(AsyncApiOAuthFlows flows, string[] scopes = null, string description = null) => new()
+        public static AsyncApiSecurityScheme Http(string scheme, string bearerFormat = null, string description = null) 
         {
-            Type = SecuritySchemeType.OAuth2,
-            Description = description,
-            Flows = flows,
-            Scopes = scopes,
-        };
+            if (string.IsNullOrWhiteSpace(scheme))
+            {
+                throw new ArgumentException($"'{nameof(scheme)}' cannot be null or whitespace.");
+            }
 
-        public static AsyncApiSecurityScheme OpenIdConnect(string openIdConnectUrl, string description = null) => new()
+            return new AsyncApiSecurityScheme
+            {
+                Type = SecuritySchemeType.Http,
+                Description = description,
+                Scheme = scheme,
+                BearerFormat = bearerFormat,
+            };
+        }
+
+        public static AsyncApiSecurityScheme OAuth2(AsyncApiOAuthFlows flows, string[] scopes = null, string description = null)
         {
-            Type = SecuritySchemeType.OpenIdConnect,
-            Description = description,
-            OpenIdConnectUrl = new Uri(openIdConnectUrl, UriKind.RelativeOrAbsolute),
-        };
+            if (flows is null)
+            {
+                throw new ArgumentException($"'{nameof(flows)}' cannot be null.");
+            }
+
+            return new AsyncApiSecurityScheme
+            {
+                Type = SecuritySchemeType.OAuth2,
+                Description = description,
+                Flows = flows,
+                Scopes = scopes ?? Array.Empty<string>(),
+            };
+        }
+
+        public static AsyncApiSecurityScheme OpenIdConnect(Uri openIdConnectUrl, string description = null)
+        {
+            if (openIdConnectUrl is null)
+            {
+                throw new ArgumentException($"'{nameof(openIdConnectUrl)}' cannot be null.");
+            }
+
+            if (!openIdConnectUrl.IsAbsoluteUri)
+            {
+                throw new ArgumentException($"'{nameof(openIdConnectUrl)}' must be an absolute URI.");
+            }
+
+            return new AsyncApiSecurityScheme
+            {
+                Type = SecuritySchemeType.OpenIdConnect,
+                Description = description,
+                OpenIdConnectUrl = openIdConnectUrl,
+            };
+        }
 
         public static AsyncApiSecurityScheme Plain(string description = null) => new()
         {

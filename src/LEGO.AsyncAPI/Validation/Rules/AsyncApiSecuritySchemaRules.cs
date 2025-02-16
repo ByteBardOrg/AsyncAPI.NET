@@ -27,7 +27,7 @@ namespace LEGO.AsyncAPI.Validation.Rules
                     context.Exit();
 
                     context.Enter("name");
-                    if (securityScheme.Name is null && securityScheme.IsFieldRequired("name"))
+                    if (string.IsNullOrWhiteSpace(securityScheme.Name) && securityScheme.IsFieldRequired("name"))
                     {
                         context.CreateError(
                             nameof(SecuritySchemeRequiredFields),
@@ -47,7 +47,7 @@ namespace LEGO.AsyncAPI.Validation.Rules
                     context.Exit();
 
                     context.Enter("scheme");
-                    if (securityScheme.Scheme is null && securityScheme.IsFieldRequired("scheme"))
+                    if (string.IsNullOrWhiteSpace(securityScheme.Scheme) && securityScheme.IsFieldRequired("scheme"))
                     {
                         context.CreateError(
                             nameof(SecuritySchemeRequiredFields),
@@ -72,6 +72,21 @@ namespace LEGO.AsyncAPI.Validation.Rules
                         context.CreateError(
                             nameof(SecuritySchemeRequiredFields),
                             string.Format(Resource.Validation_FieldRequired, "openIdConnectUrl", "securityScheme"));
+                    }
+
+                    context.Exit();
+                });
+
+        public static ValidationRule<AsyncApiSecurityScheme> OpenIdConnectUrlMustBeAbsolute =>
+            new ValidationRule<AsyncApiSecurityScheme>(
+                (context, securityScheme) =>
+                {
+                    context.Enter("openIdConnectUrl");
+                    if (securityScheme.OpenIdConnectUrl != null && !securityScheme.OpenIdConnectUrl.IsAbsoluteUri)
+                    {
+                        context.CreateError(
+                            nameof(OpenIdConnectUrlMustBeAbsolute),
+                            string.Format(Resource.Validation_MustBeAbsoluteUrl, "openIdConnectUrl", "securityScheme"));
                     }
 
                     context.Exit();
