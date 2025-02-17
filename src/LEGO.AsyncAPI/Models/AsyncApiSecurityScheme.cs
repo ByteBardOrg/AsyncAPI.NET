@@ -4,6 +4,7 @@ namespace LEGO.AsyncAPI.Models
 {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
     using LEGO.AsyncAPI.Models.Interfaces;
     using LEGO.AsyncAPI.Writers;
 
@@ -84,7 +85,7 @@ namespace LEGO.AsyncAPI.Models
                 Type = SecuritySchemeType.OAuth2,
                 Description = description,
                 Flows = flows,
-                Scopes = scopes ?? Array.Empty<string>(),
+                Scopes = scopes?.ToHashSet() ?? new HashSet<string>(),
             };
         }
 
@@ -178,7 +179,7 @@ namespace LEGO.AsyncAPI.Models
         /// <summary>
         /// List of the needed scope names. An empty array means no scopes are needed.
         /// </summary>
-        public virtual IList<string> Scopes { get; set; }
+        public virtual ISet<string> Scopes { get; set; } = new HashSet<string>();
 
         /// <summary>
         /// Specification Extensions.

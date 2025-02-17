@@ -5,6 +5,7 @@ using System.Linq;
 namespace LEGO.AsyncAPI.Validation.Rules
 {
     using System;
+    using System.Threading;
     using LEGO.AsyncAPI.Models;
     using LEGO.AsyncAPI.Validations;
 
@@ -46,13 +47,39 @@ namespace LEGO.AsyncAPI.Validation.Rules
                     }
 
                     var channels =
-                        context.RootDocument.Channels.Values.Where(channel => channel is not AsyncApiChannelReference);
+                        context.RootDocument.Channels.Values.Where(channel => channel.Equals(operation.Channel));
 
-                    if (channels.FirstOrDefault(c => c == operation.Channel) is null)
+                    var referencedChannel = channels.FirstOrDefault(c => c.Equals(operation.Channel));
+                    if (referencedChannel == null)
                     {
                         context.CreateError(
                             "OperationChannelRef",
                             string.Format(Resource.Validation_OperationMustReferenceValidChannel, operation.Title));
+                        return;
+                    }
+                    if (!operation.Messages.All(refMessage => referencedChannel.Messages.Any(message => message.Equals(refMessage))))
+                    {
+                        context.CreateError(
+                            "OperationChannelRef",
+                            string.Format(Resource.Validation_OperationMessagesMustReferenceOperationChannel, operation.Title));
+                        return;
+                    }
+                });
+
+        public static ValidationRule<AsyncApiOperation> OperationMessages =>
+            new ValidationRule<AsyncApiOperation>(
+                (context, operation) =>
+                {
+                    var channels =
+                        context.RootDocument.Channels.Values.Where(channel => channel.Equals(operation.Channel));
+
+                    var referencedChannel = channels.FirstOrDefault(c => c.Equals(operation.Channel));
+                    if (!operation.Messages.All(refMessage => referencedChannel.Messages.Any(message => message.Equals(refMessage))))
+                    {
+                        context.CreateError(
+                            "OperationChannelRef",
+                            string.Format(Resource.Validation_OperationMessagesMustReferenceOperationChannel, operation.Title));
+                        return;
                     }
                 });
     }
