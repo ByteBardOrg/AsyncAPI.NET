@@ -12,21 +12,20 @@ namespace LEGO.AsyncAPI.Readers
     /// </summary>
     internal static partial class AsyncApiV2Deserializer
     {
-        public static IList<AsyncApiSecurityScheme> LoadSecurityRequirement(ParseNode node)
+        public static AsyncApiSecurityScheme LoadSecurityRequirement(ParseNode node)
         {
             var mapNode = node.CheckMapNode("security");
 
-            var securityRequirements = new List<AsyncApiSecurityScheme>();
+            var securityScheme = new AsyncApiSecurityScheme();
 
             foreach (var property in mapNode)
             {
                 var scheme = LoadSecuritySchemeByReference(mapNode.Context, property.Name);
                 var scopes = property.Value.CreateSimpleList(value => value.GetScalarValue());
-
                 if (scheme != null)
                 {
-                    scheme.Scopes = scopes;
-                    securityRequirements.Add(scheme);
+                    node.Context.SetTempStorage(TempStorageKeys.SecuritySchemeScopes, scopes, property.Name);
+                    return scheme;
                 }
                 else
                 {
@@ -35,14 +34,14 @@ namespace LEGO.AsyncAPI.Readers
                 }
             }
 
-            return securityRequirements;
+            return null;
         }
 
         private static AsyncApiSecuritySchemeReference LoadSecuritySchemeByReference(
             ParsingContext context,
             string schemeName)
         {
-            var securitySchemeObject = new AsyncApiSecuritySchemeReference(schemeName);
+            var securitySchemeObject = new AsyncApiSecuritySchemeReference("#/components/securitySchemes/" + schemeName);
 
             return securitySchemeObject;
         }

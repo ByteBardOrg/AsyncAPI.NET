@@ -25,7 +25,7 @@ namespace LEGO.AsyncAPI.Readers
                 "variables", (a, n) => { a.Variables = n.CreateMap(LoadServerVariable); }
             },
             {
-                "security", (a, n) => { a.Security = LoadSecurityRequirement(n); }
+                "security", (a, n) => { a.Security = n.CreateList(LoadSecurityRequirement); }
             },
             {
                 "tags", (a, n) => { a.Tags = n.CreateList(LoadTag); }

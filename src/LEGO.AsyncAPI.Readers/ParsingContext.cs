@@ -16,10 +16,15 @@ namespace LEGO.AsyncAPI.Readers
     using LEGO.AsyncAPI.Readers.V2;
     using LEGO.AsyncAPI.Readers.V3;
 
+    public static class TempStorageKeys
+    {
+        public const string SecuritySchemeScopes = "SecSchemSco";
+    }
     public class ParsingContext
     {
         private readonly Stack<string> currentLocation = new();
-
+        private readonly Dictionary<string, object> tempStorage = new();
+        private readonly Dictionary<object, Dictionary<string, object>> scopedTempStorage = new();
         internal Dictionary<string, Func<AsyncApiAny, IAsyncApiExtension>> ExtensionParsers
         {
             get;
@@ -43,7 +48,7 @@ namespace LEGO.AsyncAPI.Readers
         public AsyncApiDiagnostic Diagnostic { get; }
 
         /// <summary>
-        /// Gets the settings used fore reading json.  
+        /// Gets the settings used fore reading json.
         /// </summary>
         public AsyncApiReaderSettings Settings { get; }
 
@@ -85,20 +90,20 @@ namespace LEGO.AsyncAPI.Readers
                     this.VersionService = new AsyncApiV2VersionService(this.Diagnostic);
                     doc = this.VersionService.LoadDocument(this.RootNode);
 
-                    // Register components
                     this.Workspace.SetRootDocument(doc);
-                    this.Workspace.RegisterComponents(doc); // pre-register components.
-                    this.Workspace.RegisterComponent(string.Empty, this.ParseToStream(jsonNode)); // register root document.
+                    this.Workspace.RegisterComponents(doc);
+                    this.Workspace.RegisterComponent(string.Empty, this.ParseToStream(jsonNode));
+
                     this.Diagnostic.SpecificationVersion = AsyncApiVersion.AsyncApi2_0;
                     break;
                 case string version when version.StartsWith("3"):
                     this.VersionService = new AsyncApiV3VersionService(this.Diagnostic);
                     doc = this.VersionService.LoadDocument(this.RootNode);
 
-                    // Register components
                     this.Workspace.SetRootDocument(doc);
-                    this.Workspace.RegisterComponents(doc); // pre-register components.
-                    this.Workspace.RegisterComponent(string.Empty, this.ParseToStream(jsonNode)); // register root document.
+                    this.Workspace.RegisterComponents(doc);
+                    this.Workspace.RegisterComponent(string.Empty, this.ParseToStream(jsonNode));
+
                     this.Diagnostic.SpecificationVersion = AsyncApiVersion.AsyncApi3_0;
                     break;
                 default:
@@ -149,6 +154,48 @@ namespace LEGO.AsyncAPI.Readers
         }
 
         internal IAsyncApiVersionService VersionService { get; set; }
+
+        public T GetFromTempStorage<T>(string key, object scope = null)
+        {
+            Dictionary<string, object> storage;
+
+            if (scope == null)
+            {
+                storage = this.tempStorage;
+            }
+            else if (!this.scopedTempStorage.TryGetValue(scope, out storage))
+            {
+                return default;
+            }
+
+            return storage.TryGetValue(key, out var value) ? (T)value : default;
+        }
+
+        /// <summary>
+        /// Sets the temporary storage for this key and value.
+        /// </summary>
+        public void SetTempStorage(string key, object value, object scope = null)
+        {
+            Dictionary<string, object> storage;
+
+            if (scope == null)
+            {
+                storage = this.tempStorage;
+            }
+            else if (!this.scopedTempStorage.TryGetValue(scope, out storage))
+            {
+                storage = this.scopedTempStorage[scope] = new();
+            }
+
+            if (value == null)
+            {
+                storage.Remove(key);
+            }
+            else
+            {
+                storage[key] = value;
+            }
+        }
 
         public void EndObject()
         {
