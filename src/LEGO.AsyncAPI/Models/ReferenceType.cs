@@ -112,10 +112,5 @@ namespace LEGO.AsyncAPI.Models
         /// Operations item.
         /// </summary>
         [Display("operations")] Operation,
-
-        /// <summary>
-        /// Schemas item.
-        /// </summary>
-        [Display("schemas")] MultiFormatSchema,
     }
 }

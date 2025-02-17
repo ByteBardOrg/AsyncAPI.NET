@@ -2,6 +2,7 @@
 
 namespace LEGO.AsyncAPI.Readers
 {
+    using System;
     using System.Collections.Generic;
     using System.Linq;
     using LEGO.AsyncAPI.Exceptions;
@@ -25,13 +26,13 @@ namespace LEGO.AsyncAPI.Readers
                 "headers", (a, n) => { /* Loaded later */ }
             },
             {
-                "payload", (a, n) => { a.Payload = new AsyncApiMultiFormatSchema(); }
+                "payload", (a, n) => { /* a.Payload = new AsyncApiMultiFormatSchema(); */ }
             },
             {
                 "correlationId", (a, n) => { a.CorrelationId = LoadCorrelationId(n); }
             },
             {
-                "schemaFormat", (a, n) => { a.Payload.SchemaFormat = n.GetScalarValue(); }
+                "schemaFormat", (a, n) => { /* a.Payload.SchemaFormat = n.GetScalarValue(); */ }
             },
             {
                 "contentType", (a, n) => { a.ContentType = n.GetScalarValue(); }
@@ -64,7 +65,7 @@ namespace LEGO.AsyncAPI.Readers
                 "traits", (a, n) => a.Traits = n.CreateList(LoadMessageTrait)
             },
         };
-        
+
         public static IAsyncApiSchema LoadJsonSchemaPayload(ParseNode n)
         {
             return LoadPayload(n, null);
@@ -149,9 +150,12 @@ namespace LEGO.AsyncAPI.Readers
                 message.Headers = new AsyncApiMultiFormatSchema { Schema = AsyncApiSchemaDeserializer.LoadSchema(mapNode["headers"]) };
             }
 
-            if (message.Payload != null)
+            if (mapNode["payload"] != null)
             {
-                message.Payload.Schema = LoadPayload(mapNode["payload"], message.Payload.SchemaFormat);
+                var schema = mapNode["schemaFormat"].Value.GetScalarValue();
+                var payload = LoadPayload(mapNode["payload"], schema);
+                var multiFormat = new AsyncApiMultiFormatSchema { Schema = payload, SchemaFormat = schema };
+                message.Payload = multiFormat;
             }
 
             return message;
