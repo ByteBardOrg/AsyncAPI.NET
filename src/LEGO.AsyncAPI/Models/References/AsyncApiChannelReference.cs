@@ -88,12 +88,17 @@ namespace LEGO.AsyncAPI.Models
 
         public override bool Equals(object obj)
         {
-            if (obj is not AsyncApiChannelReference reference || obj is not AsyncApiChannel)
+            if (obj is AsyncApiChannelReference reference)
             {
-                return false;
+                return this.Equals(reference);
             }
 
-            return this.Equals(reference);
+            if (obj is AsyncApiChannel channel)
+            {
+                return this.Equals(channel);
+            }
+
+            return false;
         }
 
         public bool Equals(AsyncApiChannel other)

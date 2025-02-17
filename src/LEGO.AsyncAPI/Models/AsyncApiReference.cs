@@ -133,6 +133,11 @@ namespace LEGO.AsyncAPI.Models
 
         public bool Equals(AsyncApiReference reference)
         {
+            if (reference == null)
+            {
+                return false;
+            }
+
             return this.Reference == reference.Reference;
         }
 
