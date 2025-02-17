@@ -62,7 +62,13 @@ namespace LEGO.AsyncAPI.Readers
 
         private static void LoadV2Operation(ParseNode node, AsyncApiChannel instance, AsyncApiAction action)
         {
+            if (node == null)
+            {
+                return;
+            }
+
             var operation = LoadOperation(node);
+
             foreach (var message in operation.Messages)
             {
                 var messageKey = message.Reference.Reference.Split('/')[^1];
