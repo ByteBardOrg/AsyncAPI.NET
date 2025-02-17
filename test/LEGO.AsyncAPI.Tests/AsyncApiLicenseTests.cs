@@ -16,7 +16,7 @@ namespace LEGO.AsyncAPI.Tests
     public class AsyncApiLicenseTests : TestBase
     {
         [Test]
-        public void Serialize_WithAllProperties_Serializes()
+        public void V2_Serialize_WithAllProperties_Serializes()
         {
             var expected = """
                 {
@@ -53,7 +53,7 @@ namespace LEGO.AsyncAPI.Tests
         }
 
         [Test]
-        public void LoadLicense_WithJson_Deserializes()
+        public void V2_LoadLicense_WithJson_Deserializes()
         {
             // Arrange
             var input = """

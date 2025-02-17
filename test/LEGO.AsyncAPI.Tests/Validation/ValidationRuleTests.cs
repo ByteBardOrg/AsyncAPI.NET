@@ -46,7 +46,7 @@ namespace LEGO.AsyncAPI.Tests.Validation
         }
 
         [Test]
-        public void ChannelKey_WithNonUniqueKey_DiagnosticsError()
+        public void V2_ChannelKey_WithNonUniqueKey_DiagnosticsError()
         {
             var input =
                 """

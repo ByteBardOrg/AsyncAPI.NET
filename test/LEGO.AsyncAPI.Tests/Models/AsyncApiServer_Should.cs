@@ -12,7 +12,7 @@ namespace LEGO.AsyncAPI.Tests.Models
     internal class AsyncApiServer_Should : TestBase
     {
         [Test]
-        public void AsyncApiServer_Serializes()
+        public void V2_AsyncApiServer_Serializes()
         {
             // Arrange
             var expected =
@@ -38,22 +38,18 @@ namespace LEGO.AsyncAPI.Tests.Models
 
             var server = new AsyncApiServer
             {
-                Url = "https://example.com/{channelkey}",
+                Host = "example.com",
+                PathName = "{channelkey}",
                 Protocol = "test",
                 ProtocolVersion = "0.1.0",
                 Description = "some description",
             };
             server.Variables.Add("channelkey", new AsyncApiServerVariable { Description = "some description" });
             server.Security.Add(
-                new AsyncApiSecurityRequirement
+                new AsyncApiSecurityScheme
                 {
-                    {
-                        new AsyncApiSecuritySchemeReference("schem1")
-                        , new List<string>
-                        {
-                            "requirement",
-                        }
-                    },
+                    Name = "schem1",
+                    Scopes = new List<string> { "requirement" },
                 });
             server.Tags.Add(new AsyncApiTag { Name = "mytag1", Description = "description of tag1" });
             server.Bindings.Add(new KafkaServerBinding
@@ -71,7 +67,7 @@ namespace LEGO.AsyncAPI.Tests.Models
         }
 
         [Test]
-        public void AsyncApiServer_WithKafkaBinding_Serializes()
+        public void V2_AsyncApiServer_WithKafkaBinding_Serializes()
         {
             var expected =
                 """

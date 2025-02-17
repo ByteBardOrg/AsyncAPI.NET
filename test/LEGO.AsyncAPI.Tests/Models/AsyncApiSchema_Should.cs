@@ -277,7 +277,7 @@ namespace LEGO.AsyncAPI.Tests.Models
         };
 
         [Test]
-        public void SerializeAsJson_WithBasicSchema_V2Works()
+        public void V2_SerializeAsJson_WithBasicSchema_V2Works()
         {
             // Arrange
             var expected = @"{ }";
@@ -291,7 +291,7 @@ namespace LEGO.AsyncAPI.Tests.Models
         }
 
         [Test]
-        public void SerializeAsJson_WithAdvancedSchemaNumber_V2Works()
+        public void V2_SerializeAsJson_WithAdvancedSchemaNumber_V2Works()
         {
             // Arrange
             var expected = """
@@ -319,7 +319,7 @@ namespace LEGO.AsyncAPI.Tests.Models
         }
 
         [Test]
-        public void SerializeAsJson_WithAdvancedSchemaBigNumbers_V2Works()
+        public void V2_SerializeAsJson_WithAdvancedSchemaBigNumbers_V2Works()
         {
             // Arrange
             var expected = """
@@ -347,7 +347,7 @@ namespace LEGO.AsyncAPI.Tests.Models
         }
 
         [Test]
-        public void SerializeAsJson_WithAdvancedSchemaObject_V2Works()
+        public void V2_SerializeAsJson_WithAdvancedSchemaObject_V2Works()
         {
             // Arrange
             string expected = this.GetTestData<string>();
@@ -361,7 +361,7 @@ namespace LEGO.AsyncAPI.Tests.Models
         }
 
         [Test]
-        public void Deserialize_WithAdvancedSchema_Works()
+        public void V2_Deserialize_WithAdvancedSchema_Works()
         {
             // Arrange
             var json = this.GetTestData<string>();
@@ -375,7 +375,7 @@ namespace LEGO.AsyncAPI.Tests.Models
         }
 
         [Test]
-        public void SerializeAsJson_WithAdvancedSchemaWithAllOf_V2Works()
+        public void V2_SerializeAsJson_WithAdvancedSchemaWithAllOf_V2Works()
         {
             // Arrange
             var expected = this.GetTestData<string>();
@@ -391,7 +391,7 @@ namespace LEGO.AsyncAPI.Tests.Models
         [Theory]
         [TestCase(true)]
         [TestCase(false)]
-        public void Serialize_WithInliningOptions_ShouldInlineAccordingly(bool shouldInline)
+        public void V2_Serialize_WithInliningOptions_ShouldInlineAccordingly(bool shouldInline)
         {
             // arrange
             var asyncApiDocument = new AsyncApiDocumentBuilder()
@@ -408,25 +408,24 @@ namespace LEGO.AsyncAPI.Tests.Models
             })
             .WithChannel("mychannel", new AsyncApiChannel()
             {
-                Publish = new AsyncApiOperation
-                {
-                    Message = new List<AsyncApiMessage>
+                    Messages = new Dictionary<string, AsyncApiMessage>
                     {
-                        new AsyncApiMessage
                         {
-                            Payload = new AsyncApiJsonSchema
+                            "whatever", new AsyncApiMessage
                             {
-                                Type = SchemaType.Object,
-                                Required = new HashSet<string> { "testB" },
-                                Properties = new Dictionary<string, AsyncApiJsonSchema>
+                                Payload = new AsyncApiJsonSchema
                                 {
-                                    { "testC", new AsyncApiJsonSchemaReference("#/components/schemas/testC") },
-                                    { "testB", new AsyncApiJsonSchemaReference("#/components/schemas/testB") },
+                                    Type = SchemaType.Object,
+                                    Required = new HashSet<string> { "testB" },
+                                    Properties = new Dictionary<string, AsyncApiJsonSchema>
+                                    {
+                                        { "testC", new AsyncApiJsonSchemaReference("#/components/schemas/testC") },
+                                        { "testB", new AsyncApiJsonSchemaReference("#/components/schemas/testB") },
+                                    },
                                 },
-                            },
+                            }
                         },
                     },
-                },
             })
             .WithComponent("testD", new AsyncApiJsonSchema() { Type = SchemaType.String, Format = "uuid" })
             .WithComponent("testC", new AsyncApiJsonSchema()
@@ -457,8 +456,76 @@ namespace LEGO.AsyncAPI.Tests.Models
                   .BePlatformAgnosticEquivalentTo(expected);
         }
 
+        [Theory]
+        [TestCase(true)]
+        [TestCase(false)]
+        public void V3_Serialize_WithInliningOptions_ShouldInlineAccordingly(bool shouldInline)
+        {
+            // arrange
+            var asyncApiDocument = new AsyncApiDocumentBuilder()
+            .WithInfo(new AsyncApiInfo
+            {
+                Title = "Streetlights Kafka API",
+                Version = "1.0.0",
+                Description = "The Smartylighting Streetlights API allows you to remotely manage the city lights.",
+                License = new AsyncApiLicense
+                {
+                    Name = "Apache 2.0",
+                    Url = new Uri("https://www.apache.org/licenses/LICENSE-2.0"),
+                },
+            })
+            .WithChannel("mychannel", new AsyncApiChannel()
+            {
+                Messages = new Dictionary<string, AsyncApiMessage>
+                    {
+                {
+                    "whatever", new AsyncApiMessage
+                    {
+                        Payload = new AsyncApiJsonSchema
+                        {
+                            Type = SchemaType.Object,
+                            Required = new HashSet<string> { "testB" },
+                            Properties = new Dictionary<string, AsyncApiJsonSchema>
+                            {
+                                { "testC", new AsyncApiJsonSchemaReference("#/components/schemas/testC") },
+                                { "testB", new AsyncApiJsonSchemaReference("#/components/schemas/testB") },
+                            },
+                        },
+                    }
+                },
+                    },
+            })
+            .WithComponent("testD", new AsyncApiJsonSchema() { Type = SchemaType.String, Format = "uuid" })
+            .WithComponent("testC", new AsyncApiJsonSchema()
+            {
+                Type = SchemaType.Object,
+                Properties = new Dictionary<string, AsyncApiJsonSchema>
+                {
+            { "testD", new AsyncApiJsonSchemaReference("#/components/schemas/testD") },
+                },
+            })
+            .WithComponent("testB", new AsyncApiJsonSchema() { Description = "test", Type = SchemaType.Boolean })
+            .Build();
+
+            var outputString = new StringWriter();
+            var writer = new AsyncApiYamlWriter(outputString, new AsyncApiWriterSettings { InlineLocalReferences = shouldInline });
+
+            // Act
+            asyncApiDocument.SerializeV3(writer);
+
+            var actual = outputString.ToString();
+
+            // Assert
+            string expected = this.GetTestData<string>(shouldInline
+                ? "AsyncApiSchema_InlinedReferences"
+                : "AsyncApiSchema_NoInlinedReferences.yml");
+
+            actual.Should()
+                  .BePlatformAgnosticEquivalentTo(expected);
+        }
+
         [Test]
-        public void SerializeV2_WithNullWriter_Throws()
+        public void V2_SerializeV2_WithNullWriter_Throws()
         {
             // Arrange
             var asyncApiLicense = new AsyncApiLicense();
@@ -473,7 +540,7 @@ namespace LEGO.AsyncAPI.Tests.Models
         /// Bug: Serializing properties multiple times - specifically Schema.OneOf was serialized into OneOf and Then.
         /// </summary>
         [Test]
-        public void Serialize_WithOneOf_DoesNotWriteThen()
+        public void V2_Serialize_WithOneOf_DoesNotWriteThen()
         {
             var mainSchema = new AsyncApiJsonSchema();
             var subSchema = new AsyncApiJsonSchema();
@@ -491,7 +558,7 @@ namespace LEGO.AsyncAPI.Tests.Models
         /// Bug: Serializing properties multiple times - specifically Schema.AnyOf was serialized into AnyOf and If.
         /// </summary>
         [Test]
-        public void Serialize_WithAnyOf_DoesNotWriteIf()
+        public void V2_Serialize_WithAnyOf_DoesNotWriteIf()
         {
             var mainSchema = new AsyncApiJsonSchema();
             var subSchema = new AsyncApiJsonSchema();
@@ -504,7 +571,7 @@ namespace LEGO.AsyncAPI.Tests.Models
         }
 
         [Test]
-        public void Deserialize_BasicExample()
+        public void V2_Deserialize_BasicExample()
         {
             var input =
                 """
@@ -530,7 +597,7 @@ namespace LEGO.AsyncAPI.Tests.Models
         /// Bug: Serializing properties multiple times - specifically Schema.Not was serialized into Not and Else.
         /// </summary>
         [Test]
-        public void Serialize_WithNot_DoesNotWriteElse()
+        public void V2_Serialize_WithNot_DoesNotWriteElse()
         {
             var mainSchema = new AsyncApiJsonSchema();
             var subSchema = new AsyncApiJsonSchema();

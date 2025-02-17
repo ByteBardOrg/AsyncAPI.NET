@@ -9,7 +9,7 @@ namespace LEGO.AsyncAPI.Tests.Models
     public class AsyncApiInfo_Should
     {
         [Test]
-        public void SerializeV2_WithNullWriter_Throws()
+        public void V2_SerializeV2_WithNullWriter_Throws()
         {
             // Arrange
             var asyncApiInfo = new AsyncApiInfo();
