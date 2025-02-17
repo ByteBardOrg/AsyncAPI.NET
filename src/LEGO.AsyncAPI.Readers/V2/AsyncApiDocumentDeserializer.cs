@@ -43,10 +43,10 @@ namespace LEGO.AsyncAPI.Readers
                 }
             }
         }
+
         public static AsyncApiDocument LoadAsyncApi(RootNode rootNode)
         {
             var document = new AsyncApiDocument();
-            rootNode.Context.Workspace.SetRootDocument(document);
 
             var asyncApiNode = rootNode.GetMap();
             ParseMap(asyncApiNode, document, asyncApiFixedFields, asyncApiPatternFields);
