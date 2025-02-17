@@ -33,6 +33,8 @@ namespace LEGO.AsyncAPI.Models
 
         public override string Description { get => this.Target?.Description; set => this.Target.Description = value; }
 
+        public override IList<AsyncApiSecurityScheme> Security { get => this.Target?.Security; set => this.Target.Security = value; }
+
         public override IList<AsyncApiTag> Tags { get => this.Target?.Tags; set => this.Target.Tags = value; }
 
         public override AsyncApiExternalDocumentation ExternalDocs { get => this.Target?.ExternalDocs; set => this.Target.ExternalDocs = value; }
