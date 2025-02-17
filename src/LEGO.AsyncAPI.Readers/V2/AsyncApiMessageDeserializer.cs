@@ -22,7 +22,7 @@ namespace LEGO.AsyncAPI.Readers
                 "messageId", (a, n) => { }
             },
             {
-                "headers", (a, n) => { a.Headers = new AsyncApiMultiFormatSchema { Schema = AsyncApiSchemaDeserializer.LoadSchema(n) }; }
+                "headers", (a, n) => { /* Loaded later */ }
             },
             {
                 "payload", (a, n) => { a.Payload = new AsyncApiMultiFormatSchema(); }
@@ -143,7 +143,16 @@ namespace LEGO.AsyncAPI.Readers
             var message = new AsyncApiMessage();
 
             ParseMap(mapNode, message, messageFixedFields, messagePatternFields);
-            message.Payload.Schema = LoadPayload(mapNode["payload"], message.Payload.SchemaFormat);
+
+            if (mapNode["headers"] != null)
+            {
+                message.Headers = new AsyncApiMultiFormatSchema { Schema = AsyncApiSchemaDeserializer.LoadSchema(mapNode["headers"]) };
+            }
+
+            if (message.Payload != null)
+            {
+                message.Payload.Schema = LoadPayload(mapNode["payload"], message.Payload.SchemaFormat);
+            }
 
             return message;
         }
