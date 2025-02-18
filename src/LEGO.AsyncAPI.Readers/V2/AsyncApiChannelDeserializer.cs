@@ -39,8 +39,8 @@ namespace LEGO.AsyncAPI.Readers
             if (channelAddress != null)
             {
                 channel.Address = channelAddress;
-                LoadV2Operation(mapNode["subscribe"], channel, AsyncApiAction.Send);
-                LoadV2Operation(mapNode["publish"], channel, AsyncApiAction.Receive);
+                LoadV2Operation(mapNode["subscribe"]?.Value, channel, AsyncApiAction.Send);
+                LoadV2Operation(mapNode["publish"]?.Value, channel, AsyncApiAction.Receive);
             }
 
             return channel;

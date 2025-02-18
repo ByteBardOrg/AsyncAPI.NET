@@ -29,6 +29,8 @@ namespace LEGO.AsyncAPI.Readers
 
         private static void SetSecuritySchemeScopes(ParsingContext context, AsyncApiDocument document)
         {
+            if (document.Components?.SecuritySchemes == null)
+            { return; }
             foreach (var securityScheme in document.Components?.SecuritySchemes)
             {
                 var scopes = context.GetFromTempStorage<List<string>>(TempStorageKeys.SecuritySchemeScopes, securityScheme.Key);
