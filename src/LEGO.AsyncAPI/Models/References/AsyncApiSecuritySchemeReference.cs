@@ -4,6 +4,7 @@ namespace LEGO.AsyncAPI.Models
 {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
     using LEGO.AsyncAPI.Models.Interfaces;
     using LEGO.AsyncAPI.Writers;
 
@@ -87,18 +88,23 @@ namespace LEGO.AsyncAPI.Models
                 throw new ArgumentNullException(nameof(writer));
             }
 
+            this.Reference.Workspace = writer.Workspace;
+
             writer.WriteStartObject();
 
             writer.WritePropertyName(this.Reference.FragmentId.Split("/")[^1]);
-            writer.WriteStartArray();
 
-            foreach (var scope in this.Scopes)
+            if (this.Scopes.Any())
             {
-                writer.WriteValue(scope);
+                writer.WriteStartArray();
+
+                foreach (var scope in this.Scopes)
+                {
+                    writer.WriteValue(scope);
+                }
+
+                writer.WriteEndArray();
             }
-
-            writer.WriteEndArray();
-
             writer.WriteEndObject();
         }
     }

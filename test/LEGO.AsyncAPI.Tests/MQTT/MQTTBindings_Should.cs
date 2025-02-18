@@ -17,7 +17,7 @@ namespace LEGO.AsyncAPI.Tests.Bindings.MQTT
             // Arrange
             var expected =
                 """
-                url: https://example.com
+                url: mqtt://example.com
                 protocol: mqtt
                 bindings:
                   mqtt:

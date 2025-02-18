@@ -94,7 +94,7 @@ namespace LEGO.AsyncAPI.Tests.Bindings.Pulsar
             // Arrange
             var expected =
                 """
-                url: example.com
+                url: pulsar://example.com
                 protocol: pulsar
                 bindings:
                   pulsar:
@@ -130,7 +130,7 @@ namespace LEGO.AsyncAPI.Tests.Bindings.Pulsar
             // Arrange
             var expected =
                 """
-                url: example.com
+                url: pulsar://example.com
                 protocol: pulsar
                 bindings:
                   pulsar:
@@ -168,7 +168,7 @@ namespace LEGO.AsyncAPI.Tests.Bindings.Pulsar
             // Arrange
             var expected =
                 """
-                url: example.com
+                url: pulsar://example.com
                 protocol: pulsar
                 bindings:
                   pulsar:
