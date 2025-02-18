@@ -52,6 +52,17 @@ namespace LEGO.AsyncAPI.Readers.ParseNodes
             return this.nodeList.Select(n => map(new ValueNode(this.Context, n))).ToList();
         }
 
+        public override HashSet<T> CreateSimpleSet<T>(Func<ValueNode, T> map)
+        {
+            if (this.nodeList == null)
+            {
+                throw new AsyncApiReaderException(
+                    $"Expected list while parsing {typeof(T).Name}");
+            }
+
+            return this.nodeList.Select(n => map(new ValueNode(this.Context, n))).ToHashSet();
+        }
+
         public IEnumerator<ParseNode> GetEnumerator()
         {
             return this.nodeList.Select(n => Create(this.Context, n)).ToList().GetEnumerator();

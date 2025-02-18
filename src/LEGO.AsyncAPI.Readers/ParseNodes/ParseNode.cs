@@ -80,6 +80,11 @@ namespace LEGO.AsyncAPI.Readers.ParseNodes
             throw new AsyncApiReaderException("Cannot create simple list from this type of node.", this.Context);
         }
 
+        public virtual HashSet<T> CreateSimpleSet<T>(Func<ValueNode, T> map)
+        {
+            throw new AsyncApiReaderException("Cannot create simple list from this type of node.", this.Context);
+        }
+
         public virtual Dictionary<string, T> CreateSimpleMap<T>(Func<ValueNode, T> map)
         {
             throw new AsyncApiReaderException("Cannot create simple map from this type of node.", this.Context);

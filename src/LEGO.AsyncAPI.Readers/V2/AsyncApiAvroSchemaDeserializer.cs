@@ -228,7 +228,10 @@ namespace LEGO.AsyncAPI.Readers
 
                 return union;
             }
-
+            if (node is PropertyNode propertyNode)
+            {
+                node = propertyNode.Value;
+            }
             if (node is MapNode mapNode)
             {
                 var pointer = mapNode.GetReferencePointer();

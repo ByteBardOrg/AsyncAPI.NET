@@ -232,13 +232,13 @@ namespace LEGO.AsyncAPI.Tests.Models
             """;
 
             // Act
-            var deserializedMessage = new AsyncApiStringReader().ReadFragment<AsyncApiMessage>(input, AsyncApiVersion.AsyncApi2_0, out _);
+            var deserializedMessage = new AsyncApiStringReader().ReadFragment<AsyncApiMessage>(input, AsyncApiVersion.AsyncApi2_0, out var diag);
 
             // Assert
             var payloadReference = deserializedMessage.Payload.Schema as AsyncApiAvroSchemaReference;
             payloadReference.UnresolvedReference.Should().BeTrue();
             payloadReference.Reference.Should().NotBeNull();
-            payloadReference.Reference.IsExternal.Should().BeTrue();
+            payloadReference.Reference.IsExternal.Should().BeTrue(); // We push the 'real' reference to components.
             payloadReference.Reference.IsFragment.Should().BeTrue();
 
         }

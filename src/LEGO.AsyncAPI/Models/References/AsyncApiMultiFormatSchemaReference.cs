@@ -24,7 +24,7 @@ namespace LEGO.AsyncAPI.Models
 
         public AsyncApiMultiFormatSchemaReference(string reference)
         {
-            this.Reference = new AsyncApiReference(reference, ReferenceType.MultiFormatSchema);
+            this.Reference = new AsyncApiReference(reference, ReferenceType.Schema);
         }
 
         public override string SchemaFormat { get => this.Target?.SchemaFormat; set => this.Target.SchemaFormat = value; }

@@ -43,7 +43,7 @@ namespace LEGO.AsyncAPI.Readers
                 },
                 {
                     "scopes",
-                    (o, n) => { o.Scopes = n.CreateSimpleList(n2 => n2.GetScalarValue()); }
+                    (o, n) => { o.Scopes = n.CreateSimpleSet(n2 => n2.GetScalarValue()); }
                 },
             };
 

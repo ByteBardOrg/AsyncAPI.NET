@@ -14,6 +14,7 @@ namespace LEGO.AsyncAPI.Readers
             { "summary", (a, n) => { a.Summary = n.GetScalarValue(); } },
             { "description", (a, n) => { a.Description = n.GetScalarValue(); } },
             { "tags", (a, n) => { a.Tags = n.CreateList(LoadTag); } },
+            { "security", (a, n) => { a.Security = n.CreateList(LoadSecurityScheme); } },
             { "externalDocs", (a, n) => { a.Tags = n.CreateList(LoadTag); } },
             { "bindings", (a, n) => { a.Bindings = LoadOperationBindings(n); } },
         };

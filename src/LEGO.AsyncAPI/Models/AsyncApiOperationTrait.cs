@@ -28,6 +28,11 @@ namespace LEGO.AsyncAPI.Models
         public virtual string Description { get; set; }
 
         /// <summary>
+        /// A declaration of which security schemes are associated with this operation. Only one of the security scheme objects MUST be satisfied to authorize an operation. In cases where Server Security also applies, it MUST also be satisfied.
+        /// </summary>
+        public virtual IList<AsyncApiSecurityScheme> Security { get; set; } = new List<AsyncApiSecurityScheme>();
+
+        /// <summary>
         /// a list of tags for API documentation control. Tags can be used for logical grouping of operations.
         /// </summary>
         public virtual IList<AsyncApiTag> Tags { get; set; } = new List<AsyncApiTag>();
@@ -57,6 +62,7 @@ namespace LEGO.AsyncAPI.Models
             //writer.WriteOptionalProperty(AsyncApiConstants.OperationId, this.OperationId);
             writer.WriteOptionalProperty(AsyncApiConstants.Summary, this.Summary);
             writer.WriteOptionalProperty(AsyncApiConstants.Description, this.Description);
+            writer.WriteOptionalCollection(AsyncApiConstants.Security, this.Security, (w, t) => t.SerializeV2(w));
             writer.WriteOptionalCollection(AsyncApiConstants.Tags, this.Tags, (w, t) => t.SerializeV2(w));
             writer.WriteOptionalObject(AsyncApiConstants.ExternalDocs, this.ExternalDocs, (w, e) => e.SerializeV2(w));
             writer.WriteOptionalObject(AsyncApiConstants.Bindings, this.Bindings, (w, t) => t.SerializeV2(w));

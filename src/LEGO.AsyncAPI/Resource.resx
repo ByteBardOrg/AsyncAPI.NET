@@ -144,4 +144,7 @@
   <data name="Validation_SymbolsMustMatchRegularExpression" xml:space="preserve">
     <value>Symbols  MUST match the regular expression '{1}'.</value>
   </data>
+  <data name="Validation_OperationMessagesMustReferenceOperationChannel" xml:space="preserve">
+    <value>The messages of operation '{0}' MUST be a subset of the referenced channels messages.</value>
+  </data>
 </root>

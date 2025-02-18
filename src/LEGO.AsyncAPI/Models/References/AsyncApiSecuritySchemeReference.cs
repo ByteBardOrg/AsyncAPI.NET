@@ -44,7 +44,7 @@ namespace LEGO.AsyncAPI.Models
 
         public override Uri OpenIdConnectUrl { get => this.Target?.OpenIdConnectUrl; set => this.Target.OpenIdConnectUrl = value; }
 
-        public override IList<string> Scopes { get => this.Target?.Scopes; set => this.Target.Scopes = value; }
+        public override ISet<string> Scopes { get => this.Target?.Scopes; set => this.Target.Scopes = value; }
 
         public override IDictionary<string, IAsyncApiExtension> Extensions { get => this.Target?.Extensions; set => this.Target.Extensions = value; }
 
@@ -89,7 +89,7 @@ namespace LEGO.AsyncAPI.Models
 
             writer.WriteStartObject();
 
-            writer.WritePropertyName(this.Reference.FragmentId);
+            writer.WritePropertyName(this.Reference.FragmentId.Split("/")[^1]);
             writer.WriteStartArray();
 
             foreach (var scope in this.Scopes)

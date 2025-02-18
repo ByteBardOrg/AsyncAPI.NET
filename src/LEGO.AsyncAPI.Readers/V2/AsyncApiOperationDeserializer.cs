@@ -24,7 +24,7 @@ namespace LEGO.AsyncAPI.Readers
                     "description", (a, n) => { a.Description = n.GetScalarValue(); }
                 },
                 {
-                    "security", (a, n) => { a.Security = LoadSecurityRequirement(n); }
+                    "security", (a, n) => { a.Security = n.CreateList(LoadSecurityRequirement); }
                 },
                 {
                     "tags", (a, n) => a.Tags = n.CreateList(LoadTag)
@@ -83,7 +83,10 @@ namespace LEGO.AsyncAPI.Readers
         internal static AsyncApiOperation LoadOperation(ParseNode node)
         {
             var mapNode = node.CheckMapNode("operation");
-
+            if (mapNode == null)
+            {
+                return null;
+            }
             var operation = new AsyncApiOperation();
 
             ParseMap(mapNode, operation, operationFixedFields, operationPatternFields);
