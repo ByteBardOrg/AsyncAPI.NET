@@ -60,7 +60,7 @@ namespace LEGO.AsyncAPI.Readers
             {
                 if (message is not AsyncApiMessageReference messageReference)
                 {
-                    var reference = "#/components/messages/upgradedOperationMessage_" + (mapNode["operationId"]?.GetScalarValue() + message.Name) ?? counter.ToString();
+                    var reference = "#/components/messages/upgradedOperationMessage_" + (mapNode["operationId"]?.Value.GetScalarValue() + message.Name) ?? counter.ToString();
 
                     n.Context.Workspace.RegisterComponent(reference, message);
                     messageReferences.Add(new AsyncApiMessageReference(reference));

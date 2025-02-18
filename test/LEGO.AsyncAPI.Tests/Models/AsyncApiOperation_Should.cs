@@ -32,8 +32,8 @@ namespace LEGO.AsyncAPI.Tests.Models
             var expected = """
                 message:
                   oneOf:
-                    - $ref: #/components/messages/first
-                    - $ref: #/components/messages/second
+                    - $ref: '#/components/messages/first'
+                    - $ref: '#/components/messages/second'
                 """;
 
             var asyncApiOperation = new AsyncApiOperation();
@@ -59,7 +59,7 @@ namespace LEGO.AsyncAPI.Tests.Models
             // Arrange
             var expected = """
                 message:
-                  $ref: #/components/messages/first
+                  $ref: '#/components/messages/first'
                 """;
 
             var asyncApiOperation = new AsyncApiOperation();

@@ -94,7 +94,7 @@ namespace LEGO.AsyncAPI.Readers
                     return AsyncApiAvroSchemaDeserializer.LoadSchema(n);
                 default:
                     var supportedFormats = SupportedJsonSchemaFormats.Concat(SupportedAvroSchemaFormats);
-                    throw new AsyncApiException($"'Could not deserialize Payload. Supported formats are {string.Join(", ", supportedFormats)}");
+                    throw new AsyncApiException($"Could not deserialize Payload. Supported formats are {string.Join(", ", supportedFormats)}");
             }
         }
 
@@ -147,13 +147,13 @@ namespace LEGO.AsyncAPI.Readers
 
             if (mapNode["headers"] != null)
             {
-                message.Headers = new AsyncApiMultiFormatSchema { Schema = AsyncApiSchemaDeserializer.LoadSchema(mapNode["headers"]) };
+                message.Headers = new AsyncApiMultiFormatSchema { Schema = AsyncApiSchemaDeserializer.LoadSchema(mapNode["headers"].Value) };
             }
 
             if (mapNode["payload"] != null)
             {
-                var schema = mapNode["schemaFormat"].Value.GetScalarValue();
-                var payload = LoadPayload(mapNode["payload"], schema);
+                var schema = mapNode["schemaFormat"]?.Value.GetScalarValue();
+                var payload = LoadPayload(mapNode["payload"].Value, schema);
                 var multiFormat = new AsyncApiMultiFormatSchema { Schema = payload, SchemaFormat = schema };
                 message.Payload = multiFormat;
             }

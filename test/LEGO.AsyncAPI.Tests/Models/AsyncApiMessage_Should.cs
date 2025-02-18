@@ -41,7 +41,7 @@ namespace LEGO.AsyncAPI.Tests.Models
 
             // Assert
             diagnostic.Errors.Should().BeEmpty();
-            message.Payload.As<AsyncApiJsonSchema>().Properties.First().Value.Enum.Should().HaveCount(2);
+            message.Payload.Schema.As<AsyncApiJsonSchema>().Properties.First().Value.Enum.Should().HaveCount(2);
         }
 
         [Test]
@@ -86,7 +86,7 @@ namespace LEGO.AsyncAPI.Tests.Models
 
             // Assert
             diagnostic.Errors.Should().HaveCount(1);
-            diagnostic.Errors.First().Message.Should().StartWith("'whatever' is not a supported format");
+            diagnostic.Errors.First().Message.Should().StartWith("Could not deserialize Payload. Supported formats are");
         }
 
         [Test]
@@ -473,7 +473,7 @@ namespace LEGO.AsyncAPI.Tests.Models
 
             var settings = new AsyncApiReaderSettings();
             settings.Bindings = BindingsCollection.All;
-            var deserializedMessage = new AsyncApiStringReader(settings).ReadFragment<AsyncApiMessage>(expected, AsyncApiVersion.AsyncApi2_0, out _);
+            var deserializedMessage = new AsyncApiStringReader(settings).ReadFragment<AsyncApiMessage>(expected, AsyncApiVersion.AsyncApi2_0, out var diag);
 
             // Assert
             actual.Should()
