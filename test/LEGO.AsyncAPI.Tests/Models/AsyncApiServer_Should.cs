@@ -115,7 +115,7 @@ namespace LEGO.AsyncAPI.Tests.Models
         {
             var expected =
                 """
-                url: test://example.com/
+                url: test://example.com
                 protocol: test
                 bindings:
                   kafka:

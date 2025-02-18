@@ -53,7 +53,7 @@ namespace LEGO.AsyncAPI.Readers
             var uri = new Uri(value);
 
             a.Host = uri.Host;
-            a.PathName = uri.LocalPath;
+            a.PathName = uri.LocalPath == "/" ? null : uri.LocalPath;
         }
 
         private static readonly PatternFieldMap<AsyncApiServer> serverPatternFields =

@@ -11,7 +11,7 @@ namespace LEGO.AsyncAPI.Tests.Validation
     {
         [Test]
         [TestCase("chat-{person-id}")]
-        public void ChannelKey_WithInvalidParameter_DiagnosticsError(string channelKey)
+        public void V2_ChannelKey_WithInvalidParameter_DiagnosticsError(string channelKey)
         {
             var input =
                 $"""
