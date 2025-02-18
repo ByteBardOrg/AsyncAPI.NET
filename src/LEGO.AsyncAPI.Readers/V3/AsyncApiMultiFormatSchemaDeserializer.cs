@@ -60,7 +60,7 @@ namespace LEGO.AsyncAPI.Readers
                     return AsyncApiAvroSchemaDeserializer.LoadSchema(n);
                 default:
                     var supportedFormats = SupportedJsonSchemaFormats.Concat(SupportedAvroSchemaFormats);
-                    throw new AsyncApiException($"'Could not deserialize Schema. Supported formats are {string.Join(", ", supportedFormats)}");
+                    throw new AsyncApiException($"Could not deserialize Schema. Supported formats are {string.Join(", ", supportedFormats)}");
             }
         }
 
