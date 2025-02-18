@@ -88,10 +88,13 @@ namespace LEGO.AsyncAPI.Models
                 throw new ArgumentNullException(nameof(writer));
             }
 
+            this.Reference.Workspace = writer.Workspace;
+
             writer.WriteStartObject();
 
             writer.WritePropertyName(this.Reference.FragmentId.Split("/")[^1]);
-            if (this.Scopes != null && this.Scopes.Any())
+
+            if (this.Scopes.Any())
             {
                 writer.WriteStartArray();
 
@@ -102,7 +105,6 @@ namespace LEGO.AsyncAPI.Models
 
                 writer.WriteEndArray();
             }
-
             writer.WriteEndObject();
         }
     }
