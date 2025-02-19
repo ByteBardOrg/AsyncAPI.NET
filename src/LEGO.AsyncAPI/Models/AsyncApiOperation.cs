@@ -23,7 +23,6 @@ namespace LEGO.AsyncAPI.Models
         /// </summary>
         public virtual AsyncApiChannelReference Channel { get; set; }
 
-
         /// <summary>
         /// unique string used to identify the operation.
         /// </summary>
@@ -69,7 +68,11 @@ namespace LEGO.AsyncAPI.Models
         /// </summary>
         public virtual IList<AsyncApiMessageReference> Messages { get; set; } = new List<AsyncApiMessageReference>();
 
+        /// <summary>
+        /// The definition of the reply in a request-reply operation.
+        /// </summary>
         public virtual AsyncApiOperationReply Reply { get; set; }
+
         /// <inheritdoc/>
         public virtual IDictionary<string, IAsyncApiExtension> Extensions { get; set; } = new Dictionary<string, IAsyncApiExtension>();
 
@@ -81,7 +84,10 @@ namespace LEGO.AsyncAPI.Models
             }
 
             writer.WriteStartObject();
-            // writer.WriteOptionalProperty(AsyncApiConstants.OperationId, this.Title);
+
+            var operationId = writer.Workspace.RootDocument.Operations.FirstOrDefault(pair => pair.Value == this).Key;
+
+            writer.WriteOptionalProperty(AsyncApiConstants.OperationId, operationId);
             writer.WriteOptionalProperty(AsyncApiConstants.Summary, this.Summary);
             writer.WriteOptionalProperty(AsyncApiConstants.Description, this.Description);
             writer.WriteOptionalCollection(AsyncApiConstants.Security, this.Security, (w, t) => this.SerializeAsSecurityRequirement(t, w));

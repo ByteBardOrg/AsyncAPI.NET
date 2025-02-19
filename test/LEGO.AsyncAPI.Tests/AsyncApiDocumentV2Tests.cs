@@ -184,7 +184,7 @@ namespace LEGO.AsyncAPI.Tests
                     streetlightId:
                       description: The ID of the streetlight.
                       schema:
-                        type: string
+                        default: '1'
                   operationTraits:
                     kafka:
                       bindings:
@@ -277,7 +277,7 @@ namespace LEGO.AsyncAPI.Tests
                 "lighting.measured",
                 new AsyncApiChannel()
                 {
-                    Address = "smartylighting.streetlights.1.0.event.{streetlightId}",
+                    Address = "smartylighting.streetlights.1.0.event.{streetlightId}.lighting.measured",
                     Description = "The topic on which measured values may be produced and consumed.",
                     Parameters = new Dictionary<string, AsyncApiParameter>
                     {
@@ -290,7 +290,7 @@ namespace LEGO.AsyncAPI.Tests
                 "turn.on",
                 new AsyncApiChannel()
                 {
-                    Address = "smartylighting.streetlights.1.0.action.{streetlightId}",
+                    Address = "smartylighting.streetlights.1.0.action.{streetlightId}.turn.on",
                     Parameters = new Dictionary<string, AsyncApiParameter>
                     {
                     {
@@ -302,7 +302,7 @@ namespace LEGO.AsyncAPI.Tests
                 "turn.off",
                 new AsyncApiChannel()
                 {
-                    Address = "smartylighting.streetlights.1.0.action.{streetlightId}",
+                    Address = "smartylighting.streetlights.1.0.action.{streetlightId}.turn.off",
                     Parameters = new Dictionary<string, AsyncApiParameter>
                     {
                     {
@@ -314,7 +314,7 @@ namespace LEGO.AsyncAPI.Tests
                 "dim",
                 new AsyncApiChannel()
                 {
-                    Address = "smartylighting.streetlights.1.0.action.{streetlightId}",
+                    Address = "smartylighting.streetlights.1.0.action.{streetlightId}.dim",
                     Parameters = new Dictionary<string, AsyncApiParameter>
                     {
                     {
@@ -324,7 +324,7 @@ namespace LEGO.AsyncAPI.Tests
                 })
                 .WithOperation("receiveLightMeasurement", new AsyncApiOperation()
                 {
-                    Action = AsyncApiAction.Send,
+                    Action = AsyncApiAction.Receive,
                     Summary = "Inform about environmental lighting conditions of a particular streetlight.",
                     Channel = new AsyncApiChannelReference("#/channels/lighting.measured"),
                     Traits = new List<AsyncApiOperationTrait>
@@ -338,7 +338,7 @@ namespace LEGO.AsyncAPI.Tests
                 })
                 .WithOperation("turnOn", new AsyncApiOperation()
                 {
-                    Action = AsyncApiAction.Receive,
+                    Action = AsyncApiAction.Send,
                     Channel = new AsyncApiChannelReference("#/channels/turn.on"),
                     Traits = new List<AsyncApiOperationTrait>
                     {
@@ -351,7 +351,7 @@ namespace LEGO.AsyncAPI.Tests
                 })
                 .WithOperation("turnOff", new AsyncApiOperation()
                 {
-                    Action = AsyncApiAction.Receive,
+                    Action = AsyncApiAction.Send,
                     Channel = new AsyncApiChannelReference("#/channels/turn.off"),
                     Traits = new List<AsyncApiOperationTrait>
                     {
@@ -364,7 +364,7 @@ namespace LEGO.AsyncAPI.Tests
                 })
                 .WithOperation("dimLight", new AsyncApiOperation()
                 {
-                    Action = AsyncApiAction.Receive,
+                    Action = AsyncApiAction.Send,
                     Channel = new AsyncApiChannelReference("#/channels/dim"),
                     Traits = new List<AsyncApiOperationTrait>
                     {
@@ -479,6 +479,7 @@ namespace LEGO.AsyncAPI.Tests
                 .WithComponent("streetlightId", new AsyncApiParameter()
                 {
                     Description = "The ID of the streetlight.",
+                    Default = "1",
                 })
                 .WithComponent("commonHeaders", new AsyncApiMessageTrait()
                 {

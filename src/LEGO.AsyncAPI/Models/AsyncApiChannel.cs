@@ -85,7 +85,7 @@ namespace LEGO.AsyncAPI.Models
             // servers
             writer.WriteOptionalCollection(AsyncApiConstants.Servers, this.Servers.Select(s => s.Reference.FragmentId).ToList(), (w, s) => w.WriteValue(s));
 
-            var operations = writer.Workspace.RootDocument?.Operations.Values.Where(operation => this.CheckOperationChannel(operation, writer));
+            var operations = writer.Workspace.RootDocument?.Operations.Values!.Where(operation => this.CheckOperationChannel(operation, writer)).ToList();
 
             // subscribe (Now Send)
             writer.WriteOptionalObject(AsyncApiConstants.Subscribe, operations?.FirstOrDefault(o => o.Action == AsyncApiAction.Send), (w, s) => s?.SerializeV2(w));
@@ -142,7 +142,6 @@ namespace LEGO.AsyncAPI.Models
             writer.WriteEndObject();
         }
 
-        // TODO: Validate with Alexander
         private bool CheckOperationChannel(AsyncApiOperation operation, IAsyncApiWriter writer)
         {
             operation.Channel.Reference.Workspace = writer.Workspace;
