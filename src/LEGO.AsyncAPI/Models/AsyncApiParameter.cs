@@ -4,6 +4,7 @@ namespace LEGO.AsyncAPI.Models
 {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
     using LEGO.AsyncAPI.Models.Interfaces;
     using LEGO.AsyncAPI.Writers;
 
@@ -13,17 +14,26 @@ namespace LEGO.AsyncAPI.Models
     public class AsyncApiParameter : IAsyncApiExtensible, IAsyncApiSerializable
     {
         /// <summary>
-        /// Gets or sets a verbose explanation of the parameter. CommonMark syntax can be used for rich text representation.
+        /// An enumeration of string values to be used if the substitution options are from a limited set.
+        /// </summary>
+        public virtual IList<string> Enum { get; set; } = new List<string>();
+
+        /// <summary>
+        /// The default value to use for substitution, and to send, if an alternate value is not supplied.
+        /// </summary>
+        public virtual string Default { get; set; }
+        /// <summary>
+        /// An optional description for the parameter. CommonMark syntax MAY be used for rich text representation.
         /// </summary>
         public virtual string Description { get; set; }
 
         /// <summary>
-        /// Gets or sets definition of the parameter.
+        /// An array of examples of the parameter value.
         /// </summary>
-        public virtual AsyncApiJsonSchema Schema { get; set; }
+        public virtual IList<string> Examples { get; set; } = new List<string>();
 
         /// <summary>
-        /// Gets or sets a runtime expression that specifies the location of the parameter value.
+        /// A runtime expression that specifies the location of the parameter value.
         /// </summary>
         public virtual string Location { get; set; }
 
@@ -39,7 +49,43 @@ namespace LEGO.AsyncAPI.Models
 
             writer.WriteStartObject();
             writer.WriteOptionalProperty(AsyncApiConstants.Description, this.Description);
-            writer.WriteOptionalObject(AsyncApiConstants.Schema, this.Schema, (w, s) => s.SerializeV2(w));
+
+            if (this.Enum.Any() || this.Default != null || this.Examples.Any())
+            {
+                var schema = new AsyncApiJsonSchema();
+                if (this.Enum.Any())
+                {
+                    schema.Enum = this.Enum.Select(e => new AsyncApiAny(e)).ToList();
+                }
+                if (this.Default != null)
+                {
+                    schema.Default = new AsyncApiAny(this.Default);
+                }
+                if (this.Examples.Any())
+                {
+                    schema.Examples = this.Examples.Select(e => new AsyncApiAny(e)).ToList();
+                }
+
+                writer.WriteOptionalObject(AsyncApiConstants.Schema, schema, (w, s) => s.SerializeV2(w));
+            }
+
+            writer.WriteOptionalProperty(AsyncApiConstants.Location, this.Location);
+            writer.WriteExtensions(this.Extensions);
+            writer.WriteEndObject();
+        }
+
+        public virtual void SerializeV3(IAsyncApiWriter writer)
+        {
+            if (writer is null)
+            {
+                throw new ArgumentNullException(nameof(writer));
+            }
+
+            writer.WriteStartObject();
+            writer.WriteOptionalCollection(AsyncApiConstants.Enum, this.Enum, (w, e) => w.WriteValue(e));
+            writer.WriteOptionalProperty(AsyncApiConstants.Default, this.Default);
+            writer.WriteOptionalProperty(AsyncApiConstants.Description, this.Description);
+            writer.WriteOptionalCollection(AsyncApiConstants.Examples, this.Examples, (w, e) => w.WriteValue(e));
             writer.WriteOptionalProperty(AsyncApiConstants.Location, this.Location);
             writer.WriteExtensions(this.Extensions);
             writer.WriteEndObject();

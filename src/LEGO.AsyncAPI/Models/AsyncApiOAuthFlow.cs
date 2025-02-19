@@ -29,7 +29,7 @@ namespace LEGO.AsyncAPI.Models
         /// <summary>
         /// REQUIRED. A map between the scope name and a short description for it.
         /// </summary>
-        public IDictionary<string, string> Scopes { get; set; } = new Dictionary<string, string>();
+        public IDictionary<string, string> AvailableScopes { get; set; } = new Dictionary<string, string>();
 
         /// <summary>
         /// Specification Extensions.
@@ -58,7 +58,34 @@ namespace LEGO.AsyncAPI.Models
             writer.WriteOptionalProperty(AsyncApiConstants.RefreshUrl, this.RefreshUrl?.ToString());
 
             // scopes
-            writer.WriteRequiredMap(AsyncApiConstants.Scopes, this.Scopes, (w, s) => w.WriteValue(s));
+            writer.WriteRequiredMap(AsyncApiConstants.Scopes, this.AvailableScopes, (w, s) => w.WriteValue(s));
+
+            // extensions
+            writer.WriteExtensions(this.Extensions);
+
+            writer.WriteEndObject();
+        }
+
+        public void SerializeV3(IAsyncApiWriter writer)
+        {
+            if (writer is null)
+            {
+                throw new ArgumentNullException(nameof(writer));
+            }
+
+            writer.WriteStartObject();
+
+            // authorizationUrl
+            writer.WriteOptionalProperty(AsyncApiConstants.AuthorizationUrl, this.AuthorizationUrl?.ToString());
+
+            // tokenUrl
+            writer.WriteOptionalProperty(AsyncApiConstants.TokenUrl, this.TokenUrl?.ToString());
+
+            // refreshUrl
+            writer.WriteOptionalProperty(AsyncApiConstants.RefreshUrl, this.RefreshUrl?.ToString());
+
+            // scopes
+            writer.WriteRequiredMap(AsyncApiConstants.AvailableScopes, this.AvailableScopes, (w, s) => w.WriteValue(s));
 
             // extensions
             writer.WriteExtensions(this.Extensions);

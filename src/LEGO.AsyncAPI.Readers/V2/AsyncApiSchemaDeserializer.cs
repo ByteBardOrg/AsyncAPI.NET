@@ -7,7 +7,6 @@ namespace LEGO.AsyncAPI.Readers
     using LEGO.AsyncAPI.Extensions;
     using LEGO.AsyncAPI.Models;
     using LEGO.AsyncAPI.Readers.ParseNodes;
-    using LEGO.AsyncAPI.Writers;
 
     public class AsyncApiSchemaDeserializer
     {

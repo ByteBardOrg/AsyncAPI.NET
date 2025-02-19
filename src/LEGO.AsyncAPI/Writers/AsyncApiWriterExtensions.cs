@@ -307,6 +307,20 @@ namespace LEGO.AsyncAPI.Writers
             }
         }
 
+        public static void WriteRequiredMap<T>(
+            this IAsyncApiWriter writer,
+            string name,
+            IDictionary<string, T> elements,
+            Func<T, string> keySelector,
+            Action<IAsyncApiWriter, string, T> action)
+            where T : IAsyncApiElement
+        {
+            if (elements != null && elements.Any())
+            {
+                writer.WriteMapInternal(name, elements, keySelector, action);
+            }
+        }
+
         /// <summary>
         /// Write the optional AsyncApi element map.
         /// </summary>
@@ -410,6 +424,17 @@ namespace LEGO.AsyncAPI.Writers
             IDictionary<string, T> elements,
             Action<IAsyncApiWriter, string, T> action)
         {
+
+            WriteMapInternal(writer, name, elements, null, action);
+        }
+
+        private static void WriteMapInternal<T>(
+            this IAsyncApiWriter writer,
+            string name,
+            IDictionary<string, T> elements,
+            Func<T, string> keySelector,
+            Action<IAsyncApiWriter, string, T> action)
+        {
             CheckArguments(writer, name, action);
 
             writer.WritePropertyName(name);
@@ -419,10 +444,20 @@ namespace LEGO.AsyncAPI.Writers
             {
                 foreach (var item in elements)
                 {
-                    writer.WritePropertyName(item.Key);
+                    string itemKey = item.Key;
+                    if (keySelector != null && item.Value != null)
+                    {
+                        var newKey = keySelector(item.Value);
+                        if (!string.IsNullOrWhiteSpace(newKey))
+                        {
+                            itemKey = newKey;
+                        }
+                    }
+
+                    writer.WritePropertyName(itemKey);
                     if (item.Value != null)
                     {
-                        action(writer, item.Key, item.Value);
+                        action(writer, itemKey, item.Value);
                     }
                     else
                     {

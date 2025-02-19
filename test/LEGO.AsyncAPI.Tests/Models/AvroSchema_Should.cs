@@ -11,7 +11,7 @@ namespace LEGO.AsyncAPI.Tests.Models
     public class AvroSchema_Should
     {
         [Test]
-        public void Serialize_WithDefaultNull_SetJsonNull()
+        public void V2_Serialize_WithDefaultNull_SetJsonNull()
         {
             var input = """
             type: record
@@ -34,7 +34,7 @@ namespace LEGO.AsyncAPI.Tests.Models
         }
 
         [Test]
-        public void Deserialize_WithMetadata_CreatesMetadata()
+        public void V2_Deserialize_WithMetadata_CreatesMetadata()
         {
             var input =
                 """
@@ -83,7 +83,7 @@ namespace LEGO.AsyncAPI.Tests.Models
         }
 
         [Test]
-        public void SerializeV2_SerializesCorrectly()
+        public void V2_SerializeV2_SerializesCorrectly()
         {
             // Arrange
             var expected = """
@@ -246,7 +246,7 @@ namespace LEGO.AsyncAPI.Tests.Models
         }
 
         [Test]
-        public void SerializeV2_WithLogicalTypes_SerializesCorrectly()
+        public void V2_SerializeV2_WithLogicalTypes_SerializesCorrectly()
         {
             // Arrange
             var input = """
@@ -303,7 +303,7 @@ namespace LEGO.AsyncAPI.Tests.Models
         }
 
         [Test]
-        public void ReadFragment_DeserializesCorrectly()
+        public void V2_ReadFragment_DeserializesCorrectly()
         {
             // Arrange
             var input = """

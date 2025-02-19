@@ -26,6 +26,7 @@ namespace LEGO.AsyncAPI.Models
         {
             this.Reference = new AsyncApiReference(reference, ReferenceType.ServerVariable);
         }
+
         public override IList<string> Enum { get => this.Target?.Enum; set => this.Target.Enum = value; }
 
         public override string Default { get => this.Target?.Default; set => this.Target.Default = value; }
@@ -51,6 +52,20 @@ namespace LEGO.AsyncAPI.Models
             {
                 this.Reference.Workspace = writer.Workspace;
                 this.Target.SerializeV2(writer);
+            }
+        }
+
+        public override void SerializeV3(IAsyncApiWriter writer)
+        {
+            if (!writer.GetSettings().ShouldInlineReference(this.Reference))
+            {
+                this.Reference.SerializeV3(writer);
+                return;
+            }
+            else
+            {
+                this.Reference.Workspace = writer.Workspace;
+                this.Target.SerializeV3(writer);
             }
         }
     }

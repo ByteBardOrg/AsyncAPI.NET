@@ -1,5 +1,7 @@
 // Copyright (c) The LEGO Group. All rights reserved.
 
+using LEGO.AsyncAPI.Models;
+
 namespace LEGO.AsyncAPI.Validations
 {
     /// <summary>
@@ -34,5 +36,10 @@ namespace LEGO.AsyncAPI.Validations
         /// Pointer to source of validation error in document.
         /// </summary>
         string PathString { get; }
+
+        /// <summary>
+        /// The root document.
+        /// </summary>
+        AsyncApiDocument RootDocument { get; }
     }
 }

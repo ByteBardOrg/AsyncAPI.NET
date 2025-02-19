@@ -10,7 +10,7 @@ namespace LEGO.AsyncAPI.Tests
     public class AsyncApiAnyTests
     {
         [Test]
-        public void GetValue_ReturnsCorrectConversions()
+        public void V2_GetValue_ReturnsCorrectConversions()
         {
             // Arrange
             // Act

@@ -16,7 +16,7 @@ namespace LEGO.AsyncAPI.Tests
     public class AsyncApiReference_Should : TestBase
     {
         [Test]
-        public void ReferencePointers()
+        public void V2_ReferencePointers()
         {
             var diag = new AsyncApiDiagnostic();
             var versionService = new AsyncApiV2VersionService(diag);
@@ -49,7 +49,7 @@ namespace LEGO.AsyncAPI.Tests
         }
 
         [Test]
-        public void Reference()
+        public void V2_Reference()
         {
             var json =
                 """
@@ -72,14 +72,14 @@ namespace LEGO.AsyncAPI.Tests
         }
 
         [Test]
-        public void ExternalFragmentReference_ResolvesFragtment()
+        public void V2_ExternalFragmentReference_ResolvesFragtment()
         {
             var externalJson =
                 """
                 {
                     "servers": [
                         {
-                            "url": "wss://production.gigantic-server.com:443",
+                            "host": "production.gigantic-server.com:443",
                             "protocol": "wss",
                             "protocolVersion": "1.0.0",
                             "description": "The production API server",
@@ -115,11 +115,12 @@ namespace LEGO.AsyncAPI.Tests
             var reference = doc.Servers.First().Value as AsyncApiServerReference;
             reference.Reference.FragmentId.Should().Be("/servers/0");
             reference.Reference.IsFragment.Should().BeTrue();
-            reference.Url.Should().Be("wss://production.gigantic-server.com:443");
+            reference.Host.Should().Be("production.gigantic-server.com:443");
+            reference.Protocol.Should().Be("wss");
         }
 
         [Test]
-        public void ServerReference_WithComponentReference_ResolvesReference()
+        public void V2_ServerReference_WithComponentReference_ResolvesReference()
         {
             var json =
                 """
@@ -134,7 +135,7 @@ namespace LEGO.AsyncAPI.Tests
           "components": {
             "servers": {
                 "whatever": {
-                  "url": "wss://production.gigantic-server.com:443",
+                  "host": "production.gigantic-server.com:443",
                   "protocol": "wss",
                   "protocolVersion": "1.0.0",
                   "description": "The production API server",
@@ -159,12 +160,13 @@ namespace LEGO.AsyncAPI.Tests
             reference.Reference.ExternalResource.Should().BeNull();
             reference.Reference.FragmentId.Should().Be("/components/servers/whatever");
             reference.Reference.IsFragment.Should().BeTrue();
-            reference.Url.Should().Be("wss://production.gigantic-server.com:443");
+            reference.Host.Should().Be("production.gigantic-server.com:443");
+            reference.Protocol.Should().Be("wss");
 
         }
 
         [Test]
-        public void AsyncApiReference_WithExternalFragmentUriReference_AllowReference()
+        public void V2_AsyncApiReference_WithExternalFragmentUriReference_AllowReference()
         {
             // Arrange
             var actual = """
@@ -193,7 +195,7 @@ namespace LEGO.AsyncAPI.Tests
         }
 
         [Test]
-        public void AsyncApiReference_WithFragmentReference_AllowReference()
+        public void V2_AsyncApiReference_WithFragmentReference_AllowReference()
         {
             // Arrange
             var actual = """
@@ -222,7 +224,7 @@ namespace LEGO.AsyncAPI.Tests
         }
 
         [Test]
-        public void AsyncApiReference_WithInternalComponentReference_AllowReference()
+        public void V2_AsyncApiReference_WithInternalComponentReference_AllowReference()
         {
             // Arrange
             var actual = """
@@ -250,7 +252,7 @@ namespace LEGO.AsyncAPI.Tests
         }
 
         [Test]
-        public void AsyncApiReference_WithExternalFragmentReference_AllowReference()
+        public void V2_AsyncApiReference_WithExternalFragmentReference_AllowReference()
         {
             // Arrange
             var actual = """
@@ -277,7 +279,7 @@ namespace LEGO.AsyncAPI.Tests
         }
 
         [Test]
-        public void AsyncApiReference_WithExternalComponentReference_AllowReference()
+        public void V2_AsyncApiReference_WithExternalComponentReference_AllowReference()
         {
             // Arrange
             var actual = """
@@ -305,7 +307,7 @@ namespace LEGO.AsyncAPI.Tests
         }
 
         [Test]
-        public void AsyncApiDocument_WithInternalComponentReference_ResolvesReference()
+        public void V2_AsyncApiDocument_WithInternalComponentReference_ResolvesReference()
         {
             // Arrange
             var actual = """
@@ -344,7 +346,7 @@ namespace LEGO.AsyncAPI.Tests
         }
 
         [Test]
-        public void AsyncApiDocument_WithExternalReferenceOnlySetToResolveInternalReferences_DoesNotResolve()
+        public void V2_AsyncApiDocument_WithExternalReferenceOnlySetToResolveInternalReferences_DoesNotResolve()
         {
             // Arrange
             var actual = """
@@ -380,7 +382,7 @@ namespace LEGO.AsyncAPI.Tests
         }
 
         [Test]
-        public void AsyncApiReference_WithExternalReference_AllowsReferenceDoesNotResolve()
+        public void V2_AsyncApiReference_WithExternalReference_AllowsReferenceDoesNotResolve()
         {
             // Arrange
             var actual = """
@@ -410,7 +412,7 @@ namespace LEGO.AsyncAPI.Tests
         }
 
         [Test]
-        public void AsyncApiReference_WithExternalResourcesInterface_DeserializesCorrectly()
+        public void V2_AsyncApiReference_WithExternalResourcesInterface_DeserializesCorrectly()
         {
             var yaml = """
                        asyncapi: 2.3.0
@@ -430,14 +432,14 @@ namespace LEGO.AsyncAPI.Tests
             };
             var reader = new AsyncApiStringReader(settings);
             var doc = reader.Read(yaml, out var diagnostic);
-            var message = doc.Channels["workspace"].Publish.Message.First();
+            var message = doc.Channels["workspace"].Messages.Values.First();
             message.Name.Should().Be("Test");
             var payload = message.Payload.As<AsyncApiJsonSchema>();
             payload.Properties.Count.Should().Be(1);
         }
 
         [Test]
-        public void AsyncApiReference_DocumentLevelReferencePointer_DeserializesCorrectly()
+        public void V2_AsyncApiReference_DocumentLevelReferencePointer_DeserializesCorrectly()
         {
             var yaml = """
                asyncapi: 2.3.0
@@ -456,11 +458,11 @@ namespace LEGO.AsyncAPI.Tests
             var reader = new AsyncApiStringReader();
             var doc = reader.Read(yaml, out var diagnostic);
             doc.Channels.Should().HaveCount(2);
-            doc.Channels["other"].Publish.Message.First().Title.Should().Be("test message");
+            doc.Channels["other"].Messages.Values.First().Title.Should().Be("test message");
         }
 
         [Test]
-        public void AsyncApiReference_WithExternalAvroResource_DeserializesCorrectly()
+        public void V2_AsyncApiReference_WithExternalAvroResource_DeserializesCorrectly()
         {
             var avroPayload =
                 """
@@ -512,7 +514,7 @@ namespace LEGO.AsyncAPI.Tests
             };
             var reader = new AsyncApiStringReader(settings);
             var doc = reader.Read(yaml, out var diagnostic);
-            var message = doc.Channels["workspace"].Publish.Message.First();
+            var message = doc.Channels["workspace"].Messages.Values.First();
             var payload = message.Payload.As<AsyncApiAvroSchema>();
             payload.As<AvroRecord>().Name.Should().Be("thecodebuzz_schema");
 

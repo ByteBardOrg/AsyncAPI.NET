@@ -124,6 +124,24 @@ namespace LEGO.AsyncAPI {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The messages of operation &apos;{0}&apos; MUST be a subset of the referenced channels messages..
+        /// </summary>
+        internal static string Validation_OperationMessagesMustReferenceOperationChannel {
+            get {
+                return ResourceManager.GetString("Validation_OperationMessagesMustReferenceOperationChannel", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The operation &apos;{0}&apos; MUST point to a channel definition located in the root Channels Object..
+        /// </summary>
+        internal static string Validation_OperationMustReferenceValidChannel {
+            get {
+                return ResourceManager.GetString("Validation_OperationMustReferenceValidChannel", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Symbols  MUST match the regular expression &apos;{1}&apos;..
         /// </summary>
         internal static string Validation_SymbolsMustMatchRegularExpression {

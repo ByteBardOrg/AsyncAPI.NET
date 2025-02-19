@@ -15,17 +15,27 @@ namespace LEGO.AsyncAPI.Models
         /// <summary>
         /// a short description of the target documentation. CommonMark syntax can be used for rich text representation.
         /// </summary>
-        public string Description { get; set; }
+        public virtual string Description { get; set; }
 
         /// <summary>
         /// REQUIRED. The URL for the target documentation. Value MUST be in the format of a URL.
         /// </summary>
-        public Uri Url { get; set; }
+        public virtual Uri Url { get; set; }
 
         /// <inheritdoc/>
-        public IDictionary<string, IAsyncApiExtension> Extensions { get; set; } = new Dictionary<string, IAsyncApiExtension>();
+        public virtual IDictionary<string, IAsyncApiExtension> Extensions { get; set; } = new Dictionary<string, IAsyncApiExtension>();
 
-        public void SerializeV2(IAsyncApiWriter writer)
+        public virtual void SerializeV2(IAsyncApiWriter writer)
+        {
+            this.SerializeCore(writer);
+        }
+
+        public virtual void SerializeV3(IAsyncApiWriter writer)
+        {
+            this.SerializeCore(writer);
+        }
+
+        private void SerializeCore(IAsyncApiWriter writer)
         {
             if (writer is null)
             {

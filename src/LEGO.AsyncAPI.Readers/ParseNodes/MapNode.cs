@@ -52,6 +52,42 @@ namespace LEGO.AsyncAPI.Readers.ParseNodes
             }
         }
 
+        public override Dictionary<string, T> CreateMap<T>(Func<string, string> keySelector, Func<MapNode, string, T> map)
+        {
+            var jsonMap = this.node;
+            if (jsonMap == null)
+            {
+                throw new AsyncApiReaderException($"Expected map while parsing {typeof(T).Name}", this.Context);
+            }
+
+            var nodes = jsonMap.Select(
+                n =>
+                {
+                    var originalKey = n.Key;
+                    var newKey = keySelector(originalKey);
+                    T value;
+                    try
+                    {
+                        this.Context.StartObject(originalKey);
+                        value = n.Value is JsonObject
+                          ? map(new MapNode(this.Context, n.Value), originalKey)
+                          : default(T);
+                    }
+                    finally
+                    {
+                        this.Context.EndObject();
+                    }
+
+                    return new
+                    {
+                        key = newKey,
+                        value,
+                    };
+                });
+
+            return nodes.ToDictionary(k => k.key, v => v.value);
+        }
+
         public override Dictionary<string, T> CreateMap<T>(Func<MapNode, T> map)
         {
             var jsonMap = this.node;
@@ -209,7 +245,7 @@ namespace LEGO.AsyncAPI.Readers.ParseNodes
             return new AsyncApiAny(this.node);
         }
 
-        public void ParseFields<T>(ref T parentInstance, IDictionary<string, Action<T, ParseNode>> fixedFields, IDictionary<Func<string, bool>, Action<T, string, ParseNode>> patternFields)
+        public void ParseFields<T>(T parentInstance, IDictionary<string, Action<T, ParseNode>> fixedFields, IDictionary<Func<string, bool>, Action<T, string, ParseNode>> patternFields)
         {
             foreach (var propertyNode in this)
             {

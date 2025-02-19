@@ -315,5 +315,31 @@ namespace LEGO.AsyncAPI.Models
 
             this.Target.SerializeV2(writer);
         }
+
+        public override void SerializeV3(IAsyncApiWriter writer)
+        {
+            if (writer is null)
+            {
+                throw new ArgumentNullException(nameof(writer));
+            }
+
+            var settings = writer.GetSettings();
+            if (!settings.ShouldInlineReference(this.Reference))
+            {
+                this.Reference.SerializeV3(writer);
+                return;
+            }
+
+            this.Reference.Workspace = writer.Workspace;
+            // If Loop is detected then just Serialize as a reference.
+            if (!settings.LoopDetector.PushLoop(this))
+            {
+                settings.LoopDetector.SaveLoop(this);
+                this.Reference.SerializeV3(writer);
+                return;
+            }
+
+            this.Target.SerializeV3(writer);
+        }
     }
 }
