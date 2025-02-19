@@ -82,13 +82,13 @@ namespace LEGO.AsyncAPI.Models
             writer.WriteOptionalProperty(AsyncApiConstants.Id, this.Id);
 
             // servers
-            writer.WriteOptionalMap(AsyncApiConstants.Servers, this.Servers, (writer, key, component) => component.SerializeV2(writer));
+            writer.WriteOptionalMap(AsyncApiConstants.Servers, this.Servers, (writer, component) => component.SerializeV2(writer));
 
             // content type
             writer.WriteOptionalProperty(AsyncApiConstants.DefaultContentType, this.DefaultContentType);
 
             // channels
-            writer.WriteRequiredMap(AsyncApiConstants.Channels, this.Channels, (writer, key, component) => component.SerializeV2(writer));
+            writer.WriteRequiredMap(AsyncApiConstants.Channels, this.Channels, (channel) => channel.Address, (writer, key, component) => component.SerializeV2(writer));
 
             // components
             writer.WriteOptionalObject(AsyncApiConstants.Components, this.Components, (w, c) => c.SerializeV2(w));
