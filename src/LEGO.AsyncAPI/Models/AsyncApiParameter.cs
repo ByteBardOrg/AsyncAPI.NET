@@ -49,21 +49,26 @@ namespace LEGO.AsyncAPI.Models
 
             writer.WriteStartObject();
             writer.WriteOptionalProperty(AsyncApiConstants.Description, this.Description);
-            var schema = new AsyncApiJsonSchema();
-            if (this.Enum.Any())
+
+            if (this.Enum.Any() || this.Default != null || this.Examples.Any())
             {
-                schema.Enum = this.Enum.Select(e => new AsyncApiAny(e)).ToList();
-            }
-            if (this.Default != null)
-            {
-                schema.Default = new AsyncApiAny(this.Default);
-            }
-            if (this.Examples.Any())
-            {
-                schema.Examples = this.Examples.Select(e => new AsyncApiAny(e)).ToList();
+                var schema = new AsyncApiJsonSchema();
+                if (this.Enum.Any())
+                {
+                    schema.Enum = this.Enum.Select(e => new AsyncApiAny(e)).ToList();
+                }
+                if (this.Default != null)
+                {
+                    schema.Default = new AsyncApiAny(this.Default);
+                }
+                if (this.Examples.Any())
+                {
+                    schema.Examples = this.Examples.Select(e => new AsyncApiAny(e)).ToList();
+                }
+
+                writer.WriteOptionalObject(AsyncApiConstants.Schema, schema, (w, s) => s.SerializeV2(w));
             }
 
-            writer.WriteOptionalObject(AsyncApiConstants.Schema, schema, (w, s) => s.SerializeV2(w));
             writer.WriteOptionalProperty(AsyncApiConstants.Location, this.Location);
             writer.WriteExtensions(this.Extensions);
             writer.WriteEndObject();

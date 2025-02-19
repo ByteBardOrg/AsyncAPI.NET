@@ -129,5 +129,33 @@ namespace LEGO.AsyncAPI.Tests.Models
             actual.Should()
                   .BePlatformAgnosticEquivalentTo(expected);
         }
+
+        [Test]
+        public void V2_AsyncApiChannel_UpgradesAndNormalizesKey()
+        {
+            var yaml =
+                """
+                asyncapi: 2.6.0
+                info:
+                  title: test spec
+                  version: 1.0.0
+                channels:
+                  'mychannel/{param}':
+                    description: test channel
+                    parameters:
+                      param:
+                        description: some parameter
+                """;
+
+            var document = new AsyncApiStringReader().Read(yaml, out var diag);
+
+            document.Channels.First().Key.Should().Be("mychannelparam");
+            document.Channels.First().Value.Address.Should().Be("mychannel/{param}");
+            document.Channels.First().Value.Parameters.First().Key.Should().Be("param");
+
+            var reserialized = document.SerializeAsYaml(AsyncApiVersion.AsyncApi2_0);
+
+            reserialized.Should().BePlatformAgnosticEquivalentTo(yaml);
+        }
     }
 }
