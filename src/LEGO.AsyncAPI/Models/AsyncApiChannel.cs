@@ -85,7 +85,7 @@ namespace LEGO.AsyncAPI.Models
             // servers
             writer.WriteOptionalCollection(AsyncApiConstants.Servers, this.Servers.Select(s => s.Reference.FragmentId).ToList(), (w, s) => w.WriteValue(s));
 
-            var operations = writer.Workspace.RootDocument?.Operations.Values!.Where(operation => this.CheckOperationChannel(operation, writer)).ToList();
+            var operations = writer.Workspace.RootDocument?.Operations.Values.Where(operation => this.CheckOperationChannel(operation, writer)).ToList();
 
             // subscribe (Now Send)
             writer.WriteOptionalObject(AsyncApiConstants.Subscribe, operations?.FirstOrDefault(o => o.Action == AsyncApiAction.Send), (w, s) => s?.SerializeV2(w));
