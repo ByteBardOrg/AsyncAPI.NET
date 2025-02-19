@@ -42,7 +42,7 @@ namespace LEGO.AsyncAPI.Tests
                     url: https://www.apache.org/licenses/LICENSE-2.0
                 servers:
                   scram-connections:
-                    url: test.mykafkacluster.org:18092
+                    url: kafka-secure://test.mykafkacluster.org:18092
                     protocol: kafka-secure
                     description: Test broker secured with scramSha256
                     security:
@@ -55,7 +55,7 @@ namespace LEGO.AsyncAPI.Tests
                       - name: visibility:private
                         description: This resource is private and only available to certain users
                   mtls-connections:
-                    url: test.mykafkacluster.org:28092
+                    url: kafka-secure://test.mykafkacluster.org:28092
                     protocol: kafka-secure
                     description: Test broker secured with X509
                     security:
@@ -274,9 +274,10 @@ namespace LEGO.AsyncAPI.Tests
                 })
                 .WithDefaultContentType()
                 .WithChannel(
-                "smartylighting.streetlights.1.0.event.{streetlightId}.lighting.measured",
+                "lighting.measured",
                 new AsyncApiChannel()
                 {
+                    Address = "smartylighting.streetlights.1.0.event.{streetlightId}",
                     Description = "The topic on which measured values may be produced and consumed.",
                     Parameters = new Dictionary<string, AsyncApiParameter>
                     {
@@ -286,9 +287,10 @@ namespace LEGO.AsyncAPI.Tests
                     },
                 })
                 .WithChannel(
-                "smartylighting.streetlights.1.0.action.{streetlightId}.turn.on",
+                "turn.on",
                 new AsyncApiChannel()
                 {
+                    Address = "smartylighting.streetlights.1.0.action.{streetlightId}",
                     Parameters = new Dictionary<string, AsyncApiParameter>
                     {
                     {
@@ -297,9 +299,10 @@ namespace LEGO.AsyncAPI.Tests
                     },
                 })
                 .WithChannel(
-                "smartylighting.streetlights.1.0.action.{streetlightId}.turn.off",
+                "turn.off",
                 new AsyncApiChannel()
                 {
+                    Address = "smartylighting.streetlights.1.0.action.{streetlightId}",
                     Parameters = new Dictionary<string, AsyncApiParameter>
                     {
                     {
@@ -308,9 +311,10 @@ namespace LEGO.AsyncAPI.Tests
                     },
                 })
                 .WithChannel(
-                "smartylighting.streetlights.1.0.action.{streetlightId}.dim",
+                "dim",
                 new AsyncApiChannel()
                 {
+                    Address = "smartylighting.streetlights.1.0.action.{streetlightId}",
                     Parameters = new Dictionary<string, AsyncApiParameter>
                     {
                     {
@@ -322,7 +326,7 @@ namespace LEGO.AsyncAPI.Tests
                 {
                     Action = AsyncApiAction.Send,
                     Summary = "Inform about environmental lighting conditions of a particular streetlight.",
-                    Channel = new AsyncApiChannelReference("#/channels/smartylighting.streetlights.1.0.event.{streetlightId}.lighting.measured"),
+                    Channel = new AsyncApiChannelReference("#/channels/lighting.measured"),
                     Traits = new List<AsyncApiOperationTrait>
                     {
                         new AsyncApiOperationTraitReference("#/components/operationTraits/kafka"),
@@ -335,7 +339,7 @@ namespace LEGO.AsyncAPI.Tests
                 .WithOperation("turnOn", new AsyncApiOperation()
                 {
                     Action = AsyncApiAction.Receive,
-                    Channel = new AsyncApiChannelReference("#/channels/smartylighting.streetlights.1.0.action.{streetlightId}.turn.on"),
+                    Channel = new AsyncApiChannelReference("#/channels/turn.on"),
                     Traits = new List<AsyncApiOperationTrait>
                     {
                         new AsyncApiOperationTraitReference("#/components/operationTraits/kafka"),
@@ -348,7 +352,7 @@ namespace LEGO.AsyncAPI.Tests
                 .WithOperation("turnOff", new AsyncApiOperation()
                 {
                     Action = AsyncApiAction.Receive,
-                    Channel = new AsyncApiChannelReference("#/channels/smartylighting.streetlights.1.0.action.{streetlightId}.turn.off"),
+                    Channel = new AsyncApiChannelReference("#/channels/turn.off"),
                     Traits = new List<AsyncApiOperationTrait>
                     {
                         new AsyncApiOperationTraitReference("#/components/operationTraits/kafka"),
@@ -361,7 +365,7 @@ namespace LEGO.AsyncAPI.Tests
                 .WithOperation("dimLight", new AsyncApiOperation()
                 {
                     Action = AsyncApiAction.Receive,
-                    Channel = new AsyncApiChannelReference("#/channels/smartylighting.streetlights.1.0.action.{streetlightId}.dim"),
+                    Channel = new AsyncApiChannelReference("#/channels/dim"),
                     Traits = new List<AsyncApiOperationTrait>
                     {
                         new AsyncApiOperationTraitReference("#/components/operationTraits/kafka"),

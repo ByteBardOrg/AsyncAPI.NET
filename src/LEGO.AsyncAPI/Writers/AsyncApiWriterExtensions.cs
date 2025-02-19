@@ -1,5 +1,7 @@
 ﻿// Copyright (c) The LEGO Group. All rights reserved.
 
+using LEGO.AsyncAPI.Models;
+
 namespace LEGO.AsyncAPI.Writers
 {
     using System;
@@ -419,7 +421,12 @@ namespace LEGO.AsyncAPI.Writers
             {
                 foreach (var item in elements)
                 {
-                    writer.WritePropertyName(item.Key);
+                    // TODO: Validate with Alexander if this is correct and how to make it work only on V2
+                    var key = item.Value is AsyncApiChannel channel
+                        ? channel.Address + "." + item.Key
+                        : item.Key;
+
+                    writer.WritePropertyName(key);
                     if (item.Value != null)
                     {
                         action(writer, item.Key, item.Value);
