@@ -69,6 +69,7 @@ namespace LEGO.AsyncAPI.Models
 
             writer.Workspace.SetRootDocument(this);
             writer.Workspace.RegisterComponents(this);
+            this.RegisterChannels(writer);
 
             writer.WriteStartObject();
 
@@ -145,6 +146,38 @@ namespace LEGO.AsyncAPI.Models
             writer.WriteExtensions(this.Extensions);
 
             writer.WriteEndObject();
+        }
+
+        private void RegisterChannels(IAsyncApiWriter writer)
+        {
+            const string baseUri = "#/";
+
+            if (this.Channels is null)
+            {
+                return;
+            }
+
+            foreach (var item in this.Channels)
+            {
+                var location = baseUri + ReferenceType.Channel.GetDisplayName() + "/" + item.Key;
+                writer.Workspace.RegisterComponent(location, item.Value);
+
+                if (item.Value.Messages is not null)
+                {
+                    this.RegisterMessages(writer, item.Value, item.Key);
+                }
+            }
+        }
+
+        private void RegisterMessages(IAsyncApiWriter writer, AsyncApiChannel channel, string channelKey)
+        {
+            var baseUri = $"#/channels/{channelKey}/";
+
+            foreach (var item in channel.Messages)
+            {
+                var location = baseUri + ReferenceType.Message.GetDisplayName() + "/" + item.Key;
+                writer.Workspace.RegisterComponent(location, item.Value);
+            }
         }
     }
 }
