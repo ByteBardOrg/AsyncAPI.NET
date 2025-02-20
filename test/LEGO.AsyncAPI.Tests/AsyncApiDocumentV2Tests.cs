@@ -72,7 +72,6 @@ namespace LEGO.AsyncAPI.Tests
                   'smartylighting.streetlights.1.0.event.{streetlightId}.lighting.measured':
                     description: The topic on which measured values may be produced and consumed.
                     publish:
-                      operationId: receiveLightMeasurement
                       summary: Inform about environmental lighting conditions of a particular streetlight.
                       traits:
                         - $ref: '#/components/operationTraits/kafka'
@@ -83,7 +82,6 @@ namespace LEGO.AsyncAPI.Tests
                         $ref: '#/components/parameters/streetlightId'
                   'smartylighting.streetlights.1.0.action.{streetlightId}.turn.on':
                     subscribe:
-                      operationId: turnOn
                       traits:
                         - $ref: '#/components/operationTraits/kafka'
                       message:
@@ -93,7 +91,6 @@ namespace LEGO.AsyncAPI.Tests
                         $ref: '#/components/parameters/streetlightId'
                   'smartylighting.streetlights.1.0.action.{streetlightId}.turn.off':
                     subscribe:
-                      operationId: turnOff
                       traits:
                         - $ref: '#/components/operationTraits/kafka'
                       message:
@@ -103,7 +100,6 @@ namespace LEGO.AsyncAPI.Tests
                         $ref: '#/components/parameters/streetlightId'
                   'smartylighting.streetlights.1.0.action.{streetlightId}.dim':
                     subscribe:
-                      operationId: dimLight
                       traits:
                         - $ref: '#/components/operationTraits/kafka'
                       message:
