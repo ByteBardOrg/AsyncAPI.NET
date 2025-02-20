@@ -63,15 +63,23 @@ namespace LEGO.AsyncAPI.Readers
         private static void SetMessages(ParsingContext context, AsyncApiDocument document)
         {
             var messages = context.GetFromTempStorage<Dictionary<string, AsyncApiMessage>>(TempStorageKeys.ComponentMessages);
+            if (messages == null)
+            {
+                return;
+            }
             foreach (var message in messages)
             {
-                document.Components.Messages.Add(message.Key, message.Value);
+                document?.Components?.Messages.Add(message.Key, message.Value);
             }
         }
 
         private static void SetOperations(ParsingContext context, AsyncApiDocument document)
         {
             var operations = context.GetFromTempStorage<Dictionary<string, AsyncApiOperation>>(TempStorageKeys.Operations);
+            if (operations == null)
+            {
+                return;
+            }
             foreach (var operation in operations)
             {
                 document.Operations.Add(operation);
