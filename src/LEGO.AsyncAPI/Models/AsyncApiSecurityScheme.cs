@@ -57,7 +57,7 @@ namespace LEGO.AsyncAPI.Models
             };
         }
 
-        public static AsyncApiSecurityScheme Http(string scheme, string bearerFormat = null, string description = null) 
+        public static AsyncApiSecurityScheme Http(string scheme, string bearerFormat = null, string description = null)
         {
             if (string.IsNullOrWhiteSpace(scheme))
             {

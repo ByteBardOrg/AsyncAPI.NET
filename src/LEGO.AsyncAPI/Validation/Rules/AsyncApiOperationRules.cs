@@ -5,7 +5,6 @@ using System.Linq;
 namespace LEGO.AsyncAPI.Validation.Rules
 {
     using System;
-    using System.Threading;
     using LEGO.AsyncAPI.Models;
     using LEGO.AsyncAPI.Validations;
 

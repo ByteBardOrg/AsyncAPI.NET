@@ -4,13 +4,15 @@ namespace LEGO.AsyncAPI.Models
 {
     using System;
     using System.Collections.Generic;
+    /// <summary>
+    /// The definition of a security scheme this application MAY use.
+    /// </summary>
+    using System.Diagnostics;
     using System.Linq;
     using LEGO.AsyncAPI.Models.Interfaces;
     using LEGO.AsyncAPI.Writers;
 
-    /// <summary>
-    /// The definition of a security scheme this application MAY use.
-    /// </summary>
+    [DebuggerDisplay("{Reference}")]
     public class AsyncApiSecuritySchemeReference : AsyncApiSecurityScheme, IAsyncApiReferenceable
     {
         private AsyncApiSecurityScheme target;

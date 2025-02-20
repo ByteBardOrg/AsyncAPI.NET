@@ -1,7 +1,6 @@
 // Copyright (c) The LEGO Group. All rights reserved.
 
 using System.Collections.Generic;
-using System.Linq;
 
 namespace LEGO.AsyncAPI.Validation.Rules
 {

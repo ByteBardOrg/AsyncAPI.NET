@@ -4,11 +4,13 @@ namespace LEGO.AsyncAPI.Tests.Models
 {
     using System;
     using System.IO;
+    using System.Linq;
     using FluentAssertions;
     using LEGO.AsyncAPI.Bindings.Http;
     using LEGO.AsyncAPI.Bindings.Kafka;
     using LEGO.AsyncAPI.Models;
     using LEGO.AsyncAPI.Models.Interfaces;
+    using LEGO.AsyncAPI.Readers;
     using LEGO.AsyncAPI.Writers;
     using NUnit.Framework;
 
@@ -26,9 +28,84 @@ namespace LEGO.AsyncAPI.Tests.Models
         }
 
         [Test]
+        public void V2_SerializeV2_WithMultipleMessages_Upgrades()
+        {
+            // Arrange
+            var yaml =
+                """
+                asyncapi: 2.6.0
+                info:
+                  title: Example API with oneOf in messages
+                  version: 1.0.0
+
+                channels:
+                  SomeChannel:
+                    description: A channel where messages can be sent and received.
+                    subscribe:
+                      operationId: receiveMessage
+                      summary: 'Receives a message that can be either a text or a file.'
+                      message:
+                        oneOf:
+                          - $ref: '#/components/messages/TextMessage'
+                          - $ref: '#/components/messages/FileMessage'
+                          - description: Http Message
+                            contentType: 'application/json'
+                            payload:
+                              type: string
+                          - description: web socket Message
+                            messageId: wsMessage
+                            contentType: 'application/json'
+                            payload:
+                              type: string
+                components:
+                  messages:
+                    TextMessage:
+                      contentType: 'application/json'
+                      payload:
+                        type: 'object'
+                        properties:
+                          type:
+                            type: 'string'
+                            enum:
+                              - 'text'
+                          content:
+                            type: 'string'
+                            description: 'The text content of the message.'
+
+                    FileMessage:
+                      contentType: 'application/json'
+                      payload:
+                        type: 'object'
+                        properties:
+                          type:
+                            type: 'string'
+                            enum:
+                              - 'file'
+                          filename:
+                            type: 'string'
+                            description: 'The name of the file.'
+                          fileData:
+                            type: 'string'
+                            format: 'byte'
+                            description: 'The file content encoded in base64.'
+
+                """;
+
+            // Act
+            var document = new AsyncApiStringReader().Read(yaml, out var diagnostics);
+
+            // Assert
+            document.Components.Messages.Should().HaveCount(4);
+            document.Operations.Should().HaveCount(1);
+            document.Operations.First().Value.Messages.Should().HaveCount(4);
+            document.Channels.First().Value.Messages.Should().HaveCount(4);
+            // Missing resolution of references of references.
+        }
+
+        [Test]
         public void V2_SerializeV2_WithMultipleMessages_SerializesWithOneOf()
         {
-            // Arrangpublic void V2_
+            // Arrange
             var expected = """
                 message:
                   oneOf:

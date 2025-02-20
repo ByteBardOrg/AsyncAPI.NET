@@ -54,6 +54,7 @@ namespace LEGO.AsyncAPI.Models
         {
             this.SerializeCore(writer);
         }
+
         public void SerializeCore(IAsyncApiWriter writer)
         {
             writer.WriteStartObject();
