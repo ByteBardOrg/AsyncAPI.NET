@@ -550,13 +550,12 @@ namespace LEGO.AsyncAPI.Tests
                 id: documentId
                 servers:
                   myServer:
-                    url: https://example.com/server
+                    url: kafkaprotocol://example.com/server
                     protocol: KafkaProtocol
                     protocolVersion: protocolVersion
                     description: serverDescription
                     security:
-                      - securitySchemeName:
-                          - requirementItem
+                      - securitySchemeName: []
                 channels:
                   channel1:
                     description: channelDescription
@@ -592,7 +591,6 @@ namespace LEGO.AsyncAPI.Tests
                               description: correlationDescription
                               location: correlationLocation
                               x-extension: value
-                            schemaFormat: schemaFormat
                             contentType: contentType
                             name: messageName
                             title: messageTitle
@@ -686,7 +684,7 @@ namespace LEGO.AsyncAPI.Tests
             string serverKey = "myServer";
             string serverDescription = "serverDescription";
             string protocolVersion = "protocolVersion";
-            string serverUrl = "https://example.com/server";
+            string serverHost = "example.com/server";
             string protocol = "KafkaProtocol";
             string securirySchemeDescription = "securitySchemeDescription";
             string securitySchemeName = "securitySchemeName";
@@ -734,100 +732,6 @@ namespace LEGO.AsyncAPI.Tests
                             }
                         },
                     },
-                    Messages = new Dictionary<string, AsyncApiMessage>()
-                    {
-                        {
-                            messageKeyOne, new AsyncApiMessage
-                            {
-                                Description = messageDescription,
-                                Title = messageTitle,
-                                Summary = messageSummary,
-                                Name = messageName,
-                                ContentType = contentType,
-                            }
-                        },
-                        {
-                            messageKeyTwo, new AsyncApiMessage
-                            {
-                                Description = messageDescription,
-                                Title = messageTitle,
-                                Summary = messageSummary,
-                                Name = messageName,
-                                ContentType = contentType,
-                                CorrelationId = new AsyncApiCorrelationId
-                                {
-                                    Location = correlationLocation,
-                                    Description = correlationDescription,
-                                    Extensions = new Dictionary<string, IAsyncApiExtension>
-                                    {
-                                        { extensionKey, new AsyncApiAny(extensionString) },
-                                    },
-                                },
-                                Traits = new List<AsyncApiMessageTrait>
-                                {
-                                    new AsyncApiMessageTrait
-                                    {
-                                        Name = traitName,
-                                        Title = traitTitle,
-                                        Headers = new AsyncApiJsonSchema
-                                        {
-                                            Title = schemaTitle,
-                                            WriteOnly = true,
-                                            Description = schemaDescription,
-                                            Examples = new List<AsyncApiAny>
-                                            {
-                                                new AsyncApiAny(new ExtensionClass
-                                                {
-                                                    Key = anyStringValue,
-                                                    OtherKey = anyLongValue,
-                                                }),
-                                            },
-                                        },
-                                        Examples = new List<AsyncApiMessageExample>
-                                        {
-                                            new AsyncApiMessageExample
-                                            {
-                                                Summary = exampleSummary,
-                                                Name = exampleName,
-                                                Payload = new AsyncApiAny(new ExtensionClass
-                                                {
-                                                    Key = anyStringValue,
-                                                    OtherKey = anyLongValue,
-                                                }),
-                                                Extensions = new Dictionary<string, IAsyncApiExtension>
-                                                {
-                                                    { extensionKey, new AsyncApiAny(extensionString) },
-                                                },
-                                            },
-                                        },
-                                        Description = traitDescription,
-                                        Summary = traitSummary,
-                                        Tags = new List<AsyncApiTag>
-                                        {
-                                            new AsyncApiTag
-                                            {
-                                                Name = tagName,
-                                                Description = tagDescription,
-                                            },
-                                        },
-                                        ExternalDocs = new AsyncApiExternalDocumentation
-                                        {
-                                            Url = new Uri(externalDocsUri),
-                                            Description = externalDocsDescription,
-                                        },
-                                        Extensions = new Dictionary<string, IAsyncApiExtension>
-                                        {
-                                            { extensionKey, new AsyncApiAny(extensionString) },
-                                        },
-                                    },
-                                },
-                                Extensions = new Dictionary<string, IAsyncApiExtension>
-                                {
-                                    { extensionKey, new AsyncApiAny(extensionString) },
-                                },
-                            }
-                        },
-                    },
                 },
                 Servers = new Dictionary<string, AsyncApiServer>
                 {
@@ -836,11 +740,11 @@ namespace LEGO.AsyncAPI.Tests
                         {
                             Description = serverDescription,
                             ProtocolVersion = protocolVersion,
-                            Host = serverUrl,
+                            Host = serverHost,
                             Protocol = protocol,
                             Security = new List<AsyncApiSecurityScheme>
                             {
-                                new AsyncApiSecuritySchemeReference(securitySchemeName),
+                                new AsyncApiSecuritySchemeReference($"#/components/securitySchemes/{securitySchemeName}"),
                             },
                         }
                     },
@@ -877,6 +781,100 @@ namespace LEGO.AsyncAPI.Tests
                         channelKey, new AsyncApiChannel
                         {
                             Description = channelDescription,
+                            Messages = new Dictionary<string, AsyncApiMessage>()
+                            {
+                                {
+                                    messageKeyOne, new AsyncApiMessage
+                                    {
+                                        Description = messageDescription,
+                                        Title = messageTitle,
+                                        Summary = messageSummary,
+                                        Name = messageName,
+                                        ContentType = contentType,
+                                    }
+                                },
+                                {
+                                    messageKeyTwo, new AsyncApiMessage
+                                    {
+                                        Description = messageDescription,
+                                        Title = messageTitle,
+                                        Summary = messageSummary,
+                                        Name = messageName,
+                                        ContentType = contentType,
+                                        CorrelationId = new AsyncApiCorrelationId
+                                        {
+                                            Location = correlationLocation,
+                                            Description = correlationDescription,
+                                            Extensions = new Dictionary<string, IAsyncApiExtension>
+                                            {
+                                                { extensionKey, new AsyncApiAny(extensionString) },
+                                            },
+                                        },
+                                        Traits = new List<AsyncApiMessageTrait>
+                                        {
+                                            new AsyncApiMessageTrait
+                                            {
+                                                Name = traitName,
+                                                Title = traitTitle,
+                                                Headers = new AsyncApiJsonSchema
+                                                {
+                                                    Title = schemaTitle,
+                                                    WriteOnly = true,
+                                                    Description = schemaDescription,
+                                                    Examples = new List<AsyncApiAny>
+                                                    {
+                                                        new AsyncApiAny(new ExtensionClass
+                                                        {
+                                                            Key = anyStringValue,
+                                                            OtherKey = anyLongValue,
+                                                        }),
+                                                    },
+                                                },
+                                                Examples = new List<AsyncApiMessageExample>
+                                                {
+                                                    new AsyncApiMessageExample
+                                                    {
+                                                        Summary = exampleSummary,
+                                                        Name = exampleName,
+                                                        Payload = new AsyncApiAny(new ExtensionClass
+                                                        {
+                                                            Key = anyStringValue,
+                                                            OtherKey = anyLongValue,
+                                                        }),
+                                                        Extensions = new Dictionary<string, IAsyncApiExtension>
+                                                        {
+                                                            { extensionKey, new AsyncApiAny(extensionString) },
+                                                        },
+                                                    },
+                                                },
+                                                Description = traitDescription,
+                                                Summary = traitSummary,
+                                                Tags = new List<AsyncApiTag>
+                                                {
+                                                    new AsyncApiTag
+                                                    {
+                                                        Name = tagName,
+                                                        Description = tagDescription,
+                                                    },
+                                                },
+                                                ExternalDocs = new AsyncApiExternalDocumentation
+                                                {
+                                                    Url = new Uri(externalDocsUri),
+                                                    Description = externalDocsDescription,
+                                                },
+                                                Extensions = new Dictionary<string, IAsyncApiExtension>
+                                                {
+                                                    { extensionKey, new AsyncApiAny(extensionString) },
+                                                },
+                                            },
+                                        },
+                                        Extensions = new Dictionary<string, IAsyncApiExtension>
+                                        {
+                                            { extensionKey, new AsyncApiAny(extensionString) },
+                                        },
+                                    }
+                                },
+                            },
                         }
                     },
                 },
@@ -896,10 +894,10 @@ namespace LEGO.AsyncAPI.Tests
                             Messages = new List<AsyncApiMessageReference>
                             {
                                 {
-                                    new($"#components/messages/{messageKeyOne}")
+                                    new($"#/channels/messages/{messageKeyOne}")
                                 },
                                 {
-                                    new($"#components/messages/{messageKeyTwo}")
+                                    new($"#/channels/messages/{messageKeyTwo}")
                                 },
                             },
                             Extensions = new Dictionary<string, IAsyncApiExtension>

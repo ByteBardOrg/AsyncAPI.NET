@@ -1,5 +1,7 @@
 ﻿// Copyright (c) The LEGO Group. All rights reserved.
 
+using System.Linq;
+
 namespace LEGO.AsyncAPI.Models
 {
     using System;
@@ -59,7 +61,9 @@ namespace LEGO.AsyncAPI.Models
 
             writer.WriteStartObject();
 
-            //writer.WriteOptionalProperty(AsyncApiConstants.OperationId, this.OperationId);
+            var operation = writer.Workspace.RootDocument.Operations.FirstOrDefault(op => op.Value.Traits.Any(tr => tr == this));
+
+            writer.WriteOptionalProperty(AsyncApiConstants.OperationId, operation.Key);
             writer.WriteOptionalProperty(AsyncApiConstants.Summary, this.Summary);
             writer.WriteOptionalProperty(AsyncApiConstants.Description, this.Description);
             writer.WriteOptionalCollection(AsyncApiConstants.Security, this.Security, (w, t) => t.SerializeV2(w));
