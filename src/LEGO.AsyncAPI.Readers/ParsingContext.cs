@@ -95,7 +95,7 @@ namespace LEGO.AsyncAPI.Readers
 
                     this.Workspace.SetRootDocument(doc);
                     this.Workspace.RegisterComponents(doc);
-                    this.Workspace.RegisterComponent(string.Empty, this.ParseToStream(jsonNode));
+                    this.Workspace.RegisterComponent(string.Empty, this.ParseToStream(doc));
 
                     this.Diagnostic.SpecificationVersion = AsyncApiVersion.AsyncApi2_0;
                     break;
@@ -114,6 +114,12 @@ namespace LEGO.AsyncAPI.Readers
             }
 
             return doc;
+        }
+
+        private Stream ParseToStream(AsyncApiDocument document)
+        {
+            var json = document.SerializeAsJson(AsyncApiVersion.AsyncApi3_0);
+            return this.ParseToStream(JsonNode.Parse(json));
         }
 
         private Stream ParseToStream(JsonNode node)

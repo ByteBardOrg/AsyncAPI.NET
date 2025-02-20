@@ -31,6 +31,7 @@ namespace LEGO.AsyncAPI.Services
             this.Walk(AsyncApiConstants.Info, () => this.Walk(doc.Info));
             this.Walk(AsyncApiConstants.Servers, () => this.Walk(doc.Servers));
             this.Walk(AsyncApiConstants.Channels, () => this.Walk(doc.Channels));
+            this.Walk(AsyncApiConstants.Operations, () => this.Walk(doc.Operations));
             this.Walk(AsyncApiConstants.Components, () => this.Walk(doc.Components));
             this.Walk(doc as IAsyncApiExtensible);
         }
@@ -66,7 +67,7 @@ namespace LEGO.AsyncAPI.Services
                 {
                     foreach (var item in components.Channels)
                     {
-                        this.Walk(item.Key, () => this.Walk(item.Value, isComponent: true));
+                        this.Walk(item.Key, () => this.Walk(item.Value));
                     }
                 }
             });
@@ -77,7 +78,7 @@ namespace LEGO.AsyncAPI.Services
                 {
                     foreach (var item in components.ServerBindings)
                     {
-                        this.Walk(item.Key, () => this.Walk(item.Value, isComponent: true));
+                        this.Walk(item.Key, () => this.Walk(item.Value));
                     }
                 }
             });
@@ -88,7 +89,7 @@ namespace LEGO.AsyncAPI.Services
                 {
                     foreach (var item in components.ChannelBindings)
                     {
-                        this.Walk(item.Key, () => this.Walk(item.Value, isComponent: true));
+                        this.Walk(item.Key, () => this.Walk(item.Value));
                     }
                 }
             });
@@ -99,7 +100,7 @@ namespace LEGO.AsyncAPI.Services
                 {
                     foreach (var item in components.OperationBindings)
                     {
-                        this.Walk(item.Key, () => this.Walk(item.Value, isComponent: true));
+                        this.Walk(item.Key, () => this.Walk(item.Value));
                     }
                 }
             });
@@ -110,7 +111,7 @@ namespace LEGO.AsyncAPI.Services
                 {
                     foreach (var item in components.MessageBindings)
                     {
-                        this.Walk(item.Key, () => this.Walk(item.Value, isComponent: true));
+                        this.Walk(item.Key, () => this.Walk(item.Value));
                     }
                 }
             });
@@ -121,7 +122,7 @@ namespace LEGO.AsyncAPI.Services
                 {
                     foreach (var item in components.Parameters)
                     {
-                        this.Walk(item.Key, () => this.Walk(item.Value, isComponent: true));
+                        this.Walk(item.Key, () => this.Walk(item.Value));
                     }
                 }
             });
@@ -132,7 +133,7 @@ namespace LEGO.AsyncAPI.Services
                 {
                     foreach (var item in components.Messages)
                     {
-                        this.Walk(item.Key, () => this.Walk(item.Value, isComponent: true));
+                        this.Walk(item.Key, () => this.Walk(item.Value));
                     }
                 }
             });
@@ -143,7 +144,7 @@ namespace LEGO.AsyncAPI.Services
                 {
                     foreach (var item in components.Servers)
                     {
-                        this.Walk(item.Key, () => this.Walk(item.Value, isComponent: true));
+                        this.Walk(item.Key, () => this.Walk(item.Value));
                     }
                 }
             });
@@ -154,7 +155,7 @@ namespace LEGO.AsyncAPI.Services
                 {
                     foreach (var item in components.CorrelationIds)
                     {
-                        this.Walk(item.Key, () => this.Walk(item.Value, isComponent: true));
+                        this.Walk(item.Key, () => this.Walk(item.Value));
                     }
                 }
             });
@@ -165,7 +166,7 @@ namespace LEGO.AsyncAPI.Services
                 {
                     foreach (var item in components.MessageTraits)
                     {
-                        this.Walk(item.Key, () => this.Walk(item.Value, isComponent: true));
+                        this.Walk(item.Key, () => this.Walk(item.Value));
                     }
                 }
             });
@@ -176,7 +177,7 @@ namespace LEGO.AsyncAPI.Services
                 {
                     foreach (var item in components.OperationTraits)
                     {
-                        this.Walk(item.Key, () => this.Walk(item.Value, isComponent: true));
+                        this.Walk(item.Key, () => this.Walk(item.Value));
                     }
                 }
             });
@@ -187,7 +188,7 @@ namespace LEGO.AsyncAPI.Services
                 {
                     foreach (var item in components.SecuritySchemes)
                     {
-                        this.Walk(item.Key, () => this.Walk(item.Value, isComponent: true));
+                        this.Walk(item.Key, () => this.Walk(item.Value));
                     }
                 }
             });
@@ -217,8 +218,13 @@ namespace LEGO.AsyncAPI.Services
             this.Walk(oAuthFlow as IAsyncApiExtensible);
         }
 
-        internal void Walk(AsyncApiSecurityScheme securityScheme, bool isComponent = false)
+        internal void Walk(AsyncApiSecurityScheme securityScheme)
         {
+            if (securityScheme is null)
+            {
+                return;
+            }
+
             if (securityScheme is AsyncApiSecuritySchemeReference)
             {
                 this.Walk(securityScheme as IAsyncApiReferenceable);
@@ -227,11 +233,8 @@ namespace LEGO.AsyncAPI.Services
 
             this.visitor.Visit(securityScheme);
 
-            if (securityScheme != null)
-            {
-                this.Walk(AsyncApiConstants.Flows, () => this.Walk(securityScheme.Flows));
-            }
 
+            this.Walk(AsyncApiConstants.Flows, () => this.Walk(securityScheme.Flows));
             this.Walk(securityScheme as IAsyncApiExtensible);
         }
 
@@ -273,7 +276,7 @@ namespace LEGO.AsyncAPI.Services
             this.Walk(externalDocs as IAsyncApiExtensible);
         }
 
-        internal void Walk(AsyncApiChannel channel, bool isComponent = false)
+        internal void Walk(AsyncApiChannel channel)
         {
             if (channel == null)
             {
@@ -325,6 +328,23 @@ namespace LEGO.AsyncAPI.Services
             }
         }
 
+        private void Walk(IDictionary<string, AsyncApiOperation> operations)
+        {
+            if (operations == null)
+            {
+                return;
+            }
+
+            this.visitor.Visit(operations);
+
+            foreach (var operation in operations)
+            {
+                this.visitor.CurrentKeys.Operation = operation.Key;
+                this.Walk(operation.Key, () => this.Walk(operation.Value));
+                this.visitor.CurrentKeys.Operation = null;
+            }
+        }
+
         private void Walk(IDictionary<string, AsyncApiParameter> parameters)
         {
             if (parameters == null)
@@ -345,7 +365,7 @@ namespace LEGO.AsyncAPI.Services
             }
         }
 
-        internal void Walk(AsyncApiParameter parameter, bool isComponent = false)
+        internal void Walk(AsyncApiParameter parameter)
         {
             if (parameter is AsyncApiParameterReference reference)
             {
@@ -382,7 +402,7 @@ namespace LEGO.AsyncAPI.Services
             this.visitor.Visit(schema);
         }
 
-        internal void Walk(AsyncApiJsonSchema schema, bool isComponent = false)
+        internal void Walk(AsyncApiJsonSchema schema)
         {
             if (schema == null)
             {
@@ -616,7 +636,7 @@ namespace LEGO.AsyncAPI.Services
             }
         }
 
-        internal void Walk(AsyncApiOperationTrait trait, bool isComponent = false)
+        internal void Walk(AsyncApiOperationTrait trait)
         {
             if (trait is AsyncApiOperationTraitReference reference)
             {
@@ -636,7 +656,7 @@ namespace LEGO.AsyncAPI.Services
             this.Walk(trait as IAsyncApiExtensible);
         }
 
-        internal void Walk(AsyncApiMessage message, bool isComponent = false)
+        internal void Walk(AsyncApiMessage message)
         {
             if (message is AsyncApiMessageReference reference)
             {
@@ -680,7 +700,7 @@ namespace LEGO.AsyncAPI.Services
             }
         }
 
-        internal void Walk(AsyncApiMessageTrait trait, bool isComponent = false)
+        internal void Walk(AsyncApiMessageTrait trait)
         {
             if (trait is AsyncApiMessageTraitReference reference)
             {
@@ -715,7 +735,7 @@ namespace LEGO.AsyncAPI.Services
             this.Walk(multiFormatSchema as IAsyncApiExtensible);
         }
 
-        internal void Walk(AsyncApiBindings<IServerBinding> serverBindings, bool isComponent = false)
+        internal void Walk(AsyncApiBindings<IServerBinding> serverBindings)
         {
             if (serverBindings is AsyncApiBindingsReference<IServerBinding> reference)
             {
@@ -747,7 +767,7 @@ namespace LEGO.AsyncAPI.Services
             this.visitor.Visit(binding);
         }
 
-        internal void Walk(AsyncApiBindings<IChannelBinding> channelBindings, bool isComponent = false)
+        internal void Walk(AsyncApiBindings<IChannelBinding> channelBindings)
         {
             if (channelBindings is AsyncApiBindingsReference<IChannelBinding> reference)
             {
@@ -779,7 +799,7 @@ namespace LEGO.AsyncAPI.Services
             this.visitor.Visit(binding);
         }
 
-        internal void Walk(AsyncApiBindings<IOperationBinding> operationBindings, bool isComponent = false)
+        internal void Walk(AsyncApiBindings<IOperationBinding> operationBindings)
         {
             if (operationBindings is AsyncApiBindingsReference<IOperationBinding> reference)
             {
@@ -811,7 +831,7 @@ namespace LEGO.AsyncAPI.Services
             this.visitor.Visit(binding);
         }
 
-        internal void Walk(AsyncApiBindings<IMessageBinding> messageBindings, bool isComponent = false)
+        internal void Walk(AsyncApiBindings<IMessageBinding> messageBindings)
         {
             if (messageBindings is AsyncApiBindingsReference<IMessageBinding> reference)
             {
@@ -899,7 +919,7 @@ namespace LEGO.AsyncAPI.Services
             }
         }
 
-        internal void Walk(AsyncApiCorrelationId correlationId, bool isComponent = false)
+        internal void Walk(AsyncApiCorrelationId correlationId)
         {
             if (correlationId is AsyncApiCorrelationIdReference)
             {
@@ -969,7 +989,7 @@ namespace LEGO.AsyncAPI.Services
             this.Walk(info as IAsyncApiExtensible);
         }
 
-        internal void Walk(AsyncApiServer server, bool isComponent = false)
+        internal void Walk(AsyncApiServer server)
         {
             if (server is AsyncApiServerReference)
             {
@@ -1001,23 +1021,6 @@ namespace LEGO.AsyncAPI.Services
                     this.Walk(i.ToString(), () => this.Walk(securitySchemes[i]));
                 }
             }
-        }
-
-        internal void Walk(AsyncApiSecurityScheme securityScheme)
-        {
-            if (securityScheme is null)
-            {
-                return;
-            }
-
-            if (securityScheme is AsyncApiSecuritySchemeReference reference)
-            {
-                this.Walk(reference as IAsyncApiReferenceable);
-                return;
-            }
-
-            this.visitor.Visit(securityScheme);
-            this.Walk(securityScheme as IAsyncApiExtensible);
         }
 
         internal void Walk(IList<AsyncApiMessage> messages)
@@ -1157,17 +1160,6 @@ namespace LEGO.AsyncAPI.Services
             }
 
             this.visitor.Visit(extension);
-        }
-
-        private bool ProcessAsReference(IAsyncApiReferenceable referenceable, bool isComponent = false)
-        {
-            var isReference = referenceable.Reference != null && !isComponent;
-            if (isReference)
-            {
-                this.Walk(referenceable);
-            }
-
-            return isReference;
         }
 
         internal void Walk(IAsyncApiReferenceable referenceable)

@@ -48,7 +48,7 @@ namespace LEGO.AsyncAPI.Models
 
         /// <summary>
         /// The operations this application MUST implement.
-        /// </summary>
+        /// </summary> 
         public IDictionary<string, AsyncApiOperation> Operations { get; set; } = new Dictionary<string, AsyncApiOperation>();
 
         /// <summary>

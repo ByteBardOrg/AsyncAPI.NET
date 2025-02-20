@@ -22,55 +22,67 @@ namespace LEGO.AsyncAPI
                 return;
             }
 
-            string baseUri = "#/components/";
+            string componentsBaseUri = "#/components/";
+            string channelBaseUri = "#/channels/";
             string location;
 
+            foreach (var channel in document.Channels)
+            {
+                location = channelBaseUri + channel.Key;
+                this.RegisterComponent(location, channel);
+
+                foreach (var message in channel.Value.Messages)
+                {
+                    location = location + "/messages/" + message.Key;
+                    this.RegisterComponent(location, message);
+                }
+            }
             // Register Schema
             foreach (var item in document.Components.Schemas)
             {
-                location = baseUri + ReferenceType.Schema.GetDisplayName() + "/" + item.Key;
+                location = componentsBaseUri + ReferenceType.Schema.GetDisplayName() + "/" + item.Key;
                 this.RegisterComponent(location, item.Value);
             }
 
             // Register Parameters
             foreach (var item in document.Components.Parameters)
             {
-                location = baseUri + ReferenceType.Parameter.GetDisplayName() + "/" + item.Key;
+                location = componentsBaseUri + ReferenceType.Parameter.GetDisplayName() + "/" + item.Key;
                 this.RegisterComponent(location, item.Value);
             }
 
             // Register Channels
             foreach (var item in document.Components.Channels)
             {
-                location = baseUri + ReferenceType.Channel.GetDisplayName() + "/" + item.Key;
+                location = componentsBaseUri + ReferenceType.Channel.GetDisplayName() + "/" + item.Key;
                 this.RegisterComponent(location, item.Value);
             }
 
             // Register Servers
             foreach (var item in document.Components.Servers)
             {
-                location = baseUri + ReferenceType.Server.GetDisplayName() + "/" + item.Key;
+                location = componentsBaseUri + ReferenceType.Server.GetDisplayName() + "/" + item.Key;
                 this.RegisterComponent(location, item.Value);
             }
 
             // Register ServerVariables
             foreach (var item in document.Components.ServerVariables)
             {
-                location = baseUri + ReferenceType.ServerVariable.GetDisplayName() + "/" + item.Key;
+                location = componentsBaseUri + ReferenceType.ServerVariable.GetDisplayName() + "/" + item.Key;
                 this.RegisterComponent(location, item.Value);
             }
 
             // Register Messages
             foreach (var item in document.Components.Messages)
             {
-                location = baseUri + ReferenceType.Message.GetDisplayName() + "/" + item.Key;
+                location = componentsBaseUri + ReferenceType.Message.GetDisplayName() + "/" + item.Key;
                 this.RegisterComponent(location, item.Value);
             }
 
             // Register SecuritySchemes
             foreach (var item in document.Components.SecuritySchemes)
             {
-                location = baseUri + ReferenceType.SecurityScheme.GetDisplayName() + "/" + item.Key;
+                location = componentsBaseUri + ReferenceType.SecurityScheme.GetDisplayName() + "/" + item.Key;
                 this.RegisterComponent(location, item.Value);
                 this.RegisterComponent(item.Key, item.Value);
             }
@@ -78,56 +90,56 @@ namespace LEGO.AsyncAPI
             // Register Parameters
             foreach (var item in document.Components.Parameters)
             {
-                location = baseUri + ReferenceType.Parameter.GetDisplayName() + "/" + item.Key;
+                location = componentsBaseUri + ReferenceType.Parameter.GetDisplayName() + "/" + item.Key;
                 this.RegisterComponent(location, item.Value);
             }
 
             // Register CorrelationIds
             foreach (var item in document.Components.CorrelationIds)
             {
-                location = baseUri + ReferenceType.CorrelationId.GetDisplayName() + "/" + item.Key;
+                location = componentsBaseUri + ReferenceType.CorrelationId.GetDisplayName() + "/" + item.Key;
                 this.RegisterComponent(location, item.Value);
             }
 
             // Register OperationTraits
             foreach (var item in document.Components.OperationTraits)
             {
-                location = baseUri + ReferenceType.OperationTrait.GetDisplayName() + "/" + item.Key;
+                location = componentsBaseUri + ReferenceType.OperationTrait.GetDisplayName() + "/" + item.Key;
                 this.RegisterComponent(location, item.Value);
             }
 
             // Register MessageTraits
             foreach (var item in document.Components.MessageTraits)
             {
-                location = baseUri + ReferenceType.MessageTrait.GetDisplayName() + "/" + item.Key;
+                location = componentsBaseUri + ReferenceType.MessageTrait.GetDisplayName() + "/" + item.Key;
                 this.RegisterComponent(location, item.Value);
             }
 
             // Register ServerBindings
             foreach (var item in document.Components.ServerBindings)
             {
-                location = baseUri + ReferenceType.ServerBindings.GetDisplayName() + "/" + item.Key;
+                location = componentsBaseUri + ReferenceType.ServerBindings.GetDisplayName() + "/" + item.Key;
                 this.RegisterComponent(location, item.Value);
             }
 
             // Register ChannelBindings
             foreach (var item in document.Components.ChannelBindings)
             {
-                location = baseUri + ReferenceType.ChannelBindings.GetDisplayName() + "/" + item.Key;
+                location = componentsBaseUri + ReferenceType.ChannelBindings.GetDisplayName() + "/" + item.Key;
                 this.RegisterComponent(location, item.Value);
             }
 
             // Register OperationBindings
             foreach (var item in document.Components.OperationBindings)
             {
-                location = baseUri + ReferenceType.OperationBindings.GetDisplayName() + "/" + item.Key;
+                location = componentsBaseUri + ReferenceType.OperationBindings.GetDisplayName() + "/" + item.Key;
                 this.RegisterComponent(location, item.Value);
             }
 
             // Register MessageBindings
             foreach (var item in document.Components.MessageBindings)
             {
-                location = baseUri + ReferenceType.MessageBindings.GetDisplayName() + "/" + item.Key;
+                location = componentsBaseUri + ReferenceType.MessageBindings.GetDisplayName() + "/" + item.Key;
                 this.RegisterComponent(location, item.Value);
             }
         }

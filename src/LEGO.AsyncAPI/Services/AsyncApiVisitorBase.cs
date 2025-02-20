@@ -71,6 +71,10 @@ namespace LEGO.AsyncAPI.Services
         {
         }
 
+        public virtual void Visit(IDictionary<string, AsyncApiOperation> anys)
+        {
+        }
+
         public virtual void Visit(IList<AsyncApiMessageTrait> traits)
         {
         }
