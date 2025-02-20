@@ -2,7 +2,6 @@
 
 namespace LEGO.AsyncAPI.Tests.Models
 {
-    using System.Collections.Generic;
     using System.Linq;
     using FluentAssertions;
     using LEGO.AsyncAPI.Bindings;

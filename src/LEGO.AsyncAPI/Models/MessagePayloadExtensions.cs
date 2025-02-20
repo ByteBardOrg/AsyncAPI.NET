@@ -3,8 +3,6 @@
 namespace LEGO.AsyncAPI.Models
 {
     using LEGO.AsyncAPI.Models.Interfaces;
-    using LEGO.AsyncAPI.Writers;
-    using System;
 
     public static class MultiFormatSchemaExtensions
     {

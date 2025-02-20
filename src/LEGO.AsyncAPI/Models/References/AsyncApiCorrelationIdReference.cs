@@ -3,12 +3,15 @@
 namespace LEGO.AsyncAPI.Models
 {
     using System.Collections.Generic;
-    using LEGO.AsyncAPI.Models.Interfaces;
-    using LEGO.AsyncAPI.Writers;
-
     /// <summary>
     /// The definition of a correlation ID this application MAY use.
     /// </summary>
+
+    using System.Diagnostics;
+    using LEGO.AsyncAPI.Models.Interfaces;
+    using LEGO.AsyncAPI.Writers;
+
+    [DebuggerDisplay("{Reference}")]
     public class AsyncApiCorrelationIdReference : AsyncApiCorrelationId, IAsyncApiReferenceable
     {
         private AsyncApiCorrelationId target;

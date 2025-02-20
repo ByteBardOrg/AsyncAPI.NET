@@ -5,9 +5,12 @@ namespace LEGO.AsyncAPI.Readers
     using LEGO.AsyncAPI.Extensions;
     using LEGO.AsyncAPI.Models;
     using LEGO.AsyncAPI.Readers.ParseNodes;
+    using System.Collections.Generic;
+    using System.Threading;
 
     internal static partial class AsyncApiV2Deserializer
     {
+        private static volatile int operationCounter = 0;
         private static readonly FixedFieldMap<AsyncApiChannel> ChannelFixedFields = new()
         {
             { "description", (a, n) => { a.Description = n.GetScalarValue(); } },
@@ -68,15 +71,14 @@ namespace LEGO.AsyncAPI.Readers
             }
 
             var operation = LoadOperation(node);
-
-            foreach (var message in operation.Messages)
-            {
-                var messageKey = message.Reference.Reference.Split('/')[^1];
-                instance.Messages.Add(messageKey, message);
-            }
-
+            var operationKey = node.CheckMapNode("operation")?["operationId"]?.Value.GetScalarValue() ?? "anonymous-operation-" + Interlocked.Increment(ref operationCounter).ToString();
             operation.Action = action;
             operation.Channel = new AsyncApiChannelReference("#/channels/" + NormalizeChannelKey(instance.Address));
+
+            var globalOperations = node.Context.GetFromTempStorage<Dictionary<string, AsyncApiOperation>>(TempStorageKeys.Operations);
+            globalOperations ??= new Dictionary<string, AsyncApiOperation>();
+            globalOperations.Add(operationKey, operation);
+            node.Context.SetTempStorage(TempStorageKeys.Operations, globalOperations);
         }
     }
 }

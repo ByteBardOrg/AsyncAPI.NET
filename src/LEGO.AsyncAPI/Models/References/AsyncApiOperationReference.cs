@@ -1,16 +1,17 @@
 // Copyright (c) The LEGO Group. All rights reserved.
 
-using System;
-
 namespace LEGO.AsyncAPI.Models
 {
     using System.Collections.Generic;
-    using LEGO.AsyncAPI.Models.Interfaces;
-    using LEGO.AsyncAPI.Writers;
-
     /// <summary>
     /// The definition of an operation trait this application MAY use.
     /// </summary>
+
+    using System.Diagnostics;
+    using LEGO.AsyncAPI.Models.Interfaces;
+    using LEGO.AsyncAPI.Writers;
+
+    [DebuggerDisplay("{Reference}")]
     public class AsyncApiOperationReference : AsyncApiOperation, IAsyncApiReferenceable
     {
         private AsyncApiOperation target;

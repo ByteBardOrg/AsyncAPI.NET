@@ -3,14 +3,15 @@
 namespace LEGO.AsyncAPI.Models
 {
     using System;
-    using System.Collections;
     using System.Collections.Generic;
+    using System.Diagnostics;
     using LEGO.AsyncAPI.Models.Interfaces;
     using LEGO.AsyncAPI.Writers;
 
     /// <summary>
     /// The definition of a message this application MAY use.
     /// </summary>
+    [DebuggerDisplay("{Reference}")]
     public class AsyncApiMessageReference : AsyncApiMessage, IAsyncApiReferenceable, IEquatable<AsyncApiMessageReference>, IEquatable<AsyncApiMessage>
     {
         private AsyncApiMessage target;

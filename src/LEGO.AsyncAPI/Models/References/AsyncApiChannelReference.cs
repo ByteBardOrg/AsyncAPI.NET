@@ -4,9 +4,11 @@ namespace LEGO.AsyncAPI.Models
 {
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics;
     using LEGO.AsyncAPI.Models.Interfaces;
     using LEGO.AsyncAPI.Writers;
 
+    [DebuggerDisplay("{Reference}")]
     public class AsyncApiChannelReference : AsyncApiChannel, IAsyncApiReferenceable, IEquatable<AsyncApiChannel>, IEquatable<AsyncApiChannelReference>
     {
         private AsyncApiChannel target;
@@ -26,12 +28,17 @@ namespace LEGO.AsyncAPI.Models
         }
 
         public override string Address { get => this.Target?.Address; set => this.Target.Address = value; }
+
         public override IDictionary<string, AsyncApiMessage> Messages { get => this.Target?.Messages; set => this.Target.Messages = value; }
+
         public override string Title { get => this.Target?.Title; set => this.Target.Title = value; }
+
         public override string Summary { get => this.Target?.Summary; set => this.Target.Summary = value; }
+
         public override string Description { get => this.Target?.Description; set => this.Target.Description = value; }
 
         public override IList<AsyncApiServerReference> Servers { get => this.Target?.Servers; set => this.Target.Servers = value; }
+
         public override IDictionary<string, AsyncApiParameter> Parameters { get => this.Target?.Parameters; set => this.Target.Parameters = value; }
 
         public override IList<AsyncApiTag> Tags { get => this.Target?.Tags; set => this.Target.Tags = value; }
@@ -83,6 +90,10 @@ namespace LEGO.AsyncAPI.Models
 
         public bool Equals(AsyncApiChannelReference other)
         {
+            if (other == null)
+            {
+                return false;
+            }
             return this.Target == other.Target;
         }
 
