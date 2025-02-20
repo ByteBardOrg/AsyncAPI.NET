@@ -6,6 +6,7 @@ namespace LEGO.AsyncAPI.Readers
     using LEGO.AsyncAPI.Models;
     using LEGO.AsyncAPI.Readers.ParseNodes;
     using System.Collections.Generic;
+    using System.Linq;
 
     internal static partial class AsyncApiV2Deserializer
     {
@@ -54,7 +55,37 @@ namespace LEGO.AsyncAPI.Readers
             ParseMap(asyncApiNode, document, asyncApiFixedFields, asyncApiPatternFields);
 
             SetSecuritySchemeScopes(asyncApiNode.Context, document);
+            SetMessages(asyncApiNode.Context, document);
+            SetOperations(asyncApiNode.Context, document);
             return document;
+        }
+
+        private static void SetMessages(ParsingContext context, AsyncApiDocument document)
+        {
+            var messages = context.GetFromTempStorage<Dictionary<string, AsyncApiMessage>>(TempStorageKeys.ComponentMessages);
+            foreach (var message in messages)
+            {
+                document.Components.Messages.Add(message.Key, message.Value);
+            }
+        }
+
+        private static void SetOperations(ParsingContext context, AsyncApiDocument document)
+        {
+            var operations = context.GetFromTempStorage<Dictionary<string, AsyncApiOperation>>(TempStorageKeys.Operations);
+            foreach (var operation in operations)
+            {
+                document.Operations.Add(operation);
+                if (operation.Value.Channel != null)
+                {
+                    var messages = context.GetFromTempStorage<Dictionary<string, AsyncApiMessageReference>>(TempStorageKeys.OperationMessageReferences, operation.Value);
+                    var channel = document.Channels.First(channel => channel.Key == operation.Value.Channel.Reference.Reference.Split("/")[^1]);
+                    foreach (var message in messages)
+                    {
+                        channel.Value.Messages.Add(message.Key, message.Value);
+                        operation.Value.Messages.Add(new AsyncApiMessageReference($"#/channels/{channel.Key}/messages/{message.Key}"));
+                    }
+                }
+            }
         }
     }
 }

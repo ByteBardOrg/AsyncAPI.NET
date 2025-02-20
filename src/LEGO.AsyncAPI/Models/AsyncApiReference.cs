@@ -3,6 +3,7 @@
 namespace LEGO.AsyncAPI.Models
 {
     using System;
+    using System.Diagnostics;
     using LEGO.AsyncAPI.Exceptions;
     using LEGO.AsyncAPI.Models.Interfaces;
     using LEGO.AsyncAPI.Writers;
@@ -10,6 +11,7 @@ namespace LEGO.AsyncAPI.Models
     /// <summary>
     /// A simple object to allow referencing other components in the specification, internally and externally.
     /// </summary>
+    [DebuggerDisplay("{Reference}")]
     public class AsyncApiReference : IAsyncApiSerializable, IEquatable<AsyncApiReference>
     {
         private string originalString;

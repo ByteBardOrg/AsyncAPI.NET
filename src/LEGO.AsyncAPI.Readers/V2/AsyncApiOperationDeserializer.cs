@@ -1,16 +1,16 @@
 // Copyright (c) The LEGO Group. All rights reserved.
 
-using System.Linq;
-
 namespace LEGO.AsyncAPI.Readers
 {
     using System.Collections.Generic;
+    using System.Threading;
     using LEGO.AsyncAPI.Extensions;
     using LEGO.AsyncAPI.Models;
     using LEGO.AsyncAPI.Readers.ParseNodes;
 
     internal static partial class AsyncApiV2Deserializer
     {
+        private static volatile int messageCounter = 0;
         private static readonly FixedFieldMap<AsyncApiOperation> operationFixedFields =
             new()
             {
@@ -39,39 +39,66 @@ namespace LEGO.AsyncAPI.Readers
                     "traits", (a, n) => { a.Traits = n.CreateList(LoadOperationTrait); }
                 },
                 {
-                    "message", (a, n) => { a.Messages = LoadMessages(n); }
+                    "message", (a, n) => { LoadMessages(n, a); }
                 },
             };
 
-        private static IList<AsyncApiMessageReference> LoadMessages(ParseNode n)
+        private static KeyValuePair<string, AsyncApiMessage> GetMessage(ParseNode node)
         {
-            var mapNode = n.CheckMapNode("message");
-            List<AsyncApiMessage> messages;
-            if (mapNode["oneOf"] != null)
+            var messageNode = node.CheckMapNode("message");
+            string key = string.Empty;
+            var message = LoadMessage(node);
+            if (message is AsyncApiMessageReference reference)
             {
-                messages = mapNode["oneOf"].Value.CreateList(LoadMessage);
+                key = reference.Reference.Reference.Split("/")[^1];
+            }
+            else if (messageNode["messageId"] != null)
+            {
+                key = messageNode["messageId"]?.Value.GetScalarValue();
+            }
+            else
+            {
+                key = "anonymous-message-" + Interlocked.Increment(ref messageCounter).ToString();
             }
 
-            messages = new List<AsyncApiMessage> { LoadMessage(n) };
-            var messageReferences = new List<AsyncApiMessageReference>();
-            var counter = 0;
+            return new KeyValuePair<string, AsyncApiMessage>(key, message);
+        }
 
+        private static void LoadMessages(ParseNode n, AsyncApiOperation instance)
+        {
+            var mapNode = n.CheckMapNode("message");
+            var messages = new Dictionary<string, AsyncApiMessage>();
+            if (mapNode["oneOf"] != null)
+            {
+                foreach (var node in (ListNode)mapNode["oneOf"].Value)
+                {
+                    var kvp = GetMessage(node);
+                    messages.Add(kvp.Key, kvp.Value);
+                }
+            }
+            else
+            {
+                var kvp = GetMessage(n);
+                messages.Add(kvp.Key, kvp.Value);
+            }
+
+            var componentMessageReferences = new Dictionary<string, AsyncApiMessageReference>();
+            var componentMessages = new Dictionary<string, AsyncApiMessage>();
             foreach (var message in messages)
             {
-                if (message is not AsyncApiMessageReference messageReference)
+                if (message.Value is not AsyncApiMessageReference messageReference)
                 {
-                    var reference = "#/components/messages/upgradedOperationMessage_" + (mapNode["operationId"]?.Value.GetScalarValue() + message.Name) ?? counter.ToString();
-
-                    n.Context.Workspace.RegisterComponent(reference, message);
-                    messageReferences.Add(new AsyncApiMessageReference(reference));
-                    counter++;
+                    var componentReference = "#/components/messages/" + message.Key;
+                    componentMessages.Add(message.Key, message.Value);
+                    componentMessageReferences.Add(message.Key, new AsyncApiMessageReference(componentReference));
                     continue;
                 }
 
-                messageReferences.Add(messageReference);
+                componentMessageReferences.Add(message.Key, messageReference);
             }
 
-            return messageReferences;
+            n.Context.SetTempStorage(TempStorageKeys.ComponentMessages, componentMessages);
+            n.Context.SetTempStorage(TempStorageKeys.OperationMessageReferences, componentMessageReferences, instance);
         }
 
         private static readonly PatternFieldMap<AsyncApiOperation> operationPatternFields =
@@ -87,8 +114,8 @@ namespace LEGO.AsyncAPI.Readers
             {
                 return null;
             }
-            var operation = new AsyncApiOperation();
 
+            var operation = new AsyncApiOperation();
             ParseMap(mapNode, operation, operationFixedFields, operationPatternFields);
 
             return operation;

@@ -4,9 +4,11 @@ namespace LEGO.AsyncAPI.Models
 {
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics;
     using LEGO.AsyncAPI.Models.Interfaces;
     using LEGO.AsyncAPI.Writers;
 
+    [DebuggerDisplay("{Reference}")]
     public class AsyncApiExternalDocumentationReference : AsyncApiExternalDocumentation, IAsyncApiReferenceable
     {
         private AsyncApiExternalDocumentation target;

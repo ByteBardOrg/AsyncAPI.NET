@@ -4,7 +4,6 @@ namespace LEGO.AsyncAPI.Readers
 {
     using LEGO.AsyncAPI.Models;
     using LEGO.AsyncAPI.Readers.ParseNodes;
-    using System.Collections.Generic;
 
     /// <summary>
     /// Class containing logic to deserialize AsyncApi document into

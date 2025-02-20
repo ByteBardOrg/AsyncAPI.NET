@@ -46,7 +46,7 @@ namespace LEGO.AsyncAPI.Tests
                     protocol: kafka-secure
                     description: Test broker secured with scramSha256
                     security:
-                      - saslScram: []
+                      - saslScram:
                     tags:
                       - name: env:test-scram
                         description: This environment is meant for running internal tests through scramSha256
@@ -59,7 +59,7 @@ namespace LEGO.AsyncAPI.Tests
                     protocol: kafka-secure
                     description: Test broker secured with X509
                     security:
-                      - certs: []
+                      - certs:
                     tags:
                       - name: env:test-mtls
                         description: This environment is meant for running internal tests through mtls
@@ -218,17 +218,12 @@ namespace LEGO.AsyncAPI.Tests
                 })
                 .WithServer("scram-connections", new AsyncApiServer
                 {
-                    Url = "test.mykafkacluster.org:18092",
+                    Host = "test.mykafkacluster.org:18092",
                     Protocol = "kafka-secure",
                     Description = "Test broker secured with scramSha256",
-                    Security = new List<AsyncApiSecurityRequirement>
+                    Security = new List<AsyncApiSecurityScheme>
                     {
-                    new AsyncApiSecurityRequirement
-                    {
-                        {
-                            new AsyncApiSecuritySchemeReference("saslScram"), new List<string>()
-                        },
-                    },
+                        new AsyncApiSecuritySchemeReference("#/components/securitySchemes/saslScram"),
                     },
                     Tags = new List<AsyncApiTag>
                     {
@@ -251,17 +246,12 @@ namespace LEGO.AsyncAPI.Tests
                 })
                 .WithServer("mtls-connections", new AsyncApiServer
                 {
-                    Url = "test.mykafkacluster.org:28092",
+                    Host = "test.mykafkacluster.org:28092",
                     Protocol = "kafka-secure",
                     Description = "Test broker secured with X509",
-                    Security = new List<AsyncApiSecurityRequirement>
+                    Security = new List<AsyncApiSecurityScheme>
                     {
-                    new AsyncApiSecurityRequirement
-                    {
-                        {
-                            new AsyncApiSecuritySchemeReference("certs"), new List<string>()
-                        },
-                    },
+                        new AsyncApiSecuritySchemeReference("#/components/securitySchemes/certs"),
                     },
                     Tags = new List<AsyncApiTag>
                     {
@@ -294,19 +284,6 @@ namespace LEGO.AsyncAPI.Tests
                         "streetlightId", new AsyncApiParameterReference("#/components/parameters/streetlightId")
                     },
                     },
-                    Publish = new AsyncApiOperation()
-                    {
-                        Summary = "Inform about environmental lighting conditions of a particular streetlight.",
-                        OperationId = "receiveLightMeasurement",
-                        Traits = new List<AsyncApiOperationTrait>
-                        {
-                        new AsyncApiOperationTraitReference("#/components/operationTraits/kafka"),
-                        },
-                        Message = new List<AsyncApiMessage>
-                        {
-                        new AsyncApiMessageReference("#/components/messages/lightMeasured"),
-                        },
-                    },
                 })
                 .WithChannel(
                 "smartylighting.streetlights.1.0.action.{streetlightId}.turn.on",
@@ -317,18 +294,6 @@ namespace LEGO.AsyncAPI.Tests
                     {
                         "streetlightId", new AsyncApiParameterReference("#/components/parameters/streetlightId")
                     },
-                    },
-                    Subscribe = new AsyncApiOperation()
-                    {
-                        OperationId = "turnOn",
-                        Traits = new List<AsyncApiOperationTrait>
-                        {
-                            new AsyncApiOperationTraitReference("#/components/operationTraits/kafka"),
-                        },
-                        Message = new List<AsyncApiMessage>
-                        {
-                            new AsyncApiMessageReference("#/components/messages/turnOnOff"),
-                        },
                     },
                 })
                 .WithChannel(
@@ -341,18 +306,6 @@ namespace LEGO.AsyncAPI.Tests
                         "streetlightId", new AsyncApiParameterReference("#/components/parameters/streetlightId")
                     },
                     },
-                    Subscribe = new AsyncApiOperation()
-                    {
-                        OperationId = "turnOff",
-                        Traits = new List<AsyncApiOperationTrait>
-                        {
-                        new AsyncApiOperationTraitReference("#/components/operationTraits/kafka"),
-                        },
-                        Message = new List<AsyncApiMessage>
-                        {
-                        new AsyncApiMessageReference("#/components/messages/turnOnOff"),
-                        },
-                    },
                 })
                 .WithChannel(
                 "smartylighting.streetlights.1.0.action.{streetlightId}.dim",
@@ -364,17 +317,58 @@ namespace LEGO.AsyncAPI.Tests
                         "streetlightId", new AsyncApiParameterReference("#/components/parameters/streetlightId")
                     },
                     },
-                    Subscribe = new AsyncApiOperation()
+                })
+                .WithOperation("receiveLightMeasurement", new AsyncApiOperation()
+                {
+                    Action = AsyncApiAction.Send,
+                    Summary = "Inform about environmental lighting conditions of a particular streetlight.",
+                    Channel = new AsyncApiChannelReference("#/channels/smartylighting.streetlights.1.0.event.{streetlightId}.lighting.measured"),
+                    Traits = new List<AsyncApiOperationTrait>
                     {
-                        OperationId = "dimLight",
-                        Traits = new List<AsyncApiOperationTrait>
-                        {
                         new AsyncApiOperationTraitReference("#/components/operationTraits/kafka"),
-                        },
-                        Message = new List<AsyncApiMessage>
-                        {
-                            new AsyncApiMessageReference("#/components/messages/dimLight"),
-                        },
+                    },
+                    Messages = new List<AsyncApiMessageReference>
+                    {
+                        new("#/components/messages/lightMeasured"),
+                    },
+                })
+                .WithOperation("turnOn", new AsyncApiOperation()
+                {
+                    Action = AsyncApiAction.Receive,
+                    Channel = new AsyncApiChannelReference("#/channels/smartylighting.streetlights.1.0.action.{streetlightId}.turn.on"),
+                    Traits = new List<AsyncApiOperationTrait>
+                    {
+                        new AsyncApiOperationTraitReference("#/components/operationTraits/kafka"),
+                    },
+                    Messages = new List<AsyncApiMessageReference>
+                    {
+                        new("#/components/messages/turnOnOff"),
+                    },
+                })
+                .WithOperation("turnOff", new AsyncApiOperation()
+                {
+                    Action = AsyncApiAction.Receive,
+                    Channel = new AsyncApiChannelReference("#/channels/smartylighting.streetlights.1.0.action.{streetlightId}.turn.off"),
+                    Traits = new List<AsyncApiOperationTrait>
+                    {
+                        new AsyncApiOperationTraitReference("#/components/operationTraits/kafka"),
+                    },
+                    Messages = new List<AsyncApiMessageReference>
+                    {
+                        new("#/components/messages/turnOnOff"),
+                    },
+                })
+                .WithOperation("dimLight", new AsyncApiOperation()
+                {
+                    Action = AsyncApiAction.Receive,
+                    Channel = new AsyncApiChannelReference("#/channels/smartylighting.streetlights.1.0.action.{streetlightId}.dim"),
+                    Traits = new List<AsyncApiOperationTrait>
+                    {
+                        new AsyncApiOperationTraitReference("#/components/operationTraits/kafka"),
+                    },
+                    Messages = new List<AsyncApiMessageReference>
+                    {
+                        new("#/components/messages/dimLight"),
                     },
                 })
                 .WithComponent("lightMeasured", new AsyncApiMessage()
@@ -476,23 +470,11 @@ namespace LEGO.AsyncAPI.Tests
                     Format = "date-time",
                     Description = "Date and time when the message was sent.",
                 })
-                .WithComponent("saslScram", new AsyncApiSecurityScheme
-                {
-                    Type = SecuritySchemeType.ScramSha256,
-                    Description = "Provide your username and password for SASL/SCRAM authentication",
-                })
-                .WithComponent("certs", new AsyncApiSecurityScheme
-                {
-                    Type = SecuritySchemeType.X509,
-                    Description = "Download the certificate files from service provider",
-                })
+                .WithComponent("saslScram", AsyncApiSecurityScheme.ScramSha256("Provide your username and password for SASL/SCRAM authentication"))
+                .WithComponent("certs", AsyncApiSecurityScheme.X509("Download the certificate files from service provider"))
                 .WithComponent("streetlightId", new AsyncApiParameter()
                 {
                     Description = "The ID of the streetlight.",
-                    Schema = new AsyncApiJsonSchema()
-                    {
-                        Type = SchemaType.String,
-                    },
                 })
                 .WithComponent("commonHeaders", new AsyncApiMessageTrait()
                 {
@@ -538,744 +520,6 @@ namespace LEGO.AsyncAPI.Tests
 
             actual.Should()
                   .BePlatformAgnosticEquivalentTo(expected);
-        }
-
-        [Test]
-        public void V2_SerializeV2_WithFullSpec_Serializes()
-        {
-            var expected =
-                """
-                asyncapi: 2.6.0
-                info:
-                  title: apiTitle
-                  version: apiVersion
-                  description: description
-                  termsOfService: https://example.com/termsOfService
-                  contact:
-                    name: contactName
-                    url: https://example.com/contact
-                    email: contactEmail
-                  license:
-                    name: licenseName
-                    url: https://example.com/license
-                    x-extension: value
-                  x-extension: value
-                id: documentId
-                servers:
-                  myServer:
-                    url: https://example.com/server
-                    protocol: KafkaProtocol
-                    protocolVersion: protocolVersion
-                    description: serverDescription
-                    security:
-                      - securitySchemeName:
-                          - requirementItem
-                channels:
-                  channel1:
-                    description: channelDescription
-                    subscribe:
-                      operationId: myOperation
-                      summary: operationSummary
-                      description: operationDescription
-                      tags:
-                        - name: tagName
-                          description: tagDescription
-                      externalDocs:
-                        description: externalDocsDescription
-                        url: https://example.com/externalDocs
-                      traits:
-                        - operationId: myOperation
-                          summary: traitSummary
-                          description: traitDescription
-                          tags:
-                            - name: tagName
-                              description: tagDescription
-                          externalDocs:
-                            description: externalDocsDescription
-                            url: https://example.com/externalDocs
-                          x-extension: value
-                      message:
-                        oneOf:
-                          - contentType: contentType
-                            name: messageName
-                            title: messageTitle
-                            summary: messageSummary
-                            description: messageDescription
-                          - correlationId:
-                              description: correlationDescription
-                              location: correlationLocation
-                              x-extension: value
-                            schemaFormat: schemaFormat
-                            contentType: contentType
-                            name: messageName
-                            title: messageTitle
-                            summary: messageSummary
-                            description: messageDescription
-                            traits:
-                              - headers:
-                                  title: schemaTitle
-                                  description: schemaDescription
-                                  writeOnly: true
-                                  examples:
-                                    - key: value
-                                      otherKey: 9223372036854775807
-                                name: traitName
-                                title: traitTitle
-                                summary: traitSummary
-                                description: traitDescription
-                                tags:
-                                  - name: tagName
-                                    description: tagDescription
-                                externalDocs:
-                                  description: externalDocsDescription
-                                  url: https://example.com/externalDocs
-                                examples:
-                                  - name: exampleName
-                                    summary: exampleSummary
-                                    payload:
-                                      key: value
-                                      otherKey: 9223372036854775807
-                                    x-extension: value
-                                x-extension: value
-                            x-extension: value
-                      x-extension: value
-                components:
-                  securitySchemes:
-                    securitySchemeName:
-                      type: oauth2
-                      description: securitySchemeDescription
-                      flows:
-                        implicit:
-                          authorizationUrl: https://example.com/authorization
-                          tokenUrl: https://example.com/tokenUrl
-                          refreshUrl: https://example.com/refresh
-                          scopes:
-                            securitySchemeScopeKey: securitySchemeScopeValue
-                          x-extension: value
-                """;
-
-            // Arrange
-            var title = "apiTitle";
-            string contactName = "contactName";
-            string contactEmail = "contactEmail";
-            string contactUri = "https://example.com/contact";
-            string description = "description";
-            string licenseName = "licenseName";
-            string licenseUri = "https://example.com/license";
-            string extensionKey = "x-extension";
-            string extensionString = "value";
-            string apiVersion = "apiVersion";
-            string termsOfServiceUri = "https://example.com/termsOfService";
-            string channelKey = "channel1";
-            string channelDescription = "channelDescription";
-            string operationDescription = "operationDescription";
-            string operationId = "myOperation";
-            string operationSummary = "operationSummary";
-            string externalDocsUri = "https://example.com/externalDocs";
-            string externalDocsDescription = "externalDocsDescription";
-            string messageDescription = "messageDescription";
-            string messageTitle = "messageTitle";
-            string messageSummary = "messageSummary";
-            string messageName = "messageName";
-            string contentType = "contentType";
-            string schemaFormat = "schemaFormat";
-            string correlationLocation = "correlationLocation";
-            string correlationDescription = "correlationDescription";
-            string traitName = "traitName";
-            string traitTitle = "traitTitle";
-            string schemaTitle = "schemaTitle";
-            string schemaDescription = "schemaDescription";
-            string anyStringValue = "value";
-            long anyLongValue = long.MaxValue;
-            string exampleSummary = "exampleSummary";
-            string exampleName = "exampleName";
-            string traitDescription = "traitDescription";
-            string traitSummary = "traitSummary";
-            string tagName = "tagName";
-            string tagDescription = "tagDescription";
-            string documentId = "documentId";
-            string serverKey = "myServer";
-            string serverDescription = "serverDescription";
-            string protocolVersion = "protocolVersion";
-            string serverUrl = "https://example.com/server";
-            string protocol = "KafkaProtocol";
-            string securirySchemeDescription = "securitySchemeDescription";
-            string securitySchemeName = "securitySchemeName";
-            string bearerFormat = "bearerFormat";
-            string scheme = "scheme";
-            string scopeKey = "securitySchemeScopeKey";
-            string scopeValue = "securitySchemeScopeValue";
-            string tokenUrl = "https://example.com/tokenUrl";
-            string refreshUrl = "https://example.com/refresh";
-            string authorizationUrl = "https://example.com/authorization";
-            string requirementString = "requirementItem";
-
-            var document = new AsyncApiDocument()
-            {
-                Id = documentId,
-                Components = new AsyncApiComponents
-                {
-                    SecuritySchemes = new Dictionary<string, AsyncApiSecurityScheme>
-                    {
-                        {
-                            securitySchemeName, new AsyncApiSecurityScheme
-                            {
-                                Description = securirySchemeDescription,
-                                Name = securitySchemeName,
-                                BearerFormat = bearerFormat,
-                                Scheme = scheme,
-                                Type = SecuritySchemeType.OAuth2,
-                                Flows = new AsyncApiOAuthFlows
-                                {
-                                    Implicit = new AsyncApiOAuthFlow
-                                    {
-                                        Scopes = new Dictionary<string, string>
-                                        {
-                                            { scopeKey, scopeValue },
-                                        },
-                                        TokenUrl = new Uri(tokenUrl),
-                                        RefreshUrl = new Uri(refreshUrl),
-                                        AuthorizationUrl = new Uri(authorizationUrl),
-                                        Extensions = new Dictionary<string, IAsyncApiExtension>
-                                        {
-                                            { extensionKey, new AsyncApiAny(extensionString) },
-                                        },
-                                    },
-                                },
-                            }
-                        },
-                    },
-                },
-                Servers = new Dictionary<string, AsyncApiServer>
-                {
-                    {
-                        serverKey, new AsyncApiServer
-                        {
-                            Description = serverDescription,
-                            ProtocolVersion = protocolVersion,
-                            Url = serverUrl,
-                            Protocol = protocol,
-                            Security = new List<AsyncApiSecurityRequirement>
-                            {
-                                new AsyncApiSecurityRequirement
-                                {
-                                    {
-                                        new AsyncApiSecuritySchemeReference(securitySchemeName),
-                                        new List<string>
-                                        {
-                                            requirementString,
-                                        }
-                                    },
-                                },
-                            },
-                        }
-                    },
-                },
-                Info = new AsyncApiInfo()
-                {
-                    Title = title,
-                    Contact = new AsyncApiContact()
-                    {
-                        Name = contactName,
-                        Email = contactEmail,
-                        Url = new Uri(contactUri),
-                    },
-                    Description = description,
-                    License = new AsyncApiLicense()
-                    {
-                        Name = licenseName,
-                        Url = new Uri(licenseUri),
-                        Extensions = new Dictionary<string, IAsyncApiExtension>
-                        {
-                            { extensionKey, new AsyncApiAny(extensionString) },
-                        },
-                    },
-                    Version = apiVersion,
-                    TermsOfService = new Uri(termsOfServiceUri),
-                    Extensions = new Dictionary<string, IAsyncApiExtension>
-                    {
-                        { extensionKey, new AsyncApiAny(extensionString) },
-                    },
-                },
-                Channels = new Dictionary<string, AsyncApiChannel>
-                {
-                    {
-                        channelKey, new AsyncApiChannel
-                        {
-                            Description = channelDescription,
-                            Subscribe = new AsyncApiOperation
-                            {
-                                Description = operationDescription,
-                                OperationId = operationId,
-                                Summary = operationSummary,
-                                ExternalDocs = new AsyncApiExternalDocumentation
-                                {
-                                    Url = new Uri(externalDocsUri),
-                                    Description = externalDocsDescription,
-                                },
-                                Message = new List<AsyncApiMessage>
-                                {
-                                    {
-                                    new AsyncApiMessage
-                                        {
-                                            Description = messageDescription,
-                                            Title = messageTitle,
-                                            Summary = messageSummary,
-                                            Name = messageName,
-                                            ContentType = contentType,
-                                        }
-                                    },
-                                    {
-                                        new AsyncApiMessage
-                                        {
-                                            Description = messageDescription,
-                                            Title = messageTitle,
-                                            Summary = messageSummary,
-                                            Name = messageName,
-                                            ContentType = contentType,
-                                            SchemaFormat = schemaFormat,
-                                            CorrelationId = new AsyncApiCorrelationId
-                                            {
-                                                Location = correlationLocation,
-                                                Description = correlationDescription,
-                                                Extensions = new Dictionary<string, IAsyncApiExtension>
-                                                {
-                                                    { extensionKey, new AsyncApiAny(extensionString) },
-                                                },
-                                            },
-                                            Traits = new List<AsyncApiMessageTrait>
-                                            {
-                                                new AsyncApiMessageTrait
-                                                {
-                                                    Name = traitName,
-                                                    Title = traitTitle,
-                                                    Headers = new AsyncApiJsonSchema
-                                                    {
-                                                        Title = schemaTitle,
-                                                        WriteOnly = true,
-                                                        Description = schemaDescription,
-                                                        Examples = new List<AsyncApiAny>
-                                                        {
-                                                            new AsyncApiAny(new ExtensionClass
-                                                            {
-                                                                Key = anyStringValue,
-                                                                OtherKey = anyLongValue,
-                                                            }),
-                                                        },
-                                                    },
-                                                    Examples = new List<AsyncApiMessageExample>
-                                                    {
-                                                        new AsyncApiMessageExample
-                                                        {
-                                                            Summary = exampleSummary,
-                                                            Name = exampleName,
-                                                            Payload = new AsyncApiAny(new ExtensionClass
-                                                            {
-                                                                Key = anyStringValue,
-                                                                OtherKey = anyLongValue,
-                                                            }),
-                                                            Extensions = new Dictionary<string, IAsyncApiExtension>
-                                                            {
-                                                                { extensionKey, new AsyncApiAny(extensionString) },
-                                                            },
-                                                        },
-                                                    },
-                                                    Description = traitDescription,
-                                                    Summary = traitSummary,
-                                                    Tags = new List<AsyncApiTag>
-                                                    {
-                                                        new AsyncApiTag
-                                                        {
-                                                            Name = tagName,
-                                                            Description = tagDescription,
-                                                        },
-                                                    },
-                                                    ExternalDocs = new AsyncApiExternalDocumentation
-                                                    {
-                                                        Url = new Uri(externalDocsUri),
-                                                        Description = externalDocsDescription,
-                                                    },
-                                                    Extensions = new Dictionary<string, IAsyncApiExtension>
-                                                    {
-                                                        { extensionKey, new AsyncApiAny(extensionString) },
-                                                    },
-                                                },
-                                            },
-                                            Extensions = new Dictionary<string, IAsyncApiExtension>
-                                            {
-                                                { extensionKey, new AsyncApiAny(extensionString) },
-                                            },
-                                        }
-                                    },
-                                },
-                                Extensions = new Dictionary<string, IAsyncApiExtension>
-                                {
-                                    { extensionKey, new AsyncApiAny(extensionString) },
-                                },
-                                Tags = new List<AsyncApiTag>
-                                {
-                                    new AsyncApiTag
-                                    {
-                                        Name = tagName,
-                                        Description = tagDescription,
-                                    },
-                                },
-                                Traits = new List<AsyncApiOperationTrait>
-                                {
-                                    new AsyncApiOperationTrait
-                                    {
-                                        Description = traitDescription,
-                                        Summary = traitSummary,
-                                        Tags = new List<AsyncApiTag>
-                                        {
-                                            new AsyncApiTag
-                                            {
-                                                Name = tagName,
-                                                Description = tagDescription,
-                                            },
-                                        },
-                                        ExternalDocs = new AsyncApiExternalDocumentation
-                                        {
-                                            Url = new Uri(externalDocsUri),
-                                            Description = externalDocsDescription,
-                                        },
-                                        OperationId = operationId,
-                                        Extensions = new Dictionary<string, IAsyncApiExtension>
-                                        {
-                                            { extensionKey, new AsyncApiAny(extensionString) },
-                                        },
-                                    },
-                                },
-                            },
-                        }
-                    },
-                },
-            };
-
-            var outputString = new StringWriter();
-            var writer = new AsyncApiYamlWriter(outputString, AsyncApiWriterSettings.Default);
-
-            // Act
-            document.SerializeV2(writer);
-            var actual = outputString.GetStringBuilder().ToString();
-
-            // Assert
-            actual.Should()
-                  .BePlatformAgnosticEquivalentTo(expected);
-        }
-
-        [Test]
-        public void V2_Read_WithAvroSchemaPayload_NoErrors()
-        {
-            // Arrange
-            var yaml =
-                """
-                asyncapi: '2.6.0'
-                info:
-                  title: schema-validation-test
-                  version: '1.0.0'
-                  description: Async API for schema validation tests
-                  contact:
-                    name: Test
-                    url: https://test.test/
-
-                channels:
-                  schema-validation-topic:
-                    description: A topic to publish messages for testing Pulsar schema validation
-                    publish:
-                      message:
-                        $ref: '#/components/messages/schema-validation-message'
-
-                components:
-                  messages:
-                    schema-validation-message:
-                      name: schema-validation-message
-                      title: Message for schema validation testing that is a json object
-                      summary: A test message is used for testing Pulsar schema validation
-                      payload:
-                        type: record
-                        name: UserSignedUp
-                        namespace: esp
-                        doc: ESP Schema validation test
-                        fields:
-                          - name: userId
-                            type: int
-                          - name: userEmail
-                            type: string
-                      schemaFormat: 'application/vnd.apache.avro;version=1.9.0'
-                """;
-
-            // Act
-            var result = new AsyncApiStringReader().Read(yaml, out var diagnostics);
-
-            // Assert
-            diagnostics.Errors.Should().HaveCount(0);
-            result.Channels.First().Value.Publish.Message.First().Payload.As<AsyncApiAvroSchema>().TryGetAs<AvroRecord>(out var record).Should().BeTrue();
-            record.Name.Should().Be("UserSignedUp");
-        }
-
-        [Test]
-        public void V2_Read_WithJsonSchemaReference_NoErrors()
-        {
-            // Arrange
-            var yaml =
-                """
-                asyncapi: '2.6.0'
-                info:
-                  title: schema-validation-test
-                  version: '1.0.0'
-                  description: Async API for schema validation tests
-                  contact:
-                    name: Test
-                    url: https://test.test/
-
-                channels:
-                  schema-validation-topic:
-                    description: A topic to publish messages for testing Pulsar schema validation
-                    publish:
-                      message:
-                        $ref: '#/components/messages/schema-validation-message'
-                    subscribe:
-                      message:
-                        $ref: '#/components/messages/schema-validation-message'
-
-                components:
-                  schemas:
-                    schema-validation-message-payload:
-                      type: object
-                      properties:
-                        content:
-                          type: string
-                          description: Content of the message
-                  messages:
-                    schema-validation-message:
-                      name: schema-validation-message
-                      title: Message for schema validation testing that is a json object
-                      summary: A test message is used for testing Pulsar schema validation
-                      payload:
-                        $ref: '#/components/schemas/schema-validation-message-payload'
-                      contentType: application/json
-                """;
-
-            // Act
-            var result = new AsyncApiStringReader().Read(yaml, out var diagnostics);
-
-            // Assert
-            diagnostics.Errors.Should().HaveCount(0);
-            result.Channels.First().Value.Publish.Message.First().Title.Should().Be("Message for schema validation testing that is a json object");
-            result.Channels.First().Value.Publish.Message.First().Payload.As<AsyncApiJsonSchema>().Properties.Should().HaveCount(1);
-        }
-
-        [Test]
-        public void V2_Serialize_WithBindingReferences_SerializesDeserializes()
-        {
-            var expected =
-                """
-                asyncapi: 2.6.0
-                info:
-                  description: test description
-                servers:
-                  production:
-                    url: example.com
-                    protocol: pulsar+ssl
-                    description: test description
-                    bindings:
-                      $ref: '#/components/serverBindings/bindings'
-                channels:
-                  testChannel:
-                    $ref: '#/components/channels/otherchannel'
-                components:
-                  channels:
-                    otherchannel:
-                      publish:
-                        description: test
-                      bindings:
-                        $ref: '#/components/channelBindings/bindings'
-                  serverBindings:
-                    bindings:
-                      pulsar:
-                        tenant: staging
-                  channelBindings:
-                    bindings:
-                      pulsar:
-                        namespace: users
-                        persistence: persistent
-                """;
-            var doc = new AsyncApiDocument();
-            doc.Info = new AsyncApiInfo()
-            {
-                Description = "test description",
-            };
-            doc.Servers.Add("production", new AsyncApiServer
-            {
-                Description = "test description",
-                Protocol = "pulsar+ssl",
-                Url = "example.com",
-                Bindings = new AsyncApiBindingsReference<IServerBinding>("#/components/serverBindings/bindings")
-            });
-            doc.Components = new AsyncApiComponents()
-            {
-                Channels = new Dictionary<string, AsyncApiChannel>()
-                {
-                    {
-                        "otherchannel", new AsyncApiChannel()
-                        {
-                            Publish = new AsyncApiOperation()
-                            {
-                                Description = "test",
-                            },
-                            Bindings = new AsyncApiBindingsReference<IChannelBinding>("#/components/channelBindings/bindings")
-                        }
-                    },
-                },
-                ServerBindings = new Dictionary<string, AsyncApiBindings<IServerBinding>>()
-                {
-                    {
-                        "bindings", new AsyncApiBindings<IServerBinding>()
-                        {
-                            new PulsarServerBinding()
-                            {
-                                Tenant = "staging",
-                            },
-                        }
-                    },
-                },
-                ChannelBindings = new Dictionary<string, AsyncApiBindings<IChannelBinding>>()
-                {
-                    {
-                        "bindings", new AsyncApiBindings<IChannelBinding>()
-                        {
-                            new PulsarChannelBinding()
-                            {
-                                Namespace = "users",
-                                Persistence = AsyncAPI.Models.Bindings.Pulsar.Persistence.Persistent,
-                            },
-                        }
-                    },
-                },
-            };
-            doc.Channels.Add(
-                "testChannel",
-                new AsyncApiChannelReference("#/components/channels/otherchannel"));
-            var actual = doc.Serialize(AsyncApiVersion.AsyncApi2_0, AsyncApiFormat.Yaml);
-            actual.Should().BePlatformAgnosticEquivalentTo(expected);
-
-            var settings = new AsyncApiReaderSettings();
-            settings.Bindings = BindingsCollection.Pulsar;
-            var reader = new AsyncApiStringReader(settings);
-            var deserialized = reader.Read(actual, out var diagnostic);
-            var serverBindings = deserialized.Servers.First().Value.Bindings;
-            serverBindings.TryGetValue<PulsarServerBinding>(out var binding);
-            binding.Tenant.Should().Be("staging");
-
-            var reserialized = deserialized.SerializeAsYaml(AsyncApiVersion.AsyncApi2_0);
-            reserialized.Should().BePlatformAgnosticEquivalentTo(expected);
-        }
-
-        [Test]
-        public void V2_Serializev2_WithBindings_Serializes()
-        {
-            var expected = """
-                asyncapi: 2.6.0
-                info:
-                  description: test description
-                servers:
-                  production:
-                    url: example.com
-                    protocol: pulsar+ssl
-                    description: test description
-                channels:
-                  testChannel:
-                    publish:
-                      message:
-                        bindings:
-                          http:
-                            headers:
-                              description: this mah binding
-                          kafka:
-                            key:
-                              description: this mah other binding
-                    bindings:
-                      kafka:
-                        partitions: 2
-                        replicas: 1
-                """;
-
-            var doc = new AsyncApiDocument();
-            doc.Info = new AsyncApiInfo()
-            {
-                Description = "test description",
-            };
-            doc.Servers.Add("production", new AsyncApiServer
-            {
-                Description = "test description",
-                Protocol = "pulsar+ssl",
-                Url = "example.com",
-            });
-            doc.Channels.Add(
-                "testChannel",
-                new AsyncApiChannel
-                {
-                    Bindings = new AsyncApiBindings<IChannelBinding>
-                    {
-                        {
-                            new KafkaChannelBinding
-                            {
-                                Partitions = 2,
-                                Replicas = 1,
-                            }
-                        },
-                    },
-                    Publish = new AsyncApiOperation
-                    {
-                        Message = new List<AsyncApiMessage>
-                        {
-                            {
-                                new AsyncApiMessage
-                                {
-                                    Bindings = new AsyncApiBindings<IMessageBinding>
-                                    {
-                                        {
-                                            new HttpMessageBinding
-                                            {
-                                                Headers = new AsyncApiJsonSchema
-                                                {
-                                                    Description = "this mah binding",
-                                                },
-                                            }
-                                        },
-                                        {
-                                            new KafkaMessageBinding
-                                            {
-                                                Key = new AsyncApiJsonSchema
-                                                {
-                                                    Description = "this mah other binding",
-                                                },
-                                            }
-                                        },
-                                    },
-                                }
-                            },
-                        },
-                    },
-                });
-            var actual = doc.Serialize(AsyncApiVersion.AsyncApi2_0, AsyncApiFormat.Yaml);
-
-            var settings = new AsyncApiReaderSettings();
-            settings.Bindings = BindingsCollection.All;
-            var reader = new AsyncApiStringReader(settings);
-            var deserialized = reader.Read(actual, out var diagnostic);
-
-            // Assert
-            actual.Should()
-                  .BePlatformAgnosticEquivalentTo(expected);
-            Assert.AreEqual(2, deserialized.Channels.First().Value.Publish.Message.First().Bindings.Count);
-
-            var binding = deserialized.Channels.First().Value.Publish.Message.First().Bindings.First();
-            Assert.AreEqual("http", binding.Key);
-            var httpBinding = binding.Value as HttpMessageBinding;
-
-            Assert.AreEqual("this mah binding", httpBinding.Headers.Description);
         }
     }
 }
