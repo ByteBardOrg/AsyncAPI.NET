@@ -84,9 +84,7 @@ namespace LEGO.AsyncAPI.Models
 
             writer.WriteStartObject();
 
-            var operationId = writer.Workspace.RootDocument.Operations.FirstOrDefault(pair => pair.Value == this).Key;
-
-            writer.WriteOptionalProperty(AsyncApiConstants.OperationId, operationId);
+            // writer.WriteOptionalProperty(AsyncApiConstants.OperationId, this.OperationId);
             writer.WriteOptionalProperty(AsyncApiConstants.Summary, this.Summary);
             writer.WriteOptionalProperty(AsyncApiConstants.Description, this.Description);
             writer.WriteOptionalCollection(AsyncApiConstants.Security, this.Security, (w, t) => this.SerializeAsSecurityRequirement(t, w));

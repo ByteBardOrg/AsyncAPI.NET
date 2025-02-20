@@ -61,9 +61,7 @@ namespace LEGO.AsyncAPI.Models
 
             writer.WriteStartObject();
 
-            var operation = writer.Workspace.RootDocument.Operations.FirstOrDefault(op => op.Value.Traits.Any(tr => tr == this));
-
-            writer.WriteOptionalProperty(AsyncApiConstants.OperationId, operation.Key);
+            // writer.WriteOptionalProperty(AsyncApiConstants.OperationId, this.OperationId);
             writer.WriteOptionalProperty(AsyncApiConstants.Summary, this.Summary);
             writer.WriteOptionalProperty(AsyncApiConstants.Description, this.Description);
             writer.WriteOptionalCollection(AsyncApiConstants.Security, this.Security, (w, t) => t.SerializeV2(w));
