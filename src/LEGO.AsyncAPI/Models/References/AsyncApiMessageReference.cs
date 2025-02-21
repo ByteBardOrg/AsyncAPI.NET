@@ -98,6 +98,13 @@ namespace LEGO.AsyncAPI.Models
         {
             if (!writer.GetSettings().ShouldInlineReference(this.Reference))
             {
+                // If messages are from a V2 component, and is proxied through channels its a reference pointing to a reference.
+                if (this.Target is AsyncApiMessageReference reference)
+                {
+                    reference.SerializeV2(writer);
+                    return;
+                }
+
                 this.Reference.SerializeV2(writer);
                 return;
             }

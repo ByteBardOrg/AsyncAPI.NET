@@ -10,7 +10,6 @@ namespace LEGO.AsyncAPI.Readers
 
     internal static partial class AsyncApiV2Deserializer
     {
-        private static volatile int operationCounter = 0;
         private static readonly FixedFieldMap<AsyncApiChannel> ChannelFixedFields = new()
         {
             { "description", (a, n) => { a.Description = n.GetScalarValue(); } },
@@ -71,7 +70,7 @@ namespace LEGO.AsyncAPI.Readers
             }
 
             var operation = LoadOperation(node);
-            var operationKey = node.CheckMapNode("operation")?["operationId"]?.Value.GetScalarValue() ?? "anonymous-operation-" + Interlocked.Increment(ref operationCounter).ToString();
+            var operationKey = node.CheckMapNode("operation")?["operationId"]?.Value.GetScalarValue() ?? "anonymous-operation-" + Interlocked.Increment(ref node.Context.OperationCounter).ToString();
             operation.Action = action;
             operation.Channel = new AsyncApiChannelReference("#/channels/" + NormalizeChannelKey(instance.Address));
 

@@ -10,7 +10,6 @@ namespace LEGO.AsyncAPI.Readers
 
     internal static partial class AsyncApiV2Deserializer
     {
-        private static volatile int messageCounter = 0;
         private static readonly FixedFieldMap<AsyncApiOperation> operationFixedFields =
             new()
             {
@@ -58,7 +57,7 @@ namespace LEGO.AsyncAPI.Readers
             }
             else
             {
-                key = "anonymous-message-" + Interlocked.Increment(ref messageCounter).ToString();
+                key = "anonymous-message-" + Interlocked.Increment(ref node.Context.MessageCounter).ToString();
             }
 
             return new KeyValuePair<string, AsyncApiMessage>(key, message);

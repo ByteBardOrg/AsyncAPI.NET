@@ -161,6 +161,26 @@ namespace LEGO.AsyncAPI.Tests.Models
         [Test]
         public void V2_AsyncApiChannel_reserializes()
         {
+            var expected =
+                """
+                asyncapi: 2.6.0
+                info:
+                  title: test spec
+                  version: 1.0.0
+                channels:
+                  mychannel:
+                    description: test channel
+                    subscribe:
+                      description: what ever
+                      message:
+                        $ref: '#/components/messages/anonymous-message-1'
+                components:
+                  messages:
+                    anonymous-message-1:
+                      payload:
+                        type: string
+                """;
+
             var yaml =
                 """
                 asyncapi: 2.6.0
@@ -180,7 +200,7 @@ namespace LEGO.AsyncAPI.Tests.Models
             var document = new AsyncApiStringReader().Read(yaml, out var diag);
             var reserialized = document.SerializeAsYaml(AsyncApiVersion.AsyncApi2_0);
 
-            reserialized.Should().BePlatformAgnosticEquivalentTo(yaml);
+            reserialized.Should().BePlatformAgnosticEquivalentTo(expected);
         }
     }
 }

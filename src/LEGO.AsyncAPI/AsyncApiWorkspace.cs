@@ -29,14 +29,15 @@ namespace LEGO.AsyncAPI
             foreach (var channel in document.Channels)
             {
                 location = channelBaseUri + channel.Key;
-                this.RegisterComponent(location, channel);
+                this.RegisterComponent(location, channel.Value);
 
                 foreach (var message in channel.Value.Messages)
                 {
                     location = location + "/messages/" + message.Key;
-                    this.RegisterComponent(location, message);
+                    this.RegisterComponent(location, message.Value);
                 }
             }
+
             // Register Schema
             foreach (var item in document.Components.Schemas)
             {

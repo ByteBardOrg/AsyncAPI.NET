@@ -15,19 +15,14 @@ namespace LEGO.AsyncAPI.Readers
     using LEGO.AsyncAPI.Readers.ParseNodes;
     using LEGO.AsyncAPI.Readers.V2;
     using LEGO.AsyncAPI.Readers.V3;
-
-    public static class TempStorageKeys
-    {
-        public const string SecuritySchemeScopes = "SecuritySchemeScopes";
-        public const string Operations = "Operations";
-        public const string OperationMessageReferences = "OperationMessageReferences";
-        public const string ComponentMessages = "ComponentMessages";
-    }
     public class ParsingContext
     {
         private readonly Stack<string> currentLocation = new();
         private readonly Dictionary<string, object> tempStorage = new();
         private readonly Dictionary<object, Dictionary<string, object>> scopedTempStorage = new();
+        public volatile int MessageCounter = 0;
+        public volatile int OperationCounter = 0;
+
         internal Dictionary<string, Func<AsyncApiAny, IAsyncApiExtension>> ExtensionParsers
         {
             get;

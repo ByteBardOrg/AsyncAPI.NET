@@ -28,9 +28,68 @@ namespace LEGO.AsyncAPI.Tests.Models
         }
 
         [Test]
-        public void V2_SerializeV2_WithMultipleMessages_Upgrades()
+        public void V2_Read_WithMultipleMessages_UpgradesAndReserializes()
         {
             // Arrange
+            var expected =
+                """
+                asyncapi: 2.6.0
+                info:
+                  title: Example API with oneOf in messages
+                  version: 1.0.0
+                channels:
+                  SomeChannel:
+                    description: A channel where messages can be sent and received.
+                    subscribe:
+                      summary: Receives a message that can be either a text or a file.
+                      message:
+                        oneOf:
+                          - $ref: '#/components/messages/TextMessage'
+                          - $ref: '#/components/messages/FileMessage'
+                          - $ref: '#/components/messages/anonymous-message-1'
+                          - $ref: '#/components/messages/wsMessage'
+                components:
+                  messages:
+                    TextMessage:
+                      payload:
+                        type: object
+                        properties:
+                          type:
+                            type: string
+                            enum:
+                              - text
+                          content:
+                            type: string
+                            description: The text content of the message.
+                      contentType: application/json
+                    FileMessage:
+                      payload:
+                        type: object
+                        properties:
+                          type:
+                            type: string
+                            enum:
+                              - file
+                          filename:
+                            type: string
+                            description: The name of the file.
+                          fileData:
+                            type: string
+                            format: byte
+                            description: The file content encoded in base64.
+                      contentType: application/json
+                    anonymous-message-1:
+                      payload:
+                        type: string
+                      contentType: application/json
+                      description: Http Message
+                    wsMessage:
+                      payload:
+                        type: string
+                      contentType: application/json
+                      description: web socket Message
+                """;
+
             var yaml =
                 """
                 asyncapi: 2.6.0
@@ -97,9 +156,32 @@ namespace LEGO.AsyncAPI.Tests.Models
             // Assert
             document.Components.Messages.Should().HaveCount(4);
             document.Operations.Should().HaveCount(1);
-            document.Operations.First().Value.Messages.Should().HaveCount(4);
             document.Channels.First().Value.Messages.Should().HaveCount(4);
-            // Missing resolution of references of references.
+
+            var channel = document.Channels.First().Value;
+            channel.Address.Should().Be("SomeChannel");
+
+            var operation = document.Operations.First().Value;
+            operation.Messages.Should().HaveCount(4);
+            operation.Channel.Description.Should().Be("A channel where messages can be sent and received.");
+            operation.Channel.Address.Should().Be("SomeChannel");
+            Assert.AreEqual(channel, operation.Channel);
+
+            var fileMessage = operation.Messages.First(message => message.Reference.Reference == "#/channels/SomeChannel/messages/FileMessage");
+            fileMessage.Should().BeOfType<AsyncApiMessageReference>();
+
+            var fileMessageSchema = fileMessage.Payload.Schema.As<AsyncApiJsonSchema>();
+            fileMessageSchema.Type.Should().Be(SchemaType.Object);
+            fileMessageSchema.Properties.Should().HaveCount(3);
+
+            var anonymousMessage = operation.Messages.First(message => message.Reference.Reference == "#/channels/SomeChannel/messages/anonymous-message-1");
+            anonymousMessage.Description.Should().Be("Http Message");
+            anonymousMessage.ContentType.Should().Be("application/json");
+            anonymousMessage.Should().BeOfType<AsyncApiMessageReference>();
+
+            var reserialized = document.SerializeAsYaml(AsyncApiVersion.AsyncApi2_0);
+
+            reserialized.Should().BePlatformAgnosticEquivalentTo(expected);
         }
 
         [Test]
