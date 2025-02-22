@@ -5,6 +5,7 @@ namespace LEGO.AsyncAPI
     using System;
     using System.Collections.Generic;
     using System.IO;
+    using System.Linq;
     using LEGO.AsyncAPI.Models;
     using LEGO.AsyncAPI.Models.Interfaces;
 
@@ -26,12 +27,12 @@ namespace LEGO.AsyncAPI
             string channelBaseUri = "#/channels/";
             string location;
 
-            foreach (var channel in document.Channels)
+            foreach (var channel in document.Channels.Where(channel => channel.Value is not IAsyncApiReferenceable))
             {
                 location = channelBaseUri + channel.Key;
                 this.RegisterComponent(location, channel.Value);
 
-                foreach (var message in channel.Value.Messages)
+                foreach (var message in channel.Value.Messages.Where(message => message.Value is not IAsyncApiReferenceable))
                 {
                     location = location + "/messages/" + message.Key;
                     this.RegisterComponent(location, message.Value);

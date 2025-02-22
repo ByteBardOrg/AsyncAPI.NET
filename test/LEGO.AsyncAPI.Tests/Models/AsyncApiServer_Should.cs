@@ -19,7 +19,7 @@ namespace LEGO.AsyncAPI.Tests.Models
             // Arrange
             var actual =
                 """
-                url: 'test://example.com/{channelKey}'
+                url: 'example.com/{channelKey}'
                 protocol: test
                 protocolVersion: 0.1.0
                 description: some description
@@ -67,7 +67,7 @@ namespace LEGO.AsyncAPI.Tests.Models
                   version: 1.0.0
                 servers:
                   testServer:
-                    url: 'test://example.com/{channelkey}'
+                    url: 'example.com/{channelkey}'
                     protocol: test
                     protocolVersion: 0.1.0
                     description: some description
@@ -114,7 +114,7 @@ namespace LEGO.AsyncAPI.Tests.Models
         {
             var expected =
                 """
-                url: test://example.com
+                url: example.com
                 protocol: test
                 bindings:
                   kafka:

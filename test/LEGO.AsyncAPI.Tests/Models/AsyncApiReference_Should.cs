@@ -124,36 +124,36 @@ namespace LEGO.AsyncAPI.Tests
         {
             var json =
                 """
-        {
-          "asyncapi": "2.6.0",
-          "info": { },
-          "servers": {
-            "production": {
-              "$ref": "#/components/servers/whatever"
-            }
-          },
-          "components": {
-            "servers": {
-                "whatever": {
-                  "host": "production.gigantic-server.com:443",
-                  "protocol": "wss",
-                  "protocolVersion": "1.0.0",
-                  "description": "The production API server",
-                  "variables": {
-                    "username": {
-                      "default": "demo",
-                      "description": "This value is assigned by the service provider"
-                    },
-                    "password": {
-                      "default": "demo",
-                      "description": "This value is assigned by the service provider"
+                {
+                  "asyncapi": "2.6.0",
+                  "info": { },
+                  "servers": {
+                    "production": {
+                      "$ref": "#/components/servers/whatever"
+                    }
+                  },
+                  "components": {
+                    "servers": {
+                        "whatever": {
+                          "url": "production.gigantic-server.com:443",
+                          "protocol": "wss",
+                          "protocolVersion": "1.0.0",
+                          "description": "The production API server",
+                          "variables": {
+                            "username": {
+                              "default": "demo",
+                              "description": "This value is assigned by the service provider"
+                            },
+                            "password": {
+                              "default": "demo",
+                              "description": "This value is assigned by the service provider"
+                            }
+                          }
+                        }
                     }
                   }
                 }
-            }
-          }
-        }
-        """;
+                """;
 
             var doc = new AsyncApiStringReader().Read(json, out var diag);
             var reference = doc.Servers.First().Value as AsyncApiServerReference;
@@ -266,7 +266,7 @@ namespace LEGO.AsyncAPI.Tests
 
             // Assert
             diagnostic.Errors.Should().BeEmpty();
-            var payload = deserialized.Payload.As<AsyncApiJsonSchemaReference>();
+            var payload = deserialized.Payload.Schema.As<AsyncApiJsonSchemaReference>();
             var reference = payload.Reference;
             reference.ExternalResource.Should().Be("./myjsonfile.json");
             reference.FragmentId.Should().Be("/fragment");
@@ -515,7 +515,7 @@ namespace LEGO.AsyncAPI.Tests
             var reader = new AsyncApiStringReader(settings);
             var doc = reader.Read(yaml, out var diagnostic);
             var message = doc.Channels["workspace"].Messages.Values.First();
-            var payload = message.Payload.As<AsyncApiAvroSchema>();
+            var payload = message.Payload.Schema.As<AsyncApiAvroSchema>();
             payload.As<AvroRecord>().Name.Should().Be("thecodebuzz_schema");
 
             doc.SerializeAsYaml(AsyncApiVersion.AsyncApi2_0).Should()

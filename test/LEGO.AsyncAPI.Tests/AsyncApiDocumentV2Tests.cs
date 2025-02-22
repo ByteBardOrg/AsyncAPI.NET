@@ -996,7 +996,7 @@ namespace LEGO.AsyncAPI.Tests
 
             // Assert
             diagnostics.Errors.Should().HaveCount(0);
-            result.Operations.Values.FirstOrDefault(op => op.Action == AsyncApiAction.Send)!.Messages.First().Payload.As<AsyncApiAvroSchema>().TryGetAs<AvroRecord>(out var record).Should().BeTrue();
+            result.Operations.Values.FirstOrDefault(op => op.Action == AsyncApiAction.Receive)!.Messages.First().Payload.Schema.As<AsyncApiAvroSchema>().TryGetAs<AvroRecord>(out var record).Should().BeTrue();
             record.Name.Should().Be("UserSignedUp");
         }
 
@@ -1051,7 +1051,7 @@ namespace LEGO.AsyncAPI.Tests
 
             var message = result.Operations.Values.FirstOrDefault(op => op.Action == AsyncApiAction.Send)!.Messages.First();
             message.Title.Should().Be("Message for schema validation testing that is a json object");
-            message.Payload.As<AsyncApiJsonSchema>().Properties.Should().HaveCount(1);
+            message.Payload.Schema.As<AsyncApiJsonSchema>().Properties.Should().HaveCount(1);
         }
 
         [Test]
@@ -1061,10 +1061,11 @@ namespace LEGO.AsyncAPI.Tests
                 """
                 asyncapi: 2.6.0
                 info:
+                  title: test
                   description: test description
                 servers:
                   production:
-                    url: example.com
+                    url: pulsar+ssl://example.com
                     protocol: pulsar+ssl
                     description: test description
                     bindings:
@@ -1092,6 +1093,7 @@ namespace LEGO.AsyncAPI.Tests
             var doc = new AsyncApiDocument();
             doc.Info = new AsyncApiInfo()
             {
+                Title = "test",
                 Description = "test description",
             };
             doc.Servers.Add("production", new AsyncApiServer
@@ -1174,6 +1176,7 @@ namespace LEGO.AsyncAPI.Tests
             var expected = """
                 asyncapi: 2.6.0
                 info:
+                  title: test
                   description: test description
                 servers:
                   production:
@@ -1200,6 +1203,7 @@ namespace LEGO.AsyncAPI.Tests
             var doc = new AsyncApiDocument();
             doc.Info = new AsyncApiInfo()
             {
+                Title = "test",
                 Description = "test description",
             };
             doc.Servers.Add("production", new AsyncApiServer
@@ -1225,6 +1229,7 @@ namespace LEGO.AsyncAPI.Tests
                 });
             doc.Operations.Add("firstOperation", new AsyncApiOperation()
             {
+                Channel = new AsyncApiChannelReference("#/channels/testChannel"),
                 Messages = new List<AsyncApiMessageReference>
                 {
                     new("#/components/messages/firstMessage"),

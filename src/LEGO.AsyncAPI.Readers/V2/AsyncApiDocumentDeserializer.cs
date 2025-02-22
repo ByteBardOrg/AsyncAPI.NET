@@ -89,7 +89,7 @@ namespace LEGO.AsyncAPI.Readers
                     var channel = document.Channels.First(channel => channel.Key == operation.Value.Channel.Reference.Reference.Split("/")[^1]);
                     foreach (var message in messages)
                     {
-                        channel.Value.Messages.Add(message.Key, message.Value);
+                        channel.Value.Messages.TryAdd(message.Key, message.Value);
                         operation.Value.Messages.Add(new AsyncApiMessageReference($"#/channels/{channel.Key}/messages/{message.Key}"));
                     }
                 }
