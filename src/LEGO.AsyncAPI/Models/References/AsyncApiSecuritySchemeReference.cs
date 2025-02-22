@@ -96,17 +96,19 @@ namespace LEGO.AsyncAPI.Models
 
             writer.WritePropertyName(this.Reference.FragmentId.Split("/")[^1]);
 
+
+            writer.WriteStartArray();
+
             if (this.Scopes.Any())
             {
-                writer.WriteStartArray();
-
                 foreach (var scope in this.Scopes)
                 {
                     writer.WriteValue(scope);
                 }
-
-                writer.WriteEndArray();
             }
+
+            writer.WriteEndArray();
+
             writer.WriteEndObject();
         }
     }
