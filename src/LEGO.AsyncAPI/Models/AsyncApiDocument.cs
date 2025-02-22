@@ -54,7 +54,7 @@ namespace LEGO.AsyncAPI.Models
         /// <summary>
         /// an element to hold various schemas for the specification.
         /// </summary>
-        public AsyncApiComponents Components { get; set; }
+        public AsyncApiComponents Components { get; set; } = new AsyncApiComponents();
 
         /// <inheritdoc/>
         public IDictionary<string, IAsyncApiExtension> Extensions { get; set; } = new Dictionary<string, IAsyncApiExtension>();
@@ -90,7 +90,29 @@ namespace LEGO.AsyncAPI.Models
             writer.WriteRequiredMap(AsyncApiConstants.Channels, this.Channels, (channel) => channel.Address, (writer, key, component) => component.SerializeV2(writer));
 
             // components
-            writer.WriteOptionalObject(AsyncApiConstants.Components, this.Components, (w, c) => c.SerializeV2(w));
+            if (this.Components.Schemas.Count > 0 ||
+                this.Components.Servers.Count > 0 ||
+                this.Components.Channels.Count > 0 ||
+                this.Components.Operations.Count > 0 ||
+                this.Components.Messages.Count > 0 ||
+                this.Components.SecuritySchemes.Count > 0 ||
+                this.Components.ServerVariables.Count > 0 ||
+                this.Components.Parameters.Count > 0 ||
+                this.Components.CorrelationIds.Count > 0 ||
+                this.Components.Replies.Count > 0 ||
+                this.Components.ReplyAddresses.Count > 0 ||
+                this.Components.ExternalDocs.Count > 0 ||
+                this.Components.Tags.Count > 0 ||
+                this.Components.OperationTraits.Count > 0 ||
+                this.Components.MessageTraits.Count > 0 ||
+                this.Components.ServerBindings.Count > 0 ||
+                this.Components.ChannelBindings.Count > 0 ||
+                this.Components.OperationBindings.Count > 0 ||
+                this.Components.MessageBindings.Count > 0 ||
+                this.Components.Extensions.Count > 0)
+            {
+                writer.WriteOptionalObject(AsyncApiConstants.Components, this.Components, (w, c) => c.SerializeV2(w));
+            }
 
             // tags
             writer.WriteOptionalCollection(AsyncApiConstants.Tags, this.Info.Tags, (w, t) => t.SerializeV2(w));
