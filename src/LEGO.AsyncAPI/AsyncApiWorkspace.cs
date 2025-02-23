@@ -60,6 +60,13 @@ namespace LEGO.AsyncAPI
                 this.RegisterComponent(location, item.Value);
             }
 
+            // Register Operations
+            foreach (var item in document.Components.Operations)
+            {
+                location = componentsBaseUri + ReferenceType.Operation.GetDisplayName() + "/" + item.Key;
+                this.RegisterComponent(location, item.Value);
+            }
+
             // Register Servers
             foreach (var item in document.Components.Servers)
             {
@@ -89,10 +96,10 @@ namespace LEGO.AsyncAPI
                 this.RegisterComponent(item.Key, item.Value);
             }
 
-            // Register Parameters
-            foreach (var item in document.Components.Parameters)
+            // Register Server Variables
+            foreach (var item in document.Components.ServerVariables)
             {
-                location = componentsBaseUri + ReferenceType.Parameter.GetDisplayName() + "/" + item.Key;
+                location = componentsBaseUri + ReferenceType.ServerVariable.GetDisplayName() + "/" + item.Key;
                 this.RegisterComponent(location, item.Value);
             }
 
@@ -102,6 +109,37 @@ namespace LEGO.AsyncAPI
                 location = componentsBaseUri + ReferenceType.CorrelationId.GetDisplayName() + "/" + item.Key;
                 this.RegisterComponent(location, item.Value);
             }
+
+
+            // Register Replies
+            foreach (var item in document.Components.Replies)
+            {
+                location = componentsBaseUri + ReferenceType.OperationReply.GetDisplayName() + "/" + item.Key;
+                this.RegisterComponent(location, item.Value);
+            }
+
+
+            // Register ReplyAddresses
+            foreach (var item in document.Components.ReplyAddresses)
+            {
+                location = componentsBaseUri + ReferenceType.OperationReplyAddress.GetDisplayName() + "/" + item.Key;
+                this.RegisterComponent(location, item.Value);
+            }
+
+            // Register ExternalDocs
+            foreach (var item in document.Components.ExternalDocs)
+            {
+                location = componentsBaseUri + ReferenceType.ExternalDocs.GetDisplayName() + "/" + item.Key;
+                this.RegisterComponent(location, item.Value);
+            }
+
+            // Register Tags
+            foreach (var item in document.Components.Tags)
+            {
+                location = componentsBaseUri + ReferenceType.Tag.GetDisplayName() + "/" + item.Key;
+                this.RegisterComponent(location, item.Value);
+            }
+
 
             // Register OperationTraits
             foreach (var item in document.Components.OperationTraits)

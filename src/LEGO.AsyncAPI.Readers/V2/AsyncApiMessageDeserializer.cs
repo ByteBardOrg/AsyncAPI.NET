@@ -153,8 +153,14 @@ namespace LEGO.AsyncAPI.Readers
             {
                 var schema = mapNode["schemaFormat"]?.Value.GetScalarValue();
                 var payload = LoadPayload(mapNode["payload"].Value, schema);
-                var multiFormat = new AsyncApiMultiFormatSchema { Schema = payload, SchemaFormat = schema };
-                message.Payload = multiFormat;
+                if (payload is IAsyncApiReferenceable reference && !reference.Reference.IsExternal)
+                {
+                    message.Payload = new AsyncApiMultiFormatSchemaReference(reference.Reference.Reference);
+                }
+                else
+                {
+                    message.Payload = new AsyncApiMultiFormatSchema { Schema = payload, SchemaFormat = schema };
+                }
             }
 
             return message;

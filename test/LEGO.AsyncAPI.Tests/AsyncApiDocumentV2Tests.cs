@@ -42,7 +42,7 @@ namespace LEGO.AsyncAPI.Tests
                     url: https://www.apache.org/licenses/LICENSE-2.0
                 servers:
                   scram-connections:
-                    url: kafka-secure://test.mykafkacluster.org:18092
+                    url: test.mykafkacluster.org:18092
                     protocol: kafka-secure
                     description: Test broker secured with scramSha256
                     security:
@@ -55,7 +55,7 @@ namespace LEGO.AsyncAPI.Tests
                       - name: visibility:private
                         description: This resource is private and only available to certain users
                   mtls-connections:
-                    url: kafka-secure://test.mykafkacluster.org:28092
+                    url: test.mykafkacluster.org:28092
                     protocol: kafka-secure
                     description: Test broker secured with X509
                     security:
@@ -546,7 +546,7 @@ namespace LEGO.AsyncAPI.Tests
                 id: documentId
                 servers:
                   myServer:
-                    url: kafkaprotocol://example.com/server
+                    url: example.com/server
                     protocol: KafkaProtocol
                     protocolVersion: protocolVersion
                     description: serverDescription
@@ -556,7 +556,6 @@ namespace LEGO.AsyncAPI.Tests
                   channel1:
                     description: channelDescription
                     subscribe:
-                      operationId: myOperation
                       summary: operationSummary
                       description: operationDescription
                       tags:
@@ -566,8 +565,7 @@ namespace LEGO.AsyncAPI.Tests
                         description: externalDocsDescription
                         url: https://example.com/externalDocs
                       traits:
-                        - operationId: myOperation
-                          summary: traitSummary
+                        - summary: traitSummary
                           description: traitDescription
                           tags:
                             - name: tagName
@@ -1065,7 +1063,7 @@ namespace LEGO.AsyncAPI.Tests
                   description: test description
                 servers:
                   production:
-                    url: pulsar+ssl://example.com
+                    url: example.com
                     protocol: pulsar+ssl
                     description: test description
                     bindings:

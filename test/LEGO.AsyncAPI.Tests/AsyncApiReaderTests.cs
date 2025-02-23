@@ -42,6 +42,8 @@ namespace LEGO.AsyncAPI.Tests
                   messages:
                     WorkspaceEventPayload:
                       schemaFormat: application/schema+yaml;version=draft-07
+                      payload:
+                        type: string
                 ";
             var reader = new AsyncApiStringReader();
             var doc = reader.Read(yaml, out var diagnostic);
@@ -584,6 +586,8 @@ namespace LEGO.AsyncAPI.Tests
                   messages:
                     WorkspaceEventPayload:
                       schemaFormat: 'application/schema+yaml;version=draft-07'
+                      payload:
+                        type: string
                   securitySchemes:
                     petstore_auth: 
                       type: oauth2

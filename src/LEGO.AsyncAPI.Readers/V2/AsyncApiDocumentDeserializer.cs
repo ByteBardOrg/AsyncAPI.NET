@@ -54,6 +54,8 @@ namespace LEGO.AsyncAPI.Readers
             var asyncApiNode = rootNode.GetMap();
             ParseMap(asyncApiNode, document, asyncApiFixedFields, asyncApiPatternFields);
 
+            asyncApiNode.Context.Workspace.RegisterComponents(document);
+
             SetSecuritySchemeScopes(asyncApiNode.Context, document);
             SetMessages(asyncApiNode.Context, document);
             SetOperations(asyncApiNode.Context, document);
@@ -87,6 +89,16 @@ namespace LEGO.AsyncAPI.Readers
                 {
                     var messages = context.GetFromTempStorage<Dictionary<string, AsyncApiMessageReference>>(TempStorageKeys.OperationMessageReferences, operation.Value);
                     var channel = document.Channels.First(channel => channel.Key == operation.Value.Channel.Reference.Reference.Split("/")[^1]);
+                    if (channel.Value is AsyncApiChannelReference channelReference)
+                    {
+                        channelReference.Reference.Workspace = context.Workspace;
+                    }
+
+                    if (messages == null)
+                    {
+                        continue;
+                    }
+
                     foreach (var message in messages)
                     {
                         channel.Value.Messages.TryAdd(message.Key, message.Value);
