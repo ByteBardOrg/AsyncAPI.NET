@@ -29,6 +29,6 @@
 	<ProjectReference Include="..\..\src\LEGO.AsyncAPI\LEGO.AsyncAPI.csproj" />
 	<AdditionalFiles Include="stylecop.json" />
 	<None Include="..\..\.editorconfig" Link=".editorconfig" />
-	<None Update="TestData\**" CopyToOutputDirectory="PreserveNewest" />
+	<None Update="V2_TestData\**" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 </Project>
