@@ -5,6 +5,7 @@
 	  <PackageId>AsyncAPI.NET.Bindings</PackageId>
 	  <AssemblyName>LEGO.AsyncAPI.Bindings</AssemblyName>
 	  <RootNamespace>LEGO.AsyncAPI.Bindings</RootNamespace>
+	  <TargetFrameworks>netstandard2.1;net8</TargetFrameworks>
   </PropertyGroup>
   <ItemGroup>
     <None Remove="stylecop.json" />
@@ -19,7 +20,7 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="System.Text.Json" Version="9.0.1" />
+    <PackageReference Include="System.Text.Json" Version="9.0.1" Condition="'$(TargetFramework)' == 'netstandard2.1'" />
   </ItemGroup>
 
   <ItemGroup>

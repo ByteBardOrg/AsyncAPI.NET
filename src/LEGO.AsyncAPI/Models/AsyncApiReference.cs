@@ -3,6 +3,7 @@
 namespace LEGO.AsyncAPI.Models
 {
     using System;
+    using System.Diagnostics;
     using LEGO.AsyncAPI.Exceptions;
     using LEGO.AsyncAPI.Models.Interfaces;
     using LEGO.AsyncAPI.Writers;
@@ -10,7 +11,8 @@ namespace LEGO.AsyncAPI.Models
     /// <summary>
     /// A simple object to allow referencing other components in the specification, internally and externally.
     /// </summary>
-    public class AsyncApiReference : IAsyncApiSerializable
+    [DebuggerDisplay("{Reference}")]
+    public class AsyncApiReference : IAsyncApiSerializable, IEquatable<AsyncApiReference>
     {
         private string originalString;
 
@@ -114,7 +116,7 @@ namespace LEGO.AsyncAPI.Models
         public bool IsExternal => this.ExternalResource != null;
 
         /// <summary>
-        /// Gets the full reference string for v2.
+        /// Gets the full reference string;
         /// </summary>
         public string Reference
         {
@@ -122,6 +124,32 @@ namespace LEGO.AsyncAPI.Models
             {
                 return this.originalString;
             }
+        }
+
+        public static bool operator !=(AsyncApiReference left, AsyncApiReference right) => !(left == right);
+
+        public static bool operator ==(AsyncApiReference left, AsyncApiReference right)
+        {
+            return Equals(left, null) ? Equals(right, null) : left.Equals(right);
+        }
+
+        public bool Equals(AsyncApiReference reference)
+        {
+            if (reference == null)
+            {
+                return false;
+            }
+
+            return this.Reference == reference.Reference;
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (obj is not AsyncApiReference reference)
+            {
+                return false;
+            }
+            return this.Equals(reference);
         }
 
         /// <summary>
@@ -149,14 +177,19 @@ namespace LEGO.AsyncAPI.Models
             writer.WriteEndObject();
         }
 
-        private string GetExternalReferenceV2()
+        public void SerializeV3(IAsyncApiWriter writer)
         {
-            return this.ExternalResource + (this.FragmentId != null ? "#" + this.FragmentId : string.Empty);
-        }
+            if (writer is null)
+            {
+                throw new ArgumentNullException(nameof(writer));
+            }
 
-        public void Write(IAsyncApiWriter writer)
-        {
-            this.SerializeV2(writer);
+            writer.WriteStartObject();
+
+            // $ref
+            writer.WriteOptionalProperty(AsyncApiConstants.DollarRef, this.Reference);
+
+            writer.WriteEndObject();
         }
     }
 }

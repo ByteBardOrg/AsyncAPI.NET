@@ -2,12 +2,11 @@
 
 namespace LEGO.AsyncAPI.Models
 {
-    using System;
     using System.Collections.Generic;
     using LEGO.AsyncAPI.Models.Interfaces;
     using LEGO.AsyncAPI.Writers;
 
-    public abstract class AsyncApiAvroSchema : IAsyncApiSerializable, IAsyncApiMessagePayload
+    public abstract class AsyncApiAvroSchema : IAsyncApiSerializable, IAsyncApiSchema
     {
         public abstract string Type { get; }
 
@@ -22,6 +21,8 @@ namespace LEGO.AsyncAPI.Models
         }
 
         public abstract void SerializeV2(IAsyncApiWriter writer);
+
+        public abstract void SerializeV3(IAsyncApiWriter writer);
 
         public virtual bool TryGetAs<T>(out T result)
             where T : AsyncApiAvroSchema

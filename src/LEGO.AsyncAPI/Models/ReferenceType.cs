@@ -86,6 +86,31 @@ namespace LEGO.AsyncAPI.Models
         /// <summary>
         /// The server variable.
         /// </summary>
-        [Display("serverVariable")] ServerVariable,
+        [Display("serverVariables")] ServerVariable,
+
+        /// <summary>
+        /// The tag.
+        /// </summary>
+        [Display("tags")] Tag,
+
+        /// <summary>
+        /// ReplyAddresses item.
+        /// </summary>
+        [Display("replyAddresses")] OperationReplyAddress,
+
+        /// <summary>
+        /// ExternalDocs item.
+        /// </summary>
+        [Display("externalDocs")] ExternalDocs,
+
+        /// <summary>
+        /// Replies item.
+        /// </summary>
+        [Display("replies")] OperationReply,
+
+        /// <summary>
+        /// Operations item.
+        /// </summary>
+        [Display("operations")] Operation,
     }
 }

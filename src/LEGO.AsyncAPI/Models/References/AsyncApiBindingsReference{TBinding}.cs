@@ -4,9 +4,11 @@ namespace LEGO.AsyncAPI.Models
 {
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics;
     using LEGO.AsyncAPI.Models.Interfaces;
     using LEGO.AsyncAPI.Writers;
 
+    [DebuggerDisplay("{Reference}")]
     public class AsyncApiBindingsReference<TBinding> : AsyncApiBindings<TBinding>, IAsyncApiReferenceable
         where TBinding : IBinding
     {
@@ -33,6 +35,8 @@ namespace LEGO.AsyncAPI.Models
         public override ICollection<string> Keys => this.Target.Keys;
 
         public override ICollection<TBinding> Values => this.Target.Values;
+
+        public override IDictionary<string, IAsyncApiExtension> Extensions => this.target.Extensions;
 
         public override int Count => this.Target.Count;
 
@@ -80,6 +84,22 @@ namespace LEGO.AsyncAPI.Models
             }
 
             this.Target.SerializeV2(writer);
+        }
+
+        public override void SerializeV3(IAsyncApiWriter writer)
+        {
+            if (writer is null)
+            {
+                throw new ArgumentNullException(nameof(writer));
+            }
+
+            if (this.Reference != null && !writer.GetSettings().ShouldInlineReference(this.Reference))
+            {
+                this.Reference.SerializeV3(writer);
+                return;
+            }
+
+            this.Target.SerializeV3(writer);
         }
 
         public override void Add(string key, TBinding value)

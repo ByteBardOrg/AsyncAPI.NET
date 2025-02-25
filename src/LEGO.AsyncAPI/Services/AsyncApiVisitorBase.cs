@@ -55,7 +55,7 @@ namespace LEGO.AsyncAPI.Services
         {
         }
 
-        public virtual void Visit(IAsyncApiMessagePayload payload)
+        public virtual void Visit(IAsyncApiSchema payload)
         {
         }
 
@@ -71,7 +71,15 @@ namespace LEGO.AsyncAPI.Services
         {
         }
 
+        public virtual void Visit(IDictionary<string, AsyncApiOperation> anys)
+        {
+        }
+
         public virtual void Visit(IList<AsyncApiMessageTrait> traits)
+        {
+        }
+
+        public virtual void Visit(IList<AsyncApiSecurityScheme> traits)
         {
         }
 
@@ -156,7 +164,19 @@ namespace LEGO.AsyncAPI.Services
         {
         }
 
+        public virtual void Visit(AsyncApiOperationReply reply)
+        {
+        }
+
+        public virtual void Visit(AsyncApiOperationReplyAddress replyAddress)
+        {
+        }
+
         public virtual void Visit(AsyncApiMessage message)
+        {
+        }
+
+        public virtual void Visit(AsyncApiMultiFormatSchema multiFormatSchema)
         {
         }
 
@@ -179,13 +199,6 @@ namespace LEGO.AsyncAPI.Services
         }
 
         /// <summary>
-        /// Visits <see cref="AsyncApiSecurityRequirement"/>.
-        /// </summary>
-        public virtual void Visit(AsyncApiSecurityRequirement securityRequirement)
-        {
-        }
-
-        /// <summary>
         /// Visits <see cref="AsyncApiSecurityScheme"/>.
         /// </summary>
         public virtual void Visit(AsyncApiSecurityScheme securityScheme)
@@ -199,12 +212,6 @@ namespace LEGO.AsyncAPI.Services
         {
         }
 
-        /// <summary>
-        /// Visits list of <see cref="AsyncApiSecurityRequirement"/>.
-        /// </summary>
-        public virtual void Visit(IList<AsyncApiSecurityRequirement> asyncApiSecurityRequirements)
-        {
-        }
 
         /// <summary>
         /// Visits <see cref="IAsyncApiExtensible"/>.
@@ -300,6 +307,10 @@ namespace LEGO.AsyncAPI.Services
         }
 
         public virtual void Visit(IList<AsyncApiMessageExample> messageExamples)
+        {
+        }
+
+        public virtual void Visit(IDictionary<string, AsyncApiMessage> messages)
         {
         }
     }

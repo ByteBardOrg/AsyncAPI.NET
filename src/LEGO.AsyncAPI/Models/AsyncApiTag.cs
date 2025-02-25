@@ -15,21 +15,31 @@ namespace LEGO.AsyncAPI.Models
         /// <summary>
         /// REQUIRED. The name of the tag.
         /// </summary>
-        public string Name { get; set; }
+        public virtual string Name { get; set; }
 
         /// <summary>
         /// a short description for the tag. CommonMark syntax can be used for rich text representation.
         /// </summary>
-        public string Description { get; set; }
+        public virtual string Description { get; set; }
 
         /// <summary>
         /// additional external documentation for this tag.
         /// </summary>
-        public AsyncApiExternalDocumentation ExternalDocs { get; set; }
+        public virtual AsyncApiExternalDocumentation ExternalDocs { get; set; }
 
-        public IDictionary<string, IAsyncApiExtension> Extensions { get; set; } = new Dictionary<string, IAsyncApiExtension>();
+        public virtual IDictionary<string, IAsyncApiExtension> Extensions { get; set; } = new Dictionary<string, IAsyncApiExtension>();
 
-        public void SerializeV2(IAsyncApiWriter writer)
+        public virtual void SerializeV2(IAsyncApiWriter writer)
+        {
+            this.SerializeCore(writer);
+        }
+
+        public virtual void SerializeV3(IAsyncApiWriter writer)
+        {
+            this.SerializeCore(writer);
+        }
+
+        private void SerializeCore(IAsyncApiWriter writer)
         {
             if (writer is null)
             {

@@ -8,7 +8,7 @@ namespace LEGO.AsyncAPI.Tests.Validation
     public class ValidationRuleSetTests
     {
         [Test]
-        public void DefaultRuleSet_ReturnsTheCorrectRules()
+        public void V2_DefaultRuleSet_ReturnsTheCorrectRules()
         {
             // Arrange
             var ruleSet = new ValidationRuleSet();
@@ -22,7 +22,7 @@ namespace LEGO.AsyncAPI.Tests.Validation
         }
 
         [Test]
-        public void DefaultRuleSet_PropertyReturnsTheCorrectRules()
+        public void V2_DefaultRuleSet_PropertyReturnsTheCorrectRules()
         {
             // Arrange & Act
             var ruleSet = ValidationRuleSet.GetDefaultRuleSet();
@@ -35,7 +35,7 @@ namespace LEGO.AsyncAPI.Tests.Validation
             Assert.IsNotEmpty(rules);
 
             // Update the number if you add new default rule(s).
-            Assert.AreEqual(18, rules.Count);
+            Assert.AreEqual(26, rules.Count);
         }
     }
 }

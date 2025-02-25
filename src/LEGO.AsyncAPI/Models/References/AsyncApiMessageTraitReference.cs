@@ -3,12 +3,15 @@
 namespace LEGO.AsyncAPI.Models
 {
     using System.Collections.Generic;
-    using LEGO.AsyncAPI.Models.Interfaces;
-    using LEGO.AsyncAPI.Writers;
-
     /// <summary>
     /// The definition of a message trait this application MAY use.
     /// </summary>
+
+    using System.Diagnostics;
+    using LEGO.AsyncAPI.Models.Interfaces;
+    using LEGO.AsyncAPI.Writers;
+
+    [DebuggerDisplay("{Reference}")]
     public class AsyncApiMessageTraitReference : AsyncApiMessageTrait, IAsyncApiReferenceable
     {
         private AsyncApiMessageTrait target;
@@ -27,13 +30,9 @@ namespace LEGO.AsyncAPI.Models
             this.Reference = new AsyncApiReference(reference, ReferenceType.MessageTrait);
         }
 
-        public override string MessageId { get => this.Target?.MessageId; set => this.Target.MessageId = value; }
-
-        public override AsyncApiJsonSchema Headers { get => this.Target?.Headers; set => this.Target.Headers = value; }
+        public override AsyncApiMultiFormatSchema Headers { get => this.Target?.Headers; set => this.Target.Headers = value; }
 
         public override AsyncApiCorrelationId CorrelationId { get => this.Target?.CorrelationId; set => this.Target.CorrelationId = value; }
-
-        public override string SchemaFormat { get => this.Target?.SchemaFormat; set => this.Target.SchemaFormat = value; }
 
         public override string ContentType { get => this.Target?.ContentType; set => this.Target.ContentType = value; }
 
@@ -70,6 +69,20 @@ namespace LEGO.AsyncAPI.Models
             {
                 this.Reference.Workspace = writer.Workspace;
                 this.Target.SerializeV2(writer);
+            }
+        }
+
+        public override void SerializeV3(IAsyncApiWriter writer)
+        {
+            if (!writer.GetSettings().ShouldInlineReference(this.Reference))
+            {
+                this.Reference.SerializeV3(writer);
+                return;
+            }
+            else
+            {
+                this.Reference.Workspace = writer.Workspace;
+                this.Target.SerializeV3(writer);
             }
         }
     }

@@ -10,10 +10,9 @@ namespace LEGO.AsyncAPI.Readers
     {
         private static FixedFieldMap<AsyncApiMessageTrait> messageTraitFixedFields = new()
         {
-            { "messageId", (a, n) => { a.MessageId = n.GetScalarValue(); } },
-            { "headers", (a, n) => { a.Headers = AsyncApiSchemaDeserializer.LoadSchema(n); } },
+            { "headers", (a, n) => { a.Headers = new AsyncApiMultiFormatSchema { Schema = AsyncApiSchemaDeserializer.LoadSchema(n) }; } },
             { "correlationId", (a, n) => { a.CorrelationId = LoadCorrelationId(n); } },
-            { "schemaFormat", (a, n) => { a.SchemaFormat = n.GetScalarValue(); } },
+            { "schemaFormat", (a, n) => { a.Headers.SchemaFormat = n.GetScalarValue(); } },
             { "contentType", (a, n) => { a.ContentType = n.GetScalarValue(); } },
             { "name", (a, n) => { a.Name = n.GetScalarValue(); } },
             { "title", (a, n) => { a.Title = n.GetScalarValue(); } },

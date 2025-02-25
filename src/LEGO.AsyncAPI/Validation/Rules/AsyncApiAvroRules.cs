@@ -16,8 +16,8 @@ namespace LEGO.AsyncAPI.Validation.Rules
         /// </summary>
         public static Regex NameRegex = new Regex(@"^[A-Za-z_][A-Za-z0-9_]*$");
 
-        public static ValidationRule<IAsyncApiMessagePayload> NameRegularExpression =>
-            new ValidationRule<IAsyncApiMessagePayload>(
+        public static ValidationRule<IAsyncApiSchema> NameRegularExpression =>
+            new ValidationRule<IAsyncApiSchema>(
                 (context, messagePayload) =>
                 {
                     string name = null;

@@ -3,12 +3,15 @@
 namespace LEGO.AsyncAPI.Models
 {
     using System.Collections.Generic;
-    using LEGO.AsyncAPI.Models.Interfaces;
-    using LEGO.AsyncAPI.Writers;
-
     /// <summary>
     /// The definition of an operation trait this application MAY use.
     /// </summary>
+
+    using System.Diagnostics;
+    using LEGO.AsyncAPI.Models.Interfaces;
+    using LEGO.AsyncAPI.Writers;
+
+    [DebuggerDisplay("{Reference}")]
     public class AsyncApiOperationTraitReference : AsyncApiOperationTrait, IAsyncApiReferenceable
     {
         private AsyncApiOperationTrait target;
@@ -27,11 +30,13 @@ namespace LEGO.AsyncAPI.Models
             this.Reference = new AsyncApiReference(reference, ReferenceType.OperationTrait);
         }
 
-        public override string OperationId { get => this.Target?.OperationId; set => this.Target.OperationId = value; }
+        public override string Title { get => this.Target?.Title; set => this.Target.Title = value; }
 
         public override string Summary { get => this.Target?.Summary; set => this.Target.Summary = value; }
 
         public override string Description { get => this.Target?.Description; set => this.Target.Description = value; }
+
+        public override IList<AsyncApiSecurityScheme> Security { get => this.Target?.Security; set => this.Target.Security = value; }
 
         public override IList<AsyncApiTag> Tags { get => this.Target?.Tags; set => this.Target.Tags = value; }
 

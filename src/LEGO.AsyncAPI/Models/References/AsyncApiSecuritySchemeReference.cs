@@ -4,12 +4,15 @@ namespace LEGO.AsyncAPI.Models
 {
     using System;
     using System.Collections.Generic;
-    using LEGO.AsyncAPI.Models.Interfaces;
-    using LEGO.AsyncAPI.Writers;
-
     /// <summary>
     /// The definition of a security scheme this application MAY use.
     /// </summary>
+    using System.Diagnostics;
+    using System.Linq;
+    using LEGO.AsyncAPI.Models.Interfaces;
+    using LEGO.AsyncAPI.Writers;
+
+    [DebuggerDisplay("{Reference}")]
     public class AsyncApiSecuritySchemeReference : AsyncApiSecurityScheme, IAsyncApiReferenceable
     {
         private AsyncApiSecurityScheme target;
@@ -34,7 +37,7 @@ namespace LEGO.AsyncAPI.Models
 
         public override string Name { get => this.Target?.Name; set => this.Target.Name = value; }
 
-        public override ParameterLocation In { get => this.Target.In; set => this.Target.In = value; }
+        public override ParameterLocation? In { get => this.Target?.In; set => this.Target.In = value; }
 
         public override string Scheme { get => this.Target?.Scheme; set => this.Target.Scheme = value; }
 
@@ -43,6 +46,8 @@ namespace LEGO.AsyncAPI.Models
         public override AsyncApiOAuthFlows Flows { get => this.Target?.Flows; set => this.Target.Flows = value; }
 
         public override Uri OpenIdConnectUrl { get => this.Target?.OpenIdConnectUrl; set => this.Target.OpenIdConnectUrl = value; }
+
+        public override ISet<string> Scopes { get => this.Target?.Scopes; set => this.Target.Scopes = value; }
 
         public override IDictionary<string, IAsyncApiExtension> Extensions { get => this.Target?.Extensions; set => this.Target.Extensions = value; }
 
@@ -62,6 +67,49 @@ namespace LEGO.AsyncAPI.Models
                 this.Reference.Workspace = writer.Workspace;
                 this.Target.SerializeV2(writer);
             }
+        }
+
+        public override void SerializeV3(IAsyncApiWriter writer)
+        {
+            if (!writer.GetSettings().ShouldInlineReference(this.Reference))
+            {
+                this.Reference.SerializeV3(writer);
+                return;
+            }
+            else
+            {
+                this.Reference.Workspace = writer.Workspace;
+                this.Target.SerializeV3(writer);
+            }
+        }
+
+        public void SerializeAsSecurityRequirement(IAsyncApiWriter writer)
+        {
+            if (writer is null)
+            {
+                throw new ArgumentNullException(nameof(writer));
+            }
+
+            this.Reference.Workspace = writer.Workspace;
+
+            writer.WriteStartObject();
+
+            writer.WritePropertyName(this.Reference.FragmentId.Split("/")[^1]);
+
+
+            writer.WriteStartArray();
+
+            if (this.Scopes.Any())
+            {
+                foreach (var scope in this.Scopes)
+                {
+                    writer.WriteValue(scope);
+                }
+            }
+
+            writer.WriteEndArray();
+
+            writer.WriteEndObject();
         }
     }
 }

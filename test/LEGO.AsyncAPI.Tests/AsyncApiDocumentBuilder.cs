@@ -46,6 +46,12 @@ namespace LEGO.AsyncAPI.Tests
             return this;
         }
 
+        public AsyncApiDocumentBuilder WithOperation(string key, AsyncApiOperation operation)
+        {
+            this.document.Operations.Add(key, operation);
+            return this;
+        }
+
         public AsyncApiDocumentBuilder WithComponent(string key, AsyncApiJsonSchema schema)
         {
             if (this.document.Components == null)
@@ -202,13 +208,13 @@ namespace LEGO.AsyncAPI.Tests
 
         public AsyncApiDocumentBuilder WithTags(AsyncApiTag tag)
         {
-            this.document.Tags.Add(tag);
+            this.document.Info.Tags.Add(tag);
             return this;
         }
 
         public AsyncApiDocumentBuilder WithExternalDocs(AsyncApiExternalDocumentation externalDocumentation)
         {
-            this.document.ExternalDocs = externalDocumentation;
+            this.document.Info.ExternalDocs = externalDocumentation;
             return this;
         }
 

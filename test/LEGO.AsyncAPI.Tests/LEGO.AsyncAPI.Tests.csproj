@@ -20,7 +20,7 @@
 	  <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 	</PackageReference>
 	<PackageReference Include="ReportGenerator" Version="5.1.2" />
-	<PackageReference Include="StyleCop.Analyzers" Version="1.1.118">
+	<PackageReference Include="StyleCop.Analyzers" Version="1.2.0-beta.556">
 	  <PrivateAssets>all</PrivateAssets>
 	  <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 	</PackageReference>
@@ -29,6 +29,6 @@
 	<ProjectReference Include="..\..\src\LEGO.AsyncAPI\LEGO.AsyncAPI.csproj" />
 	<AdditionalFiles Include="stylecop.json" />
 	<None Include="..\..\.editorconfig" Link=".editorconfig" />
-	<None Update="TestData\**" CopyToOutputDirectory="PreserveNewest" />
+	<None Update="V2_TestData\**" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 </Project>

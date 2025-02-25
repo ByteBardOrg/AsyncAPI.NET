@@ -4,9 +4,11 @@ namespace LEGO.AsyncAPI.Models
 {
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics;
     using LEGO.AsyncAPI.Models.Interfaces;
     using LEGO.AsyncAPI.Writers;
 
+    [DebuggerDisplay("{Reference}")]
     public class AsyncApiAvroSchemaReference : AsyncApiAvroSchema, IAsyncApiReferenceable
     {
         private AsyncApiAvroSchema target;
@@ -75,6 +77,22 @@ namespace LEGO.AsyncAPI.Models
             }
 
             this.Target.SerializeV2(writer);
+        }
+
+        public override void SerializeV3(IAsyncApiWriter writer)
+        {
+            if (writer is null)
+            {
+                throw new ArgumentNullException(nameof(writer));
+            }
+
+            if (this.Reference != null && !writer.GetSettings().ShouldInlineReference(this.Reference))
+            {
+                this.Reference.SerializeV2(writer);
+                return;
+            }
+
+            this.Target.SerializeV3(writer);
         }
     }
 }

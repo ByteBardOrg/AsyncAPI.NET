@@ -7,7 +7,6 @@ namespace LEGO.AsyncAPI.Readers
     using LEGO.AsyncAPI.Models.Avro.LogicalTypes;
     using LEGO.AsyncAPI.Readers.Exceptions;
     using LEGO.AsyncAPI.Readers.ParseNodes;
-    using LEGO.AsyncAPI.Writers;
 
     public class AsyncApiAvroSchemaDeserializer
     {
@@ -229,7 +228,10 @@ namespace LEGO.AsyncAPI.Readers
 
                 return union;
             }
-
+            if (node is PropertyNode propertyNode)
+            {
+                node = propertyNode.Value;
+            }
             if (node is MapNode mapNode)
             {
                 var pointer = mapNode.GetReferencePointer();
@@ -250,27 +252,27 @@ namespace LEGO.AsyncAPI.Readers
                 {
                     case "record":
                         var record = new AvroRecord();
-                        mapNode.ParseFields(ref record, RecordFixedFields, RecordMetadataPatternFields);
+                        mapNode.ParseFields(record, RecordFixedFields, RecordMetadataPatternFields);
                         return record;
                     case "enum":
                         var @enum = new AvroEnum();
-                        mapNode.ParseFields(ref @enum, EnumFixedFields, EnumMetadataPatternFields);
+                        mapNode.ParseFields(@enum, EnumFixedFields, EnumMetadataPatternFields);
                         return @enum;
                     case "fixed":
                         var @fixed = new AvroFixed();
-                        mapNode.ParseFields(ref @fixed, FixedFixedFields, FixedMetadataPatternFields);
+                        mapNode.ParseFields(@fixed, FixedFixedFields, FixedMetadataPatternFields);
                         return @fixed;
                     case "array":
                         var array = new AvroArray();
-                        mapNode.ParseFields(ref array, ArrayFixedFields, ArrayMetadataPatternFields);
+                        mapNode.ParseFields(array, ArrayFixedFields, ArrayMetadataPatternFields);
                         return array;
                     case "map":
                         var map = new AvroMap();
-                        mapNode.ParseFields(ref map, MapFixedFields, MapMetadataPatternFields);
+                        mapNode.ParseFields(map, MapFixedFields, MapMetadataPatternFields);
                         return map;
                     case "union":
                         var union = new AvroUnion();
-                        mapNode.ParseFields(ref union, UnionFixedFields, UnionMetadataPatternFields);
+                        mapNode.ParseFields(union, UnionFixedFields, UnionMetadataPatternFields);
                         return union;
                     default:
                         throw new AsyncApiException($"Unsupported type: {type}");
@@ -287,35 +289,35 @@ namespace LEGO.AsyncAPI.Readers
             {
                 case "decimal":
                     var @decimal = new AvroDecimal();
-                    mapNode.ParseFields(ref @decimal, DecimalFixedFields, DecimalMetadataPatternFields);
+                    mapNode.ParseFields(@decimal, DecimalFixedFields, DecimalMetadataPatternFields);
                     return @decimal;
                 case "uuid":
                     var uuid = new AvroUUID();
-                    mapNode.ParseFields(ref uuid, UUIDFixedFields, UUIDMetadataPatternFields);
+                    mapNode.ParseFields(uuid, UUIDFixedFields, UUIDMetadataPatternFields);
                     return uuid;
                 case "date":
                     var date = new AvroDate();
-                    mapNode.ParseFields(ref date, DateFixedFields, DateMetadataPatternFields);
+                    mapNode.ParseFields(date, DateFixedFields, DateMetadataPatternFields);
                     return date;
                 case "time-millis":
                     var timeMillis = new AvroTimeMillis();
-                    mapNode.ParseFields(ref timeMillis, TimeMillisFixedFields, TimeMillisMetadataPatternFields);
+                    mapNode.ParseFields(timeMillis, TimeMillisFixedFields, TimeMillisMetadataPatternFields);
                     return timeMillis;
                 case "time-micros":
                     var timeMicros = new AvroTimeMicros();
-                    mapNode.ParseFields(ref timeMicros, TimeMicrosFixedFields, TimeMicrosMetadataPatternFields);
+                    mapNode.ParseFields(timeMicros, TimeMicrosFixedFields, TimeMicrosMetadataPatternFields);
                     return timeMicros;
                 case "timestamp-millis":
                     var timestampMillis = new AvroTimestampMillis();
-                    mapNode.ParseFields(ref timestampMillis, TimestampMillisFixedFields, TimestampMillisMetadataPatternFields);
+                    mapNode.ParseFields(timestampMillis, TimestampMillisFixedFields, TimestampMillisMetadataPatternFields);
                     return timestampMillis;
                 case "timestamp-micros":
                     var timestampMicros = new AvroTimestampMicros();
-                    mapNode.ParseFields(ref timestampMicros, TimestampMicrosFixedFields, TimestampMicrosMetadataPatternFields);
+                    mapNode.ParseFields(timestampMicros, TimestampMicrosFixedFields, TimestampMicrosMetadataPatternFields);
                     return timestampMicros;
                 case "duration":
                     var duration = new AvroDuration();
-                    mapNode.ParseFields(ref duration, DurationFixedFields, DurationMetadataPatternFields);
+                    mapNode.ParseFields(duration, DurationFixedFields, DurationMetadataPatternFields);
                     return duration;
                 default:
                     throw new AsyncApiException($"Unsupported type: {type}");
@@ -327,7 +329,7 @@ namespace LEGO.AsyncAPI.Readers
             var mapNode = node.CheckMapNode("field");
             var field = new AvroField();
 
-            mapNode.ParseFields<AvroField>(ref field, FieldFixedFields, FieldMetadataPatternFields);
+            mapNode.ParseFields<AvroField>(field, FieldFixedFields, FieldMetadataPatternFields);
 
             return field;
 

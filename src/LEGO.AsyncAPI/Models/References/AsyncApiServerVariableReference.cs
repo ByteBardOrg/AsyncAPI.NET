@@ -3,12 +3,14 @@
 namespace LEGO.AsyncAPI.Models
 {
     using System.Collections.Generic;
-    using LEGO.AsyncAPI.Models.Interfaces;
-    using LEGO.AsyncAPI.Writers;
-
     /// <summary>
     /// The definition of a server variable this application MAY use.
     /// </summary>
+    using System.Diagnostics;
+    using LEGO.AsyncAPI.Models.Interfaces;
+    using LEGO.AsyncAPI.Writers;
+
+    [DebuggerDisplay("{Reference}")]
     public class AsyncApiServerVariableReference : AsyncApiServerVariable, IAsyncApiReferenceable
     {
         private AsyncApiServerVariable target;
@@ -26,6 +28,7 @@ namespace LEGO.AsyncAPI.Models
         {
             this.Reference = new AsyncApiReference(reference, ReferenceType.ServerVariable);
         }
+
         public override IList<string> Enum { get => this.Target?.Enum; set => this.Target.Enum = value; }
 
         public override string Default { get => this.Target?.Default; set => this.Target.Default = value; }
@@ -51,6 +54,20 @@ namespace LEGO.AsyncAPI.Models
             {
                 this.Reference.Workspace = writer.Workspace;
                 this.Target.SerializeV2(writer);
+            }
+        }
+
+        public override void SerializeV3(IAsyncApiWriter writer)
+        {
+            if (!writer.GetSettings().ShouldInlineReference(this.Reference))
+            {
+                this.Reference.SerializeV3(writer);
+                return;
+            }
+            else
+            {
+                this.Reference.Workspace = writer.Workspace;
+                this.Target.SerializeV3(writer);
             }
         }
     }

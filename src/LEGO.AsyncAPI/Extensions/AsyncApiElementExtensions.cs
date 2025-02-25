@@ -22,7 +22,13 @@ namespace LEGO.AsyncAPI.Extensions
         /// <returns>An IEnumerable of errors.  This function will never return null.</returns>
         public static IEnumerable<AsyncApiError> Validate(this IAsyncApiElement element, ValidationRuleSet ruleSet)
         {
-            var validator = new AsyncApiValidator(ruleSet);
+            AsyncApiDocument rootDocument = null;
+            if (element is AsyncApiDocument document)
+            {
+                rootDocument = document;
+            }
+
+            var validator = new AsyncApiValidator(ruleSet, rootDocument);
             var walker = new AsyncApiWalker(validator);
             walker.Walk(element);
             return validator.Errors.Cast<AsyncApiError>().Union(validator.Warnings);

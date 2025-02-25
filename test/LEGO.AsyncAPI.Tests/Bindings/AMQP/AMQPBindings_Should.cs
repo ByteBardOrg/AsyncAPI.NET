@@ -13,7 +13,7 @@ namespace LEGO.AsyncAPI.Tests.Bindings.AMQP
     public class AMQPBindings_Should
     {
         [Test]
-        public void AMQPChannelBinding_WithRoutingKey_SerializesAndDeserializes()
+        public void V2_AMQPChannelBinding_WithRoutingKey_SerializesAndDeserializes()
         {
             // Arrange
             var expected =
@@ -58,7 +58,7 @@ namespace LEGO.AsyncAPI.Tests.Bindings.AMQP
         }
 
         [Test]
-        public void AMQPChannelBinding_WithQueue_SerializesAndDeserializes()
+        public void V2_AMQPChannelBinding_WithQueue_SerializesAndDeserializes()
         {
             // Arrange
             var expected =
@@ -103,7 +103,7 @@ namespace LEGO.AsyncAPI.Tests.Bindings.AMQP
         }
 
         [Test]
-        public void AMQPMessageBinding_WithFilledObject_SerializesAndDeserializes()
+        public void V2_AMQPMessageBinding_WithFilledObject_SerializesAndDeserializes()
         {
             // Arrange
             var expected =
@@ -135,7 +135,7 @@ namespace LEGO.AsyncAPI.Tests.Bindings.AMQP
         }
 
         [Test]
-        public void AMQPOperationBinding_WithFilledObject_SerializesAndDeserializes()
+        public void V2_AMQPOperationBinding_WithFilledObject_SerializesAndDeserializes()
         {
             // Arrange
             var expected =
