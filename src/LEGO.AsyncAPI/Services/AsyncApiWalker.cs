@@ -380,6 +380,7 @@ namespace LEGO.AsyncAPI.Services
         internal void Walk(IAsyncApiSchema payload)
         {
             this.visitor.Visit(payload);
+
             if (payload is AsyncApiJsonSchema jsonSchema)
             {
                 this.Walk(AsyncApiConstants.Payload, () => this.Walk((AsyncApiJsonSchema)payload));
@@ -730,6 +731,12 @@ namespace LEGO.AsyncAPI.Services
                 return;
             }
 
+            if (multiFormatSchema is AsyncApiMultiFormatSchemaReference reference)
+            {
+                this.Walk(multiFormatSchema as IAsyncApiReferenceable);
+                return;
+            }
+
             this.visitor.Visit(multiFormatSchema);
             this.Walk(multiFormatSchema.Schema);
             this.Walk(multiFormatSchema as IAsyncApiExtensible);
@@ -939,7 +946,7 @@ namespace LEGO.AsyncAPI.Services
                 return;
             }
 
-            if (tag is AsyncApiTag)
+            if (tag is AsyncApiTagReference)
             {
                 this.Walk(tag as IAsyncApiReferenceable);
                 return;

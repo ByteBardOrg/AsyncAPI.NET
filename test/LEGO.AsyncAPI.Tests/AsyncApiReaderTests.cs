@@ -42,6 +42,8 @@ namespace LEGO.AsyncAPI.Tests
                   messages:
                     WorkspaceEventPayload:
                       schemaFormat: application/schema+yaml;version=draft-07
+                      payload:
+                        type: string
                 ";
             var reader = new AsyncApiStringReader();
             var doc = reader.Read(yaml, out var diagnostic);
@@ -312,7 +314,7 @@ namespace LEGO.AsyncAPI.Tests
                     x-eventarchetype: objectchanged
                 servers:
                   production:
-                    url: 'pulsar+ssl://prod.events.managed.io:1234'
+                    url: 'prod.events.managed.io:1234'
                     protocol: pulsar+ssl
                     description: Pulsar broker
                 """;
@@ -338,24 +340,24 @@ namespace LEGO.AsyncAPI.Tests
                     x-eventarchetype: objectchanged
                 servers:
                   production:
-                    url: 'pulsar+ssl://prod.events.managed.io:{port}'
+                    url: 'prod.events.managed.{security}.io:443    '
                     protocol: pulsar+ssl
                     description: Pulsar broker
                     variables:
-                      port:
-                        description: Secure connection (TLS) is available through port 8883.
-                        default: '1883'
+                      security:
+                        description: Secure connection
+                        default: 'secure'
                         enum:
-                          - '1883'
-                          - '8883'
+                          - 'secure'
+                          - 'insecure'
                 """;
             var reader = new AsyncApiStringReader();
             var doc = reader.Read(yaml, out var diagnostic);
             var server = doc.Servers.First();
             var variable = server.Value.Variables.First();
             Assert.AreEqual("production", server.Key);
-            Assert.AreEqual("port", variable.Key);
-            Assert.AreEqual("Secure connection (TLS) is available through port 8883.", variable.Value.Description);
+            Assert.AreEqual("security", variable.Key);
+            Assert.AreEqual("Secure connection", variable.Value.Description);
         }
 
         [Test]
@@ -584,6 +586,8 @@ namespace LEGO.AsyncAPI.Tests
                   messages:
                     WorkspaceEventPayload:
                       schemaFormat: 'application/schema+yaml;version=draft-07'
+                      payload:
+                        type: string
                   securitySchemes:
                     petstore_auth: 
                       type: oauth2

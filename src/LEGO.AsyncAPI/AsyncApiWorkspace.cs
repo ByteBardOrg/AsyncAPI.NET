@@ -5,6 +5,7 @@ namespace LEGO.AsyncAPI
     using System;
     using System.Collections.Generic;
     using System.IO;
+    using System.Linq;
     using LEGO.AsyncAPI.Models;
     using LEGO.AsyncAPI.Models.Interfaces;
 
@@ -26,12 +27,12 @@ namespace LEGO.AsyncAPI
             string channelBaseUri = "#/channels/";
             string location;
 
-            foreach (var channel in document.Channels)
+            foreach (var channel in document.Channels.Where(channel => channel.Value is not IAsyncApiReferenceable))
             {
                 location = channelBaseUri + channel.Key;
                 this.RegisterComponent(location, channel.Value);
 
-                foreach (var message in channel.Value.Messages)
+                foreach (var message in channel.Value.Messages.Where(message => message.Value is not IAsyncApiReferenceable))
                 {
                     location = location + "/messages/" + message.Key;
                     this.RegisterComponent(location, message.Value);
@@ -56,6 +57,13 @@ namespace LEGO.AsyncAPI
             foreach (var item in document.Components.Channels)
             {
                 location = componentsBaseUri + ReferenceType.Channel.GetDisplayName() + "/" + item.Key;
+                this.RegisterComponent(location, item.Value);
+            }
+
+            // Register Operations
+            foreach (var item in document.Components.Operations)
+            {
+                location = componentsBaseUri + ReferenceType.Operation.GetDisplayName() + "/" + item.Key;
                 this.RegisterComponent(location, item.Value);
             }
 
@@ -88,10 +96,10 @@ namespace LEGO.AsyncAPI
                 this.RegisterComponent(item.Key, item.Value);
             }
 
-            // Register Parameters
-            foreach (var item in document.Components.Parameters)
+            // Register Server Variables
+            foreach (var item in document.Components.ServerVariables)
             {
-                location = componentsBaseUri + ReferenceType.Parameter.GetDisplayName() + "/" + item.Key;
+                location = componentsBaseUri + ReferenceType.ServerVariable.GetDisplayName() + "/" + item.Key;
                 this.RegisterComponent(location, item.Value);
             }
 
@@ -101,6 +109,37 @@ namespace LEGO.AsyncAPI
                 location = componentsBaseUri + ReferenceType.CorrelationId.GetDisplayName() + "/" + item.Key;
                 this.RegisterComponent(location, item.Value);
             }
+
+
+            // Register Replies
+            foreach (var item in document.Components.Replies)
+            {
+                location = componentsBaseUri + ReferenceType.OperationReply.GetDisplayName() + "/" + item.Key;
+                this.RegisterComponent(location, item.Value);
+            }
+
+
+            // Register ReplyAddresses
+            foreach (var item in document.Components.ReplyAddresses)
+            {
+                location = componentsBaseUri + ReferenceType.OperationReplyAddress.GetDisplayName() + "/" + item.Key;
+                this.RegisterComponent(location, item.Value);
+            }
+
+            // Register ExternalDocs
+            foreach (var item in document.Components.ExternalDocs)
+            {
+                location = componentsBaseUri + ReferenceType.ExternalDocs.GetDisplayName() + "/" + item.Key;
+                this.RegisterComponent(location, item.Value);
+            }
+
+            // Register Tags
+            foreach (var item in document.Components.Tags)
+            {
+                location = componentsBaseUri + ReferenceType.Tag.GetDisplayName() + "/" + item.Key;
+                this.RegisterComponent(location, item.Value);
+            }
+
 
             // Register OperationTraits
             foreach (var item in document.Components.OperationTraits)

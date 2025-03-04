@@ -350,7 +350,7 @@ namespace LEGO.AsyncAPI.Tests.Models
         public void V2_SerializeAsJson_WithAdvancedSchemaObject_V2Works()
         {
             // Arrange
-            string expected = this.GetTestData<string>();
+            string expected = this.GetV2TestData<string>("SerializeAsJson_WithAdvancedSchemaObject_V2Works");
 
             // Act
             var actual = AdvancedSchemaObject.SerializeAsJson(AsyncApiVersion.AsyncApi2_0);
@@ -364,7 +364,7 @@ namespace LEGO.AsyncAPI.Tests.Models
         public void V2_Deserialize_WithAdvancedSchema_Works()
         {
             // Arrange
-            var json = this.GetTestData<string>();
+            var json = this.GetV2TestData<string>("Deserialize_WithAdvancedSchema_Works");
             var expected = AdvancedSchemaObject;
 
             // Act
@@ -378,7 +378,7 @@ namespace LEGO.AsyncAPI.Tests.Models
         public void V2_SerializeAsJson_WithAdvancedSchemaWithAllOf_V2Works()
         {
             // Arrange
-            var expected = this.GetTestData<string>();
+            var expected = this.GetV2TestData<string>("SerializeAsJson_WithAdvancedSchemaWithAllOf_V2Works");
 
             // Act
             var actual = AdvancedSchemaWithAllOf.SerializeAsJson(AsyncApiVersion.AsyncApi2_0);
@@ -427,6 +427,12 @@ namespace LEGO.AsyncAPI.Tests.Models
                         },
                     },
             })
+            .WithOperation("operationA", new AsyncApiOperation
+            {
+                Action = AsyncApiAction.Receive,
+                Channel = new AsyncApiChannelReference("#/channels/mychannel"),
+                Messages = new List<AsyncApiMessageReference> { new AsyncApiMessageReference("#/channels/mychannel/messages/whatever") }
+            })
             .WithComponent("testD", new AsyncApiJsonSchema() { Type = SchemaType.String, Format = "uuid" })
             .WithComponent("testC", new AsyncApiJsonSchema()
             {
@@ -448,7 +454,7 @@ namespace LEGO.AsyncAPI.Tests.Models
             var actual = outputString.ToString();
 
             // Assert
-            string expected = this.GetTestData<string>(shouldInline
+            string expected = this.GetV2TestData<string>(shouldInline
                 ? "AsyncApiSchema_InlinedReferences"
                 : "AsyncApiSchema_NoInlinedReferences.yml");
 
@@ -516,7 +522,7 @@ namespace LEGO.AsyncAPI.Tests.Models
             var actual = outputString.ToString();
 
             // Assert
-            string expected = this.GetTestData<string>(shouldInline
+            string expected = this.GetV2TestData<string>(shouldInline
                 ? "AsyncApiSchema_InlinedReferences"
                 : "AsyncApiSchema_NoInlinedReferences.yml");
 

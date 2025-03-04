@@ -46,13 +46,13 @@ namespace LEGO.AsyncAPI.Tests
         /// <typeparam name="T">The type to return.</typeparam>
         /// <param name="resourceName">The name of the resource file with an optional extension.</param>
         /// <returns>The result.</returns>
-        protected T GetTestData<T>([CallerMemberName] string resourceName = "")
+        protected T GetV2TestData<T>([CallerMemberName] string resourceName = "")
         {
             string searchPattern = string.IsNullOrWhiteSpace(Path.GetExtension(resourceName))
                 ? $"{resourceName}.*"
                 : resourceName;
 
-            string testDataDirectory = Path.Combine(Environment.CurrentDirectory, "TestData");
+            string testDataDirectory = Path.Combine(Environment.CurrentDirectory, "V2_TestData");
 
             string? testDataPath = Directory.GetFiles(testDataDirectory, searchPattern)
                 .FirstOrDefault();

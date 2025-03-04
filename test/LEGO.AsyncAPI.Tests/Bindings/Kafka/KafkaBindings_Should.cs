@@ -77,7 +77,7 @@ namespace LEGO.AsyncAPI.Tests.Bindings.Kafka
             // Arrange
             var expected =
                 """
-                url: kafka://example.com
+                url: example.com
                 protocol: kafka
                 bindings:
                   kafka:

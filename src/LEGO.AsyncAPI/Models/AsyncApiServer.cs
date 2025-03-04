@@ -137,8 +137,7 @@ namespace LEGO.AsyncAPI.Models
 
         private string GenerateServerUrl()
         {
-            var baseUri = new Uri($"{this.Protocol}{Uri.SchemeDelimiter}{this.Host}", UriKind.Absolute);
-            return new Uri(baseUri, this.PathName).ToString().TrimEnd('/');
+            return $"{this.Host}{this.PathName}";
         }
     }
 }
