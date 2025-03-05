@@ -74,8 +74,8 @@ namespace LEGO.AsyncAPI.Readers
             operation.Action = action;
             operation.Channel = new AsyncApiChannelReference("#/channels/" + NormalizeChannelKey(instance.Address));
 
-            var globalOperations = node.Context.GetFromTempStorage<Dictionary<string, AsyncApiOperation>>(TempStorageKeys.Operations);
-            globalOperations ??= new Dictionary<string, AsyncApiOperation>();
+            var globalOperations = node.Context.GetFromTempStorage<Dictionary<string, AsyncApiOperation>>(TempStorageKeys.Operations) ?? new Dictionary<string, AsyncApiOperation>();
+
             if (!globalOperations.TryAdd(operationKey, operation))
             {
                 node.Context.Diagnostic.Errors.Add(new AsyncApiError(node.Context.GetLocation(), $"OperationId: '{operationKey}' is not unique."));
