@@ -76,7 +76,11 @@ namespace LEGO.AsyncAPI.Readers
 
             var globalOperations = node.Context.GetFromTempStorage<Dictionary<string, AsyncApiOperation>>(TempStorageKeys.Operations);
             globalOperations ??= new Dictionary<string, AsyncApiOperation>();
-            globalOperations.Add(operationKey, operation);
+            if (!globalOperations.TryAdd(operationKey, operation))
+            {
+                node.Context.Diagnostic.Errors.Add(new AsyncApiError(node.Context.GetLocation(), $"OperationId: '{operationKey}' is not unique."));
+            }
+
             node.Context.SetTempStorage(TempStorageKeys.Operations, globalOperations);
         }
     }

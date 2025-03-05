@@ -46,7 +46,7 @@ namespace LEGO.AsyncAPI.Tests.Validation
         }
 
         [Test]
-        public void V2_ChannelKey_WithNonUniqueKey_DiagnosticsError()
+        public void V2_OperationId_WithNonUniqueKey_DiagnosticsError()
         {
             var input =
                 """
@@ -77,8 +77,8 @@ namespace LEGO.AsyncAPI.Tests.Validation
                 """;
 
             var document = new AsyncApiStringReader().Read(input, out var diagnostic);
-            diagnostic.Errors.First().Message.Should().Be("Channel signature 'chat/{}' MUST be unique.");
-            diagnostic.Errors.First().Pointer.Should().Be("#/channels");
+            diagnostic.Errors.First().Message.Should().Be("OperationId: 'onMessageReceieved' is not unique.");
+            diagnostic.Errors.First().Pointer.Should().Be("#/channels/chat~1{personIdentity}");
         }
 
         [Test]
