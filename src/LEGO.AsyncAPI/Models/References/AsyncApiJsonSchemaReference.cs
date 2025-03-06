@@ -17,7 +17,7 @@ namespace LEGO.AsyncAPI.Models
         {
             get
             {
-                this.target ??= this.Reference.Workspace?.ResolveReference<AsyncApiJsonSchema>(this.Reference);
+                this.target ??= this.Reference.Workspace?.ResolveReference<AsyncApiJsonSchema>(this.Reference) ?? this.Reference.Workspace?.ResolveReference<AsyncApiMultiFormatSchema>(this.Reference)?.Schema?.As<AsyncApiJsonSchema>();
                 return this.target;
             }
         }
