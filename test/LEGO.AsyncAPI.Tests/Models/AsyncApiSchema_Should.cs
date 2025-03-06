@@ -350,7 +350,7 @@ namespace LEGO.AsyncAPI.Tests.Models
         public void V2_SerializeAsJson_WithAdvancedSchemaObject_V2Works()
         {
             // Arrange
-            string expected = this.GetV2TestData<string>("SerializeAsJson_WithAdvancedSchemaObject_V2Works");
+            string expected = this.GetTestData<string>(AsyncApiVersion.AsyncApi2_0, "SerializeAsJson_WithAdvancedSchemaObject_V2Works");
 
             // Act
             var actual = AdvancedSchemaObject.SerializeAsJson(AsyncApiVersion.AsyncApi2_0);
@@ -364,7 +364,7 @@ namespace LEGO.AsyncAPI.Tests.Models
         public void V2_Deserialize_WithAdvancedSchema_Works()
         {
             // Arrange
-            var json = this.GetV2TestData<string>("Deserialize_WithAdvancedSchema_Works");
+            var json = this.GetTestData<string>(AsyncApiVersion.AsyncApi2_0, "Deserialize_WithAdvancedSchema_Works");
             var expected = AdvancedSchemaObject;
 
             // Act
@@ -378,7 +378,7 @@ namespace LEGO.AsyncAPI.Tests.Models
         public void V2_SerializeAsJson_WithAdvancedSchemaWithAllOf_V2Works()
         {
             // Arrange
-            var expected = this.GetV2TestData<string>("SerializeAsJson_WithAdvancedSchemaWithAllOf_V2Works");
+            var expected = this.GetTestData<string>(AsyncApiVersion.AsyncApi2_0, "SerializeAsJson_WithAdvancedSchemaWithAllOf_V2Works");
 
             // Act
             var actual = AdvancedSchemaWithAllOf.SerializeAsJson(AsyncApiVersion.AsyncApi2_0);
@@ -454,7 +454,9 @@ namespace LEGO.AsyncAPI.Tests.Models
             var actual = outputString.ToString();
 
             // Assert
-            string expected = this.GetV2TestData<string>(shouldInline
+            string expected = this.GetTestData<string>(
+                AsyncApiVersion.AsyncApi2_0,
+                shouldInline
                 ? "AsyncApiSchema_InlinedReferences"
                 : "AsyncApiSchema_NoInlinedReferences.yml");
 
@@ -522,7 +524,7 @@ namespace LEGO.AsyncAPI.Tests.Models
             var actual = outputString.ToString();
 
             // Assert
-            string expected = this.GetV2TestData<string>(shouldInline
+            string expected = this.GetTestData<string>(AsyncApiVersion.AsyncApi3_0, shouldInline
                 ? "AsyncApiSchema_InlinedReferences"
                 : "AsyncApiSchema_NoInlinedReferences.yml");
 
