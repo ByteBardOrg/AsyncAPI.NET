@@ -31,4 +31,13 @@
 	<None Include="..\..\.editorconfig" Link=".editorconfig" />
 	<None Update="V2_TestData\**" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
+
+  <ItemGroup>
+    <None Update="V3_TestData\AsyncApiSchema_InlinedReferences.yml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="V3_TestData\AsyncApiSchema_NoInlinedReferences.yml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
 </Project>

@@ -88,7 +88,12 @@ namespace LEGO.AsyncAPI.Readers
                 if (operation.Value.Channel != null)
                 {
                     var messages = context.GetFromTempStorage<Dictionary<string, AsyncApiMessageReference>>(TempStorageKeys.OperationMessageReferences, operation.Value);
-                    var channel = document.Channels.First(channel => channel.Key == operation.Value.Channel.Reference.Reference.Split("/")[^1]);
+                    var channel = document.Channels.FirstOrDefault(channel => channel.Key == operation.Value.Channel.Reference.Reference.Split("/")[^1]);
+                    if (channel.Value == null)
+                    {
+                        continue;
+                    }
+
                     if (channel.Value is AsyncApiChannelReference channelReference)
                     {
                         channelReference.Reference.Workspace = context.Workspace;

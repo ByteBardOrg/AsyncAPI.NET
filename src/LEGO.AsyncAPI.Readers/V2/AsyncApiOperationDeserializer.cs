@@ -81,8 +81,9 @@ namespace LEGO.AsyncAPI.Readers
                 messages.Add(kvp.Key, kvp.Value);
             }
 
-            var componentMessageReferences = new Dictionary<string, AsyncApiMessageReference>();
-            var componentMessages = new Dictionary<string, AsyncApiMessage>();
+            var componentMessageReferences = n.Context.GetFromTempStorage<Dictionary<string, AsyncApiMessageReference>>(TempStorageKeys.OperationMessageReferences) ?? new Dictionary<string, AsyncApiMessageReference>();
+            var componentMessages = n.Context.GetFromTempStorage<Dictionary<string, AsyncApiMessage>>(TempStorageKeys.ComponentMessages) ?? new Dictionary<string, AsyncApiMessage>();
+
             foreach (var message in messages)
             {
                 if (message.Value is not AsyncApiMessageReference messageReference)

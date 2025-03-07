@@ -34,7 +34,7 @@ namespace LEGO.AsyncAPI.Models
             }
 
             // Serialize without including the schema.
-            if (this.SchemaFormat == "application/vnd.aai.asyncapi+json;version=3.0.0" && this.Schema is AsyncApiJsonSchema)
+            if (string.IsNullOrEmpty(this.SchemaFormat) && this.Schema is AsyncApiJsonSchema)
             {
                 this.Schema.SerializeV3(writer);
                 return;
