@@ -46,6 +46,82 @@ namespace LEGO.AsyncAPI.Tests.Validation
         }
 
         [Test]
+        public void V3_OperationChannel_NotReferencingARootChannel_DiagnosticsError()
+        {
+          var input =
+            """
+            asyncapi: 3.0.0
+            info:
+              title: Chat Application
+              version: 1.0.0
+            servers:
+              testing:
+                host: test.mosquitto.org:1883
+                protocol: mqtt
+                description: Test broker
+            channels:
+              chatPersonId:
+                address: chat.{personId}
+                messages:
+                  messageReceived:
+                    name: text
+                    payload:
+                      type: string
+            operations:
+              onMessageReceived:
+                title: Message received
+                channel:
+                  $ref: '#/components/channels/secondChannel'
+                messages:
+                  - $ref: '#/channels/chatPersonId/messages/messageReceived'
+            components:
+              channels:
+                secondChannel:
+                  address: chat.{secondChannel}
+            """;
+
+          var document = new AsyncApiStringReader().Read(input, out var diagnostic);
+          diagnostic.Errors.First().Message.Should().Be("The operation 'Message received' MUST point to a channel definition located in the root Channels Object.");
+          diagnostic.Errors.First().Pointer.Should().Be("#/operations/onMessageReceived");
+        }
+
+        [Test]
+        public void V3_OperationMessage_NotReferencingARootChannel_DiagnosticsError()
+        {
+          var input =
+            """
+            asyncapi: 3.0.0
+            info:
+              title: Chat Application
+              version: 1.0.0
+            servers:
+              testing:
+                host: test.mosquitto.org:1883
+                protocol: mqtt
+                description: Test broker
+            channels:
+              chatPersonId:
+                address: chat.{personId}
+                messages:
+                  messageReceived:
+                    name: text
+                    payload:
+                      type: string
+            operations:
+              onMessageReceived:
+                title: Message received
+                channel:
+                  $ref: '#/channels/chatPersonId'
+                messages:
+                  - $ref: '#/channels/chatPersonId/messages/messageReceived'
+            """;
+
+          var document = new AsyncApiStringReader().Read(input, out var diagnostic);
+          diagnostic.Errors.First().Message.Should().Be("The operation 'Message received' MUST point to a channel definition located in the root Channels Object.");
+          diagnostic.Errors.First().Pointer.Should().Be("#/operations/onMessageReceived");
+        }
+
+        [Test]
         [TestCase("chat")]
         [TestCase("/some/chat/{personId}")]
         [TestCase("chat-{personId}")]

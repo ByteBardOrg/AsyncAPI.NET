@@ -79,7 +79,7 @@ namespace LEGO.AsyncAPI.Readers.V3
 
         public AsyncApiDocument LoadDocument(RootNode rootNode)
         {
-            return AsyncApiV2Deserializer.LoadAsyncApi(rootNode);
+            return AsyncApiV3Deserializer.LoadAsyncApi(rootNode);
         }
 
         public T LoadElement<T>(ParseNode node)

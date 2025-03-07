@@ -46,9 +46,9 @@ namespace LEGO.AsyncAPI.Validation.Rules
                     }
 
                     var channels =
-                        context.RootDocument.Channels.Values.Where(channel => channel.Equals(operation.Channel));
+                        context.RootDocument.Channels.Values.Where(channel => operation.Channel.Equals(channel));
 
-                    var referencedChannel = channels.FirstOrDefault(c => c.Equals(operation.Channel));
+                    var referencedChannel = channels.FirstOrDefault(c => operation.Channel.Equals(c));
                     if (referencedChannel == null)
                     {
                         context.CreateError(
@@ -56,7 +56,9 @@ namespace LEGO.AsyncAPI.Validation.Rules
                             string.Format(Resource.Validation_OperationMustReferenceValidChannel, operation.Title));
                         return;
                     }
-                    if (!operation.Messages.All(refMessage => referencedChannel.Messages.Any(message => message.Equals(refMessage))))
+
+                    // TODO: check this validation
+                    if (!operation.Messages.All(refMessage => referencedChannel.Messages.Any(message => refMessage.Equals(message))))
                     {
                         context.CreateError(
                             "OperationChannelRef",
@@ -73,6 +75,12 @@ namespace LEGO.AsyncAPI.Validation.Rules
                         context.RootDocument.Channels.Values.Where(channel => channel.Equals(operation.Channel));
 
                     var referencedChannel = channels.FirstOrDefault(c => c.Equals(operation.Channel));
+
+                    if (referencedChannel == null)
+                    {
+                        return;
+                    }
+
                     if (!operation.Messages.All(refMessage => referencedChannel.Messages.Any(message => message.Equals(refMessage))))
                     {
                         context.CreateError(
