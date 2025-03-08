@@ -176,8 +176,13 @@ namespace LEGO.AsyncAPI
             foreach (var channel in document.Channels)
             {
                 var registerableChannelValue = channel.Value;
-                if (channel.Value is IAsyncApiReferenceable reference && !reference.Reference.IsExternal)
+                if (channel.Value is IAsyncApiReferenceable reference)
                 {
+                    if (reference.Reference.IsExternal)
+                    {
+                        continue;
+                    }
+
                     registerableChannelValue = this.ResolveReference<AsyncApiChannel>(reference.Reference);
                 }
 
