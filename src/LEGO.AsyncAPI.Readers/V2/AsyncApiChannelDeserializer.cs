@@ -7,6 +7,7 @@ namespace LEGO.AsyncAPI.Readers
     using LEGO.AsyncAPI.Readers.ParseNodes;
     using System.Collections.Generic;
     using System.Threading;
+    using YamlDotNet.RepresentationModel;
 
     internal static partial class AsyncApiV2Deserializer
     {
@@ -41,15 +42,17 @@ namespace LEGO.AsyncAPI.Readers
             if (channelAddress != null)
             {
                 channel.Address = channelAddress;
-                LoadV2Operation(mapNode["subscribe"]?.Value, channel, AsyncApiAction.Send);
-                LoadV2Operation(mapNode["publish"]?.Value, channel, AsyncApiAction.Receive);
             }
+
+            LoadV2Operation(mapNode["subscribe"]?.Value, channel, AsyncApiAction.Send);
+            LoadV2Operation(mapNode["publish"]?.Value, channel, AsyncApiAction.Receive);
 
             return channel;
         }
 
-        public static string NormalizeChannelKey(string channelKey)
+        public static string NormalizeChannelKey(string channelKey, ParseNode node = null)
         {
+
             string newKey = string.Empty;
             foreach (var character in channelKey)
             {
@@ -57,6 +60,13 @@ namespace LEGO.AsyncAPI.Readers
                 {
                     newKey += character;
                 }
+            }
+
+            if (node != null)
+            {
+                var addresses = node.Context.GetFromTempStorage<Dictionary<string, string>>(TempStorageKeys.ChannelAddresses) ?? new Dictionary<string, string>();
+                addresses.Add(newKey, channelKey);
+                node.Context.SetTempStorage(TempStorageKeys.ChannelAddresses, addresses);
             }
 
             return newKey;
