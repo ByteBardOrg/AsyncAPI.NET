@@ -62,16 +62,8 @@ namespace LEGO.AsyncAPI.Models
 
         public override void SerializeV2(IAsyncApiWriter writer)
         {
-            if (!writer.GetSettings().ShouldInlineReference(this.Reference))
-            {
-                this.Reference.SerializeV2(writer);
-                return;
-            }
-            else
-            {
-                this.Reference.Workspace = writer.Workspace;
-                this.Target.SerializeV2(writer);
-            }
+            this.Reference.Workspace = writer.Workspace;
+            this.Target.SerializeV2(writer);
         }
 
         public override void SerializeV3(IAsyncApiWriter writer)
