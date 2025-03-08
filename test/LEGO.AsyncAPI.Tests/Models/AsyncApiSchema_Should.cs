@@ -389,9 +389,9 @@ namespace LEGO.AsyncAPI.Tests.Models
         }
 
         [Theory]
-        [TestCase(true)]
-        [TestCase(false)]
-        public void V2_Serialize_WithInliningOptions_ShouldInlineAccordingly(bool shouldInline)
+        [TestCase(ReferenceInlineSetting.InlineReferences)]
+        [TestCase(ReferenceInlineSetting.DoNotInlineReferences)]
+        public void V2_Serialize_WithInliningOptions_ShouldInlineAccordingly(ReferenceInlineSetting shouldInline)
         {
             // arrange
             var asyncApiDocument = new AsyncApiDocumentBuilder()
@@ -446,7 +446,7 @@ namespace LEGO.AsyncAPI.Tests.Models
             .Build();
 
             var outputString = new StringWriter();
-            var writer = new AsyncApiYamlWriter(outputString, new AsyncApiWriterSettings { InlineLocalReferences = shouldInline });
+            var writer = new AsyncApiYamlWriter(outputString, new AsyncApiWriterSettings { ReferenceInline = shouldInline });
 
             // Act
             asyncApiDocument.SerializeV2(writer);
@@ -456,7 +456,7 @@ namespace LEGO.AsyncAPI.Tests.Models
             // Assert
             string expected = this.GetTestData<string>(
                 AsyncApiVersion.AsyncApi2_0,
-                shouldInline
+                shouldInline == ReferenceInlineSetting.InlineReferences
                 ? "AsyncApiSchema_InlinedReferences"
                 : "AsyncApiSchema_NoInlinedReferences.yml");
 
@@ -465,9 +465,9 @@ namespace LEGO.AsyncAPI.Tests.Models
         }
 
         [Theory]
-        [TestCase(true)]
-        [TestCase(false)]
-        public void V3_Serialize_WithInliningOptions_ShouldInlineAccordingly(bool shouldInline)
+        [TestCase(ReferenceInlineSetting.InlineReferences)]
+        [TestCase(ReferenceInlineSetting.DoNotInlineReferences)]
+        public void V3_Serialize_WithInliningOptions_ShouldInlineAccordingly(ReferenceInlineSetting shouldInline)
         {
             // arrange
             var asyncApiDocument = new AsyncApiDocumentBuilder()
@@ -516,7 +516,7 @@ namespace LEGO.AsyncAPI.Tests.Models
             .Build();
 
             var outputString = new StringWriter();
-            var writer = new AsyncApiYamlWriter(outputString, new AsyncApiWriterSettings { InlineLocalReferences = shouldInline });
+            var writer = new AsyncApiYamlWriter(outputString, new AsyncApiWriterSettings { ReferenceInline = shouldInline });
 
             // Act
             asyncApiDocument.SerializeV3(writer);
@@ -524,7 +524,8 @@ namespace LEGO.AsyncAPI.Tests.Models
             var actual = outputString.ToString();
 
             // Assert
-            string expected = this.GetTestData<string>(AsyncApiVersion.AsyncApi3_0, shouldInline
+            string expected = this.GetTestData<string>(AsyncApiVersion.AsyncApi3_0,
+                shouldInline == ReferenceInlineSetting.InlineReferences
                 ? "AsyncApiSchema_InlinedReferences"
                 : "AsyncApiSchema_NoInlinedReferences.yml");
 

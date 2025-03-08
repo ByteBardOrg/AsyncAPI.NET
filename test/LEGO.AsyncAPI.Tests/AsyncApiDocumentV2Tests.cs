@@ -531,7 +531,7 @@ namespace LEGO.AsyncAPI.Tests
                 asyncapi: 2.6.0
                 info:
                   title: apiTitle
-                  version: apiVersion
+                  version: 1.0.0
                   description: description
                   termsOfService: https://example.com/termsOfService
                   contact:
@@ -1217,12 +1217,14 @@ namespace LEGO.AsyncAPI.Tests
                       kafka:
                         partitions: 2
                         replicas: 1
+                components: { }
                 """;
 
             var doc = new AsyncApiDocument();
             doc.Info = new AsyncApiInfo()
             {
                 Title = "test",
+                Version = "1.0.0",
                 Description = "test description",
             };
             doc.Servers.Add("production", new AsyncApiServer
@@ -1249,6 +1251,7 @@ namespace LEGO.AsyncAPI.Tests
             doc.Operations.Add("firstOperation", new AsyncApiOperation()
             {
                 Channel = new AsyncApiChannelReference("#/channels/testChannel"),
+                Action = AsyncApiAction.Receive,
                 Messages = new List<AsyncApiMessageReference>
                 {
                     new("#/components/messages/firstMessage"),
@@ -1280,7 +1283,11 @@ namespace LEGO.AsyncAPI.Tests
                 },
             });
 
-            var actual = doc.Serialize(AsyncApiVersion.AsyncApi2_0, AsyncApiFormat.Yaml);
+
+            var outputString = new StringWriter();
+            var writer = new AsyncApiYamlWriter(outputString, new AsyncApiWriterSettings { ReferenceInline = ReferenceInlineSetting.InlineReferences });
+            doc.SerializeV2(writer);
+            var actual = outputString.ToString();
 
             var settings = new AsyncApiReaderSettings
             {
