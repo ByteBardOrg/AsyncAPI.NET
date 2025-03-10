@@ -3,6 +3,7 @@
 namespace LEGO.AsyncAPI.Writers
 {
     using LEGO.AsyncAPI.Models;
+    using System;
 
     /// <summary>
     /// Contains settings for writing async api.
@@ -58,7 +59,7 @@ namespace LEGO.AsyncAPI.Writers
         /// <summary>
         /// Gets or sets a value indicating whether indicates if local references should be rendered as an inline object.
         /// </summary>
-        public bool InlineLocalReferences { get; set; }
+        public bool InlineLocalReferences { get; private set; }
 
         /// <summary>
         /// Figures out if a loop exists.

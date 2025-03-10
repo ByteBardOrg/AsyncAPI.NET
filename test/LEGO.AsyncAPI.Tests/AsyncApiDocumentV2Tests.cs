@@ -643,7 +643,7 @@ namespace LEGO.AsyncAPI.Tests
             string licenseUri = "https://example.com/license";
             string extensionKey = "x-extension";
             string extensionString = "value";
-            string apiVersion = "apiVersion";
+            string apiVersion = "1.0.0";
             string termsOfServiceUri = "https://example.com/termsOfService";
             string channelKey = "channel1";
             string channelDescription = "channelDescription";
@@ -888,10 +888,10 @@ namespace LEGO.AsyncAPI.Tests
                             Messages = new List<AsyncApiMessageReference>
                             {
                                 {
-                                    new($"#/channels/messages/{messageKeyOne}")
+                                    new($"#/channels/channel1/messages/{messageKeyOne}")
                                 },
                                 {
-                                    new($"#/channels/messages/{messageKeyTwo}")
+                                    new($"#/channels/channel1/messages/{messageKeyTwo}")
                                 },
                             },
                             Extensions = new Dictionary<string, IAsyncApiExtension>
