@@ -24,20 +24,9 @@ namespace LEGO.AsyncAPI
             }
 
             string componentsBaseUri = "#/components/";
-            string channelBaseUri = "#/channels/";
             string location;
 
-            foreach (var channel in document.Channels.Where(channel => channel.Value is not IAsyncApiReferenceable))
-            {
-                location = channelBaseUri + channel.Key;
-                this.RegisterComponent(location, channel.Value);
 
-                foreach (var message in channel.Value.Messages.Where(message => message.Value is not IAsyncApiReferenceable))
-                {
-                    location = location + "/messages/" + message.Key;
-                    this.RegisterComponent(location, message.Value);
-                }
-            }
 
             // Register Schema
             foreach (var item in document.Components.Schemas)
@@ -181,6 +170,29 @@ namespace LEGO.AsyncAPI
             {
                 location = componentsBaseUri + ReferenceType.MessageBindings.GetDisplayName() + "/" + item.Key;
                 this.RegisterComponent(location, item.Value);
+            }
+
+            string channelBaseUri = "#/channels/";
+            foreach (var channel in document.Channels)
+            {
+                var registerableChannelValue = channel.Value;
+                if (channel.Value is IAsyncApiReferenceable reference)
+                {
+                    if (reference.Reference.IsExternal)
+                    {
+                        continue;
+                    }
+
+                    registerableChannelValue = this.ResolveReference<AsyncApiChannel>(reference.Reference);
+                }
+
+                location = channelBaseUri + channel.Key;
+                this.RegisterComponent(location, registerableChannelValue);
+
+                foreach (var message in registerableChannelValue.Messages.Where(message => message.Value is not IAsyncApiReferenceable))
+                {
+                    this.RegisterComponent(location + "/messages/" + message.Key, message.Value);
+                }
             }
         }
 

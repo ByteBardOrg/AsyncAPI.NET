@@ -144,8 +144,12 @@ namespace LEGO.AsyncAPI.Models
 
         private bool CheckOperationChannel(AsyncApiOperation operation, IAsyncApiWriter writer)
         {
-            operation.Channel.Reference.Workspace = writer.Workspace;
+            if (operation is AsyncApiOperationReference reference)
+            {
+                reference.Reference.Workspace = writer.Workspace;
+            }
 
+            operation.Channel.Reference.Workspace = writer.Workspace;
             return operation.Channel.Equals(this);
         }
     }

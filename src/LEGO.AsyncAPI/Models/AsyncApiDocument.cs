@@ -4,6 +4,7 @@ namespace LEGO.AsyncAPI.Models
 {
     using System;
     using System.Collections.Generic;
+    using System.Security.Authentication.ExtendedProtection;
     using LEGO.AsyncAPI.Models.Interfaces;
     using LEGO.AsyncAPI.Writers;
 
@@ -87,7 +88,7 @@ namespace LEGO.AsyncAPI.Models
             writer.WriteOptionalProperty(AsyncApiConstants.DefaultContentType, this.DefaultContentType);
 
             // channels
-            writer.WriteRequiredMap(AsyncApiConstants.Channels, this.Channels, (channel) => channel.Address, (writer, key, component) => component.SerializeV2(writer));
+            writer.WriteRequiredMap(AsyncApiConstants.Channels, this.Channels, (channel) => GetChannelAddress(channel, writer.Workspace), (writer, key, component) => component.SerializeV2(writer));
 
             // components
             if (this.Components.Schemas.Count > 0 ||
@@ -124,6 +125,16 @@ namespace LEGO.AsyncAPI.Models
             writer.WriteExtensions(this.Extensions);
 
             writer.WriteEndObject();
+        }
+
+        private string GetChannelAddress(AsyncApiChannel channel, AsyncApiWorkspace workspace)
+        {
+            if (channel is AsyncApiChannelReference reference)
+            {
+                reference.Reference.Workspace = workspace;
+            }
+
+            return channel.Address;
         }
 
         public void SerializeV3(IAsyncApiWriter writer)

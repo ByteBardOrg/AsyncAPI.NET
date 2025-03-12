@@ -531,7 +531,7 @@ namespace LEGO.AsyncAPI.Tests
                 asyncapi: 2.6.0
                 info:
                   title: apiTitle
-                  version: apiVersion
+                  version: 1.0.0
                   description: description
                   termsOfService: https://example.com/termsOfService
                   contact:
@@ -643,7 +643,7 @@ namespace LEGO.AsyncAPI.Tests
             string licenseUri = "https://example.com/license";
             string extensionKey = "x-extension";
             string extensionString = "value";
-            string apiVersion = "apiVersion";
+            string apiVersion = "1.0.0";
             string termsOfServiceUri = "https://example.com/termsOfService";
             string channelKey = "channel1";
             string channelDescription = "channelDescription";
@@ -888,10 +888,10 @@ namespace LEGO.AsyncAPI.Tests
                             Messages = new List<AsyncApiMessageReference>
                             {
                                 {
-                                    new($"#/channels/messages/{messageKeyOne}")
+                                    new($"#/channels/channel1/messages/{messageKeyOne}")
                                 },
                                 {
-                                    new($"#/channels/messages/{messageKeyTwo}")
+                                    new($"#/channels/channel1/messages/{messageKeyTwo}")
                                 },
                             },
                             Extensions = new Dictionary<string, IAsyncApiExtension>
@@ -1060,6 +1060,7 @@ namespace LEGO.AsyncAPI.Tests
                 asyncapi: 2.6.0
                 info:
                   title: test
+                  version: 1.0.0
                   description: test description
                 servers:
                   production:
@@ -1069,13 +1070,16 @@ namespace LEGO.AsyncAPI.Tests
                     bindings:
                       $ref: '#/components/serverBindings/bindings'
                 channels:
-                  testChannel:
+                  'testChannel/{some}':
                     $ref: '#/components/channels/otherchannel'
                 components:
                   channels:
                     otherchannel:
                       publish:
                         description: test
+                      parameters:
+                        some:
+                          description: a parameter
                       bindings:
                         $ref: '#/components/channelBindings/bindings'
                   serverBindings:
@@ -1092,6 +1096,7 @@ namespace LEGO.AsyncAPI.Tests
             doc.Info = new AsyncApiInfo()
             {
                 Title = "test",
+                Version = "1.0.0",
                 Description = "test description",
             };
             doc.Servers.Add("production", new AsyncApiServer
@@ -1101,6 +1106,13 @@ namespace LEGO.AsyncAPI.Tests
                 Host = "example.com",
                 Bindings = new AsyncApiBindingsReference<IServerBinding>("#/components/serverBindings/bindings"),
             });
+            doc.Channels.Add(
+                "testChannel",
+                new AsyncApiChannelReference("#/components/channels/otherchannel"));
+            doc.Operations.Add(
+                "operation",
+                new AsyncApiOperationReference("#/components/operations/otherOperation"));
+
             doc.Components = new AsyncApiComponents()
             {
                 Channels = new Dictionary<string, AsyncApiChannel>()
@@ -1108,6 +1120,15 @@ namespace LEGO.AsyncAPI.Tests
                     {
                         "otherchannel", new AsyncApiChannel()
                         {
+                            Address = "testChannel/{some}",
+                            Parameters = new Dictionary<string, AsyncApiParameter>
+                            {
+                                { "some", new AsyncApiParameter
+                                    {
+                                       Description = "a parameter",
+                                    }
+                                },
+                            },
                             Bindings = new AsyncApiBindingsReference<IChannelBinding>("#/components/channelBindings/bindings"),
                         }
                     },
@@ -1140,17 +1161,16 @@ namespace LEGO.AsyncAPI.Tests
                 Operations = new Dictionary<string, AsyncApiOperation>()
                 {
                     {
-                        "operation", new AsyncApiOperation()
+                        "otherOperation", new AsyncApiOperation()
                         {
+                            Action = AsyncApiAction.Receive,
                             Description = "test",
-                            Channel = new AsyncApiChannelReference("#/components/channels/otherchannel"),
+                            Channel = new AsyncApiChannelReference("#/channels/testChannel"),
                         }
                     },
                 },
             };
-            doc.Channels.Add(
-                "testChannel",
-                new AsyncApiChannelReference("#/components/channels/otherchannel"));
+
             var actual = doc.Serialize(AsyncApiVersion.AsyncApi2_0, AsyncApiFormat.Yaml);
             actual.Should().BePlatformAgnosticEquivalentTo(expected);
 
@@ -1175,6 +1195,7 @@ namespace LEGO.AsyncAPI.Tests
                 asyncapi: 2.6.0
                 info:
                   title: test
+                  version: 1.0.0
                   description: test description
                 servers:
                   production:
@@ -1196,12 +1217,14 @@ namespace LEGO.AsyncAPI.Tests
                       kafka:
                         partitions: 2
                         replicas: 1
+                components: { }
                 """;
 
             var doc = new AsyncApiDocument();
             doc.Info = new AsyncApiInfo()
             {
                 Title = "test",
+                Version = "1.0.0",
                 Description = "test description",
             };
             doc.Servers.Add("production", new AsyncApiServer
@@ -1228,6 +1251,7 @@ namespace LEGO.AsyncAPI.Tests
             doc.Operations.Add("firstOperation", new AsyncApiOperation()
             {
                 Channel = new AsyncApiChannelReference("#/channels/testChannel"),
+                Action = AsyncApiAction.Receive,
                 Messages = new List<AsyncApiMessageReference>
                 {
                     new("#/components/messages/firstMessage"),
@@ -1259,7 +1283,11 @@ namespace LEGO.AsyncAPI.Tests
                 },
             });
 
-            var actual = doc.Serialize(AsyncApiVersion.AsyncApi2_0, AsyncApiFormat.Yaml);
+
+            var outputString = new StringWriter();
+            var writer = new AsyncApiYamlWriter(outputString, new AsyncApiWriterSettings { ReferenceInline = ReferenceInlineSetting.InlineReferences });
+            doc.SerializeV2(writer);
+            var actual = outputString.ToString();
 
             var settings = new AsyncApiReaderSettings
             {

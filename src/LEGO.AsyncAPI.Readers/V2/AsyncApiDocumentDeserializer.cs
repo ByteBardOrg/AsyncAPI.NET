@@ -18,7 +18,7 @@ namespace LEGO.AsyncAPI.Readers
             { "components", (a, n) => a.Components = LoadComponents(n) }, // Load before anything else so upgrading can go smoothly.
             { "servers", (a, n) => a.Servers = n.CreateMap(LoadServer) },
             { "defaultContentType", (a, n) => a.DefaultContentType = n.GetScalarValue() },
-            { "channels", (a, n) => a.Channels = n.CreateMap(key => NormalizeChannelKey(key), (n2, originalKey) => LoadChannel(n2, channelAddress: originalKey)) },
+            { "channels", (a, n) => a.Channels = n.CreateMap(key => NormalizeChannelKey(key, n), (n2, originalKey) => LoadChannel(n2, channelAddress: originalKey)) },
             { "tags", (a, n) => a.Info.Tags = n.CreateList(LoadTag) },
             { "externalDocs", (a, n) => a.Info.ExternalDocs = LoadExternalDocs(n) },
         };
@@ -88,15 +88,30 @@ namespace LEGO.AsyncAPI.Readers
                 if (operation.Value.Channel != null)
                 {
                     var messages = context.GetFromTempStorage<Dictionary<string, AsyncApiMessageReference>>(TempStorageKeys.OperationMessageReferences, operation.Value);
-                    var channel = document.Channels.FirstOrDefault(channel => channel.Key == operation.Value.Channel.Reference.Reference.Split("/")[^1]);
+                    var operationChannelFragmentKey = operation.Value.Channel.Reference.Reference.Split("/")[^1];
+                    var channel = document.Channels.FirstOrDefault(channel => channel.Key == operationChannelFragmentKey);
                     if (channel.Value == null)
                     {
-                        continue;
+                        // it most likely came from a components channel, so the reference will be wrong.
+                        // Find the channel that references this operations channel, and move the reference.
+                        var correctChannelReference = document.Channels.FirstOrDefault(channel => channel.Value is AsyncApiChannelReference reference && reference.Reference.Reference.EndsWith(operationChannelFragmentKey));
+                        if (correctChannelReference.Key != null)
+                        {
+                            operation.Value.Channel = new AsyncApiChannelReference("#/channels/" + correctChannelReference.Key);
+                            channel = correctChannelReference;
+                        }
+                        else
+                        {
+                            continue;
+                        }
                     }
 
                     if (channel.Value is AsyncApiChannelReference channelReference)
                     {
                         channelReference.Reference.Workspace = context.Workspace;
+                        // Set reference address to the key, as key in v2 is the address of v3.
+                        var addresses = context.GetFromTempStorage<Dictionary<string, string>>(TempStorageKeys.ChannelAddresses) ?? new Dictionary<string, string>();
+                        channelReference.Address = addresses.GetValueOrDefault(channel.Key) ?? channel.Key;
                     }
 
                     if (messages == null)
