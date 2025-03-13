@@ -62,6 +62,11 @@ namespace LEGO.AsyncAPI.Validation.Rules
             new ValidationRule<AsyncApiOperation>(
                 (context, operation) =>
                 {
+                    if (context.RootDocument?.Operations.Values.FirstOrDefault(op => op == operation) is null)
+                    {
+                        return;
+                    }
+
                     var channels =
                         context.RootDocument.Channels.Values.Where(channel => operation.Channel.Equals(channel));
 
