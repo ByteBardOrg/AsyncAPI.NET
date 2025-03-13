@@ -69,7 +69,7 @@ namespace LEGO.AsyncAPI.Writers
         /// <summary>
         /// Returns back if the refernece should be inlined or not.
         /// </summary>
-        /// <param name="reference">The refernece.</param>
+        /// <param name="reference">The reference.</param>
         /// <returns>True if it should be inlined otherwise false.</returns>
         public bool ShouldInlineReference(AsyncApiReference reference)
         {

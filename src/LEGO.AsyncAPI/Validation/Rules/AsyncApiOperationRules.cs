@@ -1,5 +1,6 @@
 // Copyright (c) The LEGO Group. All rights reserved.
 
+using System.Collections.Generic;
 using System.Linq;
 
 namespace LEGO.AsyncAPI.Validation.Rules
@@ -54,16 +55,6 @@ namespace LEGO.AsyncAPI.Validation.Rules
                         context.CreateError(
                             "OperationChannelRef",
                             string.Format(Resource.Validation_OperationMustReferenceValidChannel, operation.Title));
-                        return;
-                    }
-
-                    // TODO: check this validation
-                    if (!operation.Messages.All(refMessage => referencedChannel.Messages.Any(message => refMessage.Equals(message))))
-                    {
-                        context.CreateError(
-                            "OperationChannelRef",
-                            string.Format(Resource.Validation_OperationMessagesMustReferenceOperationChannel, operation.Title));
-                        return;
                     }
                 });
 
@@ -72,22 +63,29 @@ namespace LEGO.AsyncAPI.Validation.Rules
                 (context, operation) =>
                 {
                     var channels =
-                        context.RootDocument.Channels.Values.Where(channel => channel.Equals(operation.Channel));
+                        context.RootDocument.Channels.Values.Where(channel => operation.Channel.Equals(channel));
 
-                    var referencedChannel = channels.FirstOrDefault(c => c.Equals(operation.Channel));
+                    var referencedChannel = channels.FirstOrDefault(c => operation.Channel.Equals(c));
 
                     if (referencedChannel == null)
                     {
                         return;
                     }
 
-                    if (!operation.Messages.All(refMessage => referencedChannel.Messages.Any(message => message.Equals(refMessage))))
+                    if (!AllOperationsMessagesReferencesChannelMessages(operation.Messages, referencedChannel.Messages.Values))
                     {
                         context.CreateError(
                             "OperationChannelRef",
                             string.Format(Resource.Validation_OperationMessagesMustReferenceOperationChannel, operation.Title));
-                        return;
                     }
                 });
+
+        private static bool AllOperationsMessagesReferencesChannelMessages(
+            IList<AsyncApiMessageReference> operationMessages, ICollection<AsyncApiMessage> channelMessages) =>
+            operationMessages.All(opMessage => OperationMessageReferencesAnyChannelMessage(opMessage, channelMessages));
+
+        private static bool OperationMessageReferencesAnyChannelMessage(
+            AsyncApiMessageReference operationMessage, ICollection<AsyncApiMessage> channelMessages) =>
+            channelMessages.Any(channelMessage => channelMessage.Equals(operationMessage));
     }
 }
