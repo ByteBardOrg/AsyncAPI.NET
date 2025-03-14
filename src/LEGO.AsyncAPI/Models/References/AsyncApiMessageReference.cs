@@ -71,6 +71,11 @@ namespace LEGO.AsyncAPI.Models
 
         public bool Equals(AsyncApiMessageReference other)
         {
+            if (other.Target is AsyncApiMessageReference reference)
+            {
+                return this.Equals(reference);
+            }
+
             return this.Target == other.Target;
         }
 
