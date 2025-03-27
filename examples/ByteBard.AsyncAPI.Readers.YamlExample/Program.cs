@@ -1,0 +1,37 @@
+﻿namespace ByteBard.AsyncAPI.Readers.YamlExample
+{
+    using System;
+    using System.IO;
+    using System.Net.Http;
+    using System.Text;
+    using System.Threading.Tasks;
+    using ByteBard.AsyncAPI.Readers;
+
+    public class Program
+    {
+        static async Task Main()
+        {
+            var httpClient = new HttpClient
+            {
+                BaseAddress = new Uri("https://raw.githubusercontent.com/asyncapi/spec/"),
+            };
+
+            var stream = await httpClient.GetStreamAsync("master/examples/streetlights-kafka.yml");
+
+            var streetlightKafkaSpec = await new StreamReader(stream, Encoding.UTF8).ReadToEndAsync();
+
+            var asyncApiDocument = new AsyncApiStringReader().Read(streetlightKafkaSpec, out var diagnostic);
+
+            if (diagnostic.HasError)
+            {
+                Console.WriteLine($"Error during spec parsing: {diagnostic.Error}");
+            }
+            else
+            {
+                Console.WriteLine("Kafka Starlight YAML spec successfully parsed into AsyncApiDocument object");
+                Console.WriteLine($"Api version: {asyncApiDocument.Asyncapi}");
+                Console.WriteLine($"Number of channels: {asyncApiDocument.Channels.Count}");
+            }
+        }
+    }
+}

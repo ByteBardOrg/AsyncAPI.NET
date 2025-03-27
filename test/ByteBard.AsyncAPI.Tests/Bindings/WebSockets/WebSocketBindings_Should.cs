@@ -1,0 +1,55 @@
+﻿namespace ByteBard.AsyncAPI.Tests.Bindings.WebSockets
+{
+    using FluentAssertions;
+    using ByteBard.AsyncAPI.Bindings;
+    using ByteBard.AsyncAPI.Bindings.WebSockets;
+    using ByteBard.AsyncAPI.Models;
+    using ByteBard.AsyncAPI.Readers;
+    using NUnit.Framework;
+
+    public class WebSocketBindings_Should : TestBase
+    {
+        [Test]
+        public void WebSocketChannelBinding_WithFilledObject_SerializesAndDeserializes()
+        {
+            // Arrange
+            var expected =
+                """
+                bindings:
+                  websockets:
+                    method: POST
+                    query:
+                      description: this mah query
+                    headers:
+                      description: this mah binding
+                """;
+
+            var channel = new AsyncApiChannel();
+            channel.Bindings.Add(new WebSocketsChannelBinding
+            {
+                Method = "POST",
+                Query = new AsyncApiJsonSchema
+                {
+                    Description = "this mah query",
+                },
+                Headers = new AsyncApiJsonSchema
+                {
+                    Description = "this mah binding",
+                },
+            });
+
+            // Act
+            var actual = channel.SerializeAsYaml(AsyncApiVersion.AsyncApi2_0);
+
+            var settings = new AsyncApiReaderSettings();
+            settings.Bindings = BindingsCollection.Websockets;
+            var binding = new AsyncApiStringReader(settings).ReadFragment<AsyncApiChannel>(actual, AsyncApiVersion.AsyncApi2_0, out _);
+
+            // Assert
+            actual.Should()
+                .BePlatformAgnosticEquivalentTo(expected);
+
+            binding.Should().BeEquivalentTo(channel);
+        }
+    }
+}

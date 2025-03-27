@@ -1,0 +1,20 @@
+<Project>
+  <!-- Common Properties used by all assemblies -->
+  <PropertyGroup>
+    <LangVersion>10</LangVersion>
+    <TargetFrameworks>netstandard2.0;net8</TargetFrameworks>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <Company>ByteBard</Company>
+    <PackageProjectUrl>https://github.com/ByteBardOrg/AsyncAPI.NET</PackageProjectUrl>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <RepositoryUrl>https://github.com/ByteBardOrg/AsyncAPI.NET</RepositoryUrl>
+    <PackageTags>asyncapi .net openapi documentation</PackageTags>
+    <PackageIcon>logo.png</PackageIcon>
+    <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
+  </PropertyGroup>
+  <ItemGroup>
+    <None Include="..\..\media\logo.png" Pack="true" PackagePath="\" />
+    <None Include="..\..\README.md" Pack="true" PackagePath="\" />
+    <None Include="..\..\LICENSE.txt" Pack="true" PackagePath="\" />
+  </ItemGroup>
+</Project>

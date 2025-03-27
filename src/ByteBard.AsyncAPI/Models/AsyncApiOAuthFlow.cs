@@ -1,0 +1,67 @@
+﻿namespace ByteBard.AsyncAPI.Models
+{
+    using System;
+    using System.Collections.Generic;
+    using ByteBard.AsyncAPI.Models.Interfaces;
+    using ByteBard.AsyncAPI.Writers;
+
+    public class AsyncApiOAuthFlow : IAsyncApiSerializable, IAsyncApiExtensible
+    {
+        /// <summary>
+        /// REQUIRED. The authorization URL to be used for this flow.
+        /// Applies to implicit and authorizationCode OAuthFlow.
+        /// </summary>
+        public Uri AuthorizationUrl { get; set; }
+
+        /// <summary>
+        /// REQUIRED. The token URL to be used for this flow.
+        /// Applies to password, clientCredentials, and authorizationCode OAuthFlow.
+        /// </summary>
+        public Uri TokenUrl { get; set; }
+
+        /// <summary>
+        /// The URL to be used for obtaining refresh tokens.
+        /// </summary>
+        public Uri RefreshUrl { get; set; }
+
+        /// <summary>
+        /// REQUIRED. A map between the scope name and a short description for it.
+        /// </summary>
+        public IDictionary<string, string> Scopes { get; set; } = new Dictionary<string, string>();
+
+        /// <summary>
+        /// Specification Extensions.
+        /// </summary>
+        public IDictionary<string, IAsyncApiExtension> Extensions { get; set; } = new Dictionary<string, IAsyncApiExtension>();
+
+        /// <summary>
+        /// Serialize <see cref="AsyncApiOAuthFlow"/> to Async Api v2.4.
+        /// </summary>
+        public void SerializeV2(IAsyncApiWriter writer)
+        {
+            if (writer is null)
+            {
+                throw new ArgumentNullException(nameof(writer));
+            }
+
+            writer.WriteStartObject();
+
+            // authorizationUrl
+            writer.WriteOptionalProperty(AsyncApiConstants.AuthorizationUrl, this.AuthorizationUrl?.ToString());
+
+            // tokenUrl
+            writer.WriteOptionalProperty(AsyncApiConstants.TokenUrl, this.TokenUrl?.ToString());
+
+            // refreshUrl
+            writer.WriteOptionalProperty(AsyncApiConstants.RefreshUrl, this.RefreshUrl?.ToString());
+
+            // scopes
+            writer.WriteRequiredMap(AsyncApiConstants.Scopes, this.Scopes, (w, s) => w.WriteValue(s));
+
+            // extensions
+            writer.WriteExtensions(this.Extensions);
+
+            writer.WriteEndObject();
+        }
+    }
+}

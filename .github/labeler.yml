@@ -1,0 +1,12 @@
+documentation:
+- '**/*.md'
+ci/cd:
+- .github/**/*
+asyncapi.readers:
+- src/ByteBard.AsyncAPI.Readers/**/*
+asyncapi.bindings:
+- src/ByteBard.AsyncAPI.Bindings/**/*
+asyncapi.models:
+- src/ByteBard.AsyncAPI/**/*
+asyncapi.tests:
+- test/**/*

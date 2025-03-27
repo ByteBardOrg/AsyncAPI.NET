@@ -1,0 +1,55 @@
+﻿namespace ByteBard.AsyncAPI.Models
+{
+    using System;
+    using System.Collections.Generic;
+    using ByteBard.AsyncAPI.Models.Interfaces;
+    using ByteBard.AsyncAPI.Writers;
+
+    /// <summary>
+    /// Contact information for the exposed API.
+    /// </summary>
+    public class AsyncApiContact : IAsyncApiSerializable, IAsyncApiExtensible
+    {
+        /// <summary>
+        /// Gets or sets the identifying name of the contact person/organization.
+        /// </summary>
+        public string Name { get; set; }
+
+        /// <summary>
+        /// Gets or sets the URL pointing to the contact information. MUST be in the format of a URL.
+        /// </summary>
+        public Uri Url { get; set; }
+
+        /// <summary>
+        /// Gets or sets the email address of the contact person/organization. MUST be in the format of an email address.
+        /// </summary>
+        public string Email { get; set; }
+
+        /// <inheritdoc/>
+        public IDictionary<string, IAsyncApiExtension> Extensions { get; set; } = new Dictionary<string, IAsyncApiExtension>();
+
+        public void SerializeV2(IAsyncApiWriter writer)
+        {
+            if (writer is null)
+            {
+                throw new ArgumentNullException(nameof(writer));
+            }
+
+            writer.WriteStartObject();
+
+            // name
+            writer.WriteOptionalProperty(AsyncApiConstants.Name, this.Name);
+
+            // url
+            writer.WriteOptionalProperty(AsyncApiConstants.Url, this.Url?.OriginalString);
+
+            // email
+            writer.WriteOptionalProperty(AsyncApiConstants.Email, this.Email);
+
+            // extensions
+            writer.WriteExtensions(this.Extensions);
+
+            writer.WriteEndObject();
+        }
+    }
+}

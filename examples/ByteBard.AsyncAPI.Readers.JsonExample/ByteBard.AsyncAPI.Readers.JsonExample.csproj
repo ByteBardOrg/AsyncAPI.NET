@@ -1,0 +1,30 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net6.0</TargetFramework>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="CompleteKafkaSpec.json" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="CompleteKafkaSpec.json" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="ByteBard.AsyncAPI.Readers" Version="*-*" />
+    <PackageReference Include="StyleCop.Analyzers" Version="1.1.118">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\ByteBard.AsyncAPI.Readers\ByteBard.AsyncAPI.Readers.csproj" />
+  </ItemGroup>
+
+</Project>
