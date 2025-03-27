@@ -20,9 +20,7 @@ namespace LEGO.AsyncAPI.Readers
             var defaultSchemaFormat = "application/vnd.aai.asyncapi+json;version=3.0.0";
             if (pointer != null)
             {
-                schemaFormat.Schema = new AsyncApiJsonSchemaReference(pointer);
-                schemaFormat.SchemaFormat = defaultSchemaFormat;
-                return schemaFormat;
+                return new AsyncApiMultiFormatSchemaReference(pointer);
             }
 
             // Not a pointer and no schemaFormat means it MUST be a jsonSchema,
@@ -34,7 +32,8 @@ namespace LEGO.AsyncAPI.Readers
             }
 
             var format = mapNode["schemaFormat"].Value.GetScalarValue();
-            schemaFormat.Schema = LoadSchema(node, LoadSchemaFormat(format));
+            var schema = mapNode["schema"].Value;
+            schemaFormat.Schema = LoadSchema(schema, LoadSchemaFormat(format));
             schemaFormat.SchemaFormat = format;
             return schemaFormat;
 

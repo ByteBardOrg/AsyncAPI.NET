@@ -31,12 +31,11 @@ namespace LEGO.AsyncAPI.Readers
                 else
                 {
                     mapNode.Context.Diagnostic.Errors.Add(
-                        new AsyncApiError(node.Context.GetLocation(), $"OperationBinding {property.Name} is not found"));
+                        new AsyncApiError(node.Context.GetLocation(), $"OperationBinding '{property.Name}' was not found"));
                 }
             }
+            mapNode.ParseFields(operationBindings, operationBindingPatternFields);
 
-            // #ToFix Write test to show that we can still deserialize bindings correctly and still have extensions on the parent.
-            mapNode.ParseFields(operationBindings, null, operationBindingPatternFields);
             return operationBindings;
         }
 

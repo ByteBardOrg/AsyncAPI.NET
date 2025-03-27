@@ -94,6 +94,12 @@ namespace LEGO.AsyncAPI.Models
             {
                 return false;
             }
+
+            if (other.Target is AsyncApiChannelReference reference)
+            {
+                return this.Equals(reference);
+            }
+
             return this.Target == other.Target;
         }
 

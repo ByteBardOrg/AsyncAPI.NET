@@ -408,24 +408,25 @@ namespace LEGO.AsyncAPI.Tests.Models
             })
             .WithChannel("mychannel", new AsyncApiChannel()
             {
-                    Messages = new Dictionary<string, AsyncApiMessage>
+                Address = "mychannel-{parameter}",
+                Messages = new Dictionary<string, AsyncApiMessage>
+                {
                     {
+                        "whatever", new AsyncApiMessage
                         {
-                            "whatever", new AsyncApiMessage
+                            Payload = new AsyncApiJsonSchema
                             {
-                                Payload = new AsyncApiJsonSchema
+                                Type = SchemaType.Object,
+                                Required = new HashSet<string> { "testB" },
+                                Properties = new Dictionary<string, AsyncApiJsonSchema>
                                 {
-                                    Type = SchemaType.Object,
-                                    Required = new HashSet<string> { "testB" },
-                                    Properties = new Dictionary<string, AsyncApiJsonSchema>
-                                    {
-                                        { "testC", new AsyncApiJsonSchemaReference("#/components/schemas/testC") },
-                                        { "testB", new AsyncApiJsonSchemaReference("#/components/schemas/testB") },
-                                    },
+                                    { "testC", new AsyncApiJsonSchemaReference("#/components/schemas/testC") },
+                                    { "testB", new AsyncApiJsonSchemaReference("#/components/schemas/testB") },
                                 },
-                            }
-                        },
+                            },
+                        }
                     },
+                },
             })
             .WithOperation("operationA", new AsyncApiOperation
             {

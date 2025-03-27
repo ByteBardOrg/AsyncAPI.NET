@@ -9,7 +9,7 @@ namespace LEGO.AsyncAPI.Models
     using LEGO.AsyncAPI.Writers;
 
     [DebuggerDisplay("{Reference}")]
-    public class AsyncApiExternalDocumentationReference : AsyncApiExternalDocumentation, IAsyncApiReferenceable
+    public class AsyncApiExternalDocumentationReference : AsyncApiExternalDocumentation, IAsyncApiReferenceable, IEquatable<AsyncApiExternalDocumentationReference>, IEquatable<AsyncApiExternalDocumentation>
     {
         private AsyncApiExternalDocumentation target;
 
@@ -36,6 +36,48 @@ namespace LEGO.AsyncAPI.Models
         public AsyncApiReference Reference { get; set; }
 
         public bool UnresolvedReference { get { return this.Target == null; } }
+
+        public static bool operator !=(AsyncApiExternalDocumentationReference left, AsyncApiExternalDocumentationReference right) => !(left == right);
+
+        public static bool operator ==(AsyncApiExternalDocumentationReference left, AsyncApiExternalDocumentationReference right)
+        {
+            return Equals(left, null) ? Equals(right, null) : left.Equals(right);
+        }
+
+        public bool Equals(AsyncApiExternalDocumentationReference other)
+        {
+            if (other is null)
+            {
+                return false;
+            }
+
+            if (other.Target is AsyncApiExternalDocumentationReference reference)
+            {
+                return this.Equals(reference);
+            }
+
+            return this.Target == other.Target;
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (obj is AsyncApiExternalDocumentationReference reference)
+            {
+                return this.Equals(reference);
+            }
+
+            if (obj is AsyncApiExternalDocumentation message)
+            {
+                return this.Equals(message);
+            }
+
+            return false;
+        }
+
+        public bool Equals(AsyncApiExternalDocumentation other)
+        {
+            return this.Target == other;
+        }
 
         /// <summary>
         /// Serializes the v2.

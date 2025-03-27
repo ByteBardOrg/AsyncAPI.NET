@@ -35,8 +35,8 @@ namespace LEGO.AsyncAPI.Readers
                 }
             }
 
-            // #ToFix Write test to show that we can still deserialize bindings correctly and still have extensions on the parent.
-            mapNode.ParseFields(messageBindings, null, messageBindingPatternFields);
+            mapNode.ParseFields(messageBindings, messageBindingPatternFields);
+
             return messageBindings;
         }
 
@@ -45,6 +45,7 @@ namespace LEGO.AsyncAPI.Readers
     {
         { s => s.StartsWith("x-"), (o, p, n) => o.AddExtension(p, LoadExtension(p, n)) },
     };
+
         internal static IMessageBinding LoadMessageBinding(ParseNode node)
         {
             var property = node as PropertyNode;

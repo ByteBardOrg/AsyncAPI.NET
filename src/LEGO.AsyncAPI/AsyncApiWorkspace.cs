@@ -189,7 +189,7 @@ namespace LEGO.AsyncAPI
                 location = channelBaseUri + channel.Key;
                 this.RegisterComponent(location, registerableChannelValue);
 
-                foreach (var message in registerableChannelValue.Messages.Where(message => message.Value is not IAsyncApiReferenceable))
+                foreach (var message in registerableChannelValue.Messages)
                 {
                     this.RegisterComponent(location + "/messages/" + message.Key, message.Value);
                 }

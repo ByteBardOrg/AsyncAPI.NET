@@ -9,7 +9,7 @@ namespace LEGO.AsyncAPI.Models
     using LEGO.AsyncAPI.Writers;
 
     [DebuggerDisplay("{Reference}")]
-    public class AsyncApiJsonSchemaReference : AsyncApiJsonSchema, IAsyncApiReferenceable
+    public class AsyncApiJsonSchemaReference : AsyncApiJsonSchema, IAsyncApiReferenceable, IEquatable<AsyncApiJsonSchemaReference>, IEquatable<AsyncApiJsonSchema>
     {
         private AsyncApiJsonSchema target;
 
@@ -290,6 +290,48 @@ namespace LEGO.AsyncAPI.Models
         {
             get => this.Target?.Extensions;
             set => this.Target.Extensions = value;
+        }
+
+        public static bool operator !=(AsyncApiJsonSchemaReference left, AsyncApiJsonSchemaReference right) => !(left == right);
+
+        public static bool operator ==(AsyncApiJsonSchemaReference left, AsyncApiJsonSchemaReference right)
+        {
+            return Equals(left, null) ? Equals(right, null) : left.Equals(right);
+        }
+
+        public bool Equals(AsyncApiJsonSchemaReference other)
+        {
+            if (other is null)
+            {
+                return false;
+            }
+
+            if (other.Target is AsyncApiJsonSchemaReference reference)
+            {
+                return this.Equals(reference);
+            }
+
+            return this.Target == other.Target;
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (obj is AsyncApiJsonSchemaReference reference)
+            {
+                return this.Equals(reference);
+            }
+
+            if (obj is AsyncApiJsonSchema message)
+            {
+                return this.Equals(message);
+            }
+
+            return false;
+        }
+
+        public bool Equals(AsyncApiJsonSchema other)
+        {
+            return this.Target == other;
         }
 
         public override void SerializeV2(IAsyncApiWriter writer)

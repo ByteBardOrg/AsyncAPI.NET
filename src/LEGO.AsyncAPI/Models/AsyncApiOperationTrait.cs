@@ -73,7 +73,7 @@ namespace LEGO.AsyncAPI.Models
             writer.WriteEndObject();
         }
 
-        public void SerializeV3(IAsyncApiWriter writer)
+        public virtual void SerializeV3(IAsyncApiWriter writer)
         {
             if (writer is null)
             {

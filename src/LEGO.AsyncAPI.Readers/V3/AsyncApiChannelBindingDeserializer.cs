@@ -35,8 +35,8 @@ namespace LEGO.AsyncAPI.Readers
                 }
             }
 
-            // #ToFix Write test to show that we can still deserialize bindings correctly and still have extensions on the parent.
-            mapNode.ParseFields(channelBindings, null, channelBindingPatternFields);
+            mapNode.ParseFields(channelBindings, channelBindingPatternFields);
+            
             return channelBindings;
         }
 

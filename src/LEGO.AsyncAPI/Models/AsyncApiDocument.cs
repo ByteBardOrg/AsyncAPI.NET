@@ -158,11 +158,12 @@ namespace LEGO.AsyncAPI.Models
             // id
             writer.WriteOptionalProperty(AsyncApiConstants.Id, this.Id);
 
+            // content type
+            writer.WriteOptionalProperty(AsyncApiConstants.DefaultContentType, this.DefaultContentType);
+
             // servers
             writer.WriteOptionalMap(AsyncApiConstants.Servers, this.Servers, (writer, key, server) => server.SerializeV3(writer));
 
-            // content type
-            writer.WriteOptionalProperty(AsyncApiConstants.DefaultContentType, this.DefaultContentType);
 
             // channels
             writer.WriteOptionalMap(AsyncApiConstants.Channels, this.Channels, (writer, key, channel) => channel.SerializeV3(writer));

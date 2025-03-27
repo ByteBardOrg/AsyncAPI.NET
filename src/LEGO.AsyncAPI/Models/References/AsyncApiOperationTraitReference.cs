@@ -2,6 +2,7 @@
 
 namespace LEGO.AsyncAPI.Models
 {
+    using System;
     using System.Collections.Generic;
     /// <summary>
     /// The definition of an operation trait this application MAY use.
@@ -12,7 +13,7 @@ namespace LEGO.AsyncAPI.Models
     using LEGO.AsyncAPI.Writers;
 
     [DebuggerDisplay("{Reference}")]
-    public class AsyncApiOperationTraitReference : AsyncApiOperationTrait, IAsyncApiReferenceable
+    public class AsyncApiOperationTraitReference : AsyncApiOperationTrait, IAsyncApiReferenceable, IEquatable<AsyncApiOperationTraitReference>, IEquatable<AsyncApiOperationTrait>
     {
         private AsyncApiOperationTrait target;
 
@@ -50,6 +51,48 @@ namespace LEGO.AsyncAPI.Models
 
         public bool UnresolvedReference { get { return this.Target == null; } }
 
+        public static bool operator !=(AsyncApiOperationTraitReference left, AsyncApiOperationTraitReference right) => !(left == right);
+
+        public static bool operator ==(AsyncApiOperationTraitReference left, AsyncApiOperationTraitReference right)
+        {
+            return Equals(left, null) ? Equals(right, null) : left.Equals(right);
+        }
+
+        public bool Equals(AsyncApiOperationTraitReference other)
+        {
+            if (other is null)
+            {
+                return false;
+            }
+
+            if (other.Target is AsyncApiOperationTraitReference reference)
+            {
+                return this.Equals(reference);
+            }
+
+            return this.Target == other.Target;
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (obj is AsyncApiOperationTraitReference reference)
+            {
+                return this.Equals(reference);
+            }
+
+            if (obj is AsyncApiOperationTrait message)
+            {
+                return this.Equals(message);
+            }
+
+            return false;
+        }
+
+        public bool Equals(AsyncApiOperationTrait other)
+        {
+            return this.Target == other;
+        }
+
         public override void SerializeV2(IAsyncApiWriter writer)
         {
             if (!writer.GetSettings().ShouldInlineReference(this.Reference))
@@ -61,6 +104,20 @@ namespace LEGO.AsyncAPI.Models
             {
                 this.Reference.Workspace = writer.Workspace;
                 this.Target.SerializeV2(writer);
+            }
+        }
+
+        public override void SerializeV3(IAsyncApiWriter writer)
+        {
+            if (!writer.GetSettings().ShouldInlineReference(this.Reference))
+            {
+                this.Reference.SerializeV3(writer);
+                return;
+            }
+            else
+            {
+                this.Reference.Workspace = writer.Workspace;
+                this.Target.SerializeV3(writer);
             }
         }
     }
