@@ -1,0 +1,46 @@
+﻿namespace ByteBard.AsyncAPI.Models.Avro.LogicalTypes
+{
+    using System.Linq;
+    using ByteBard.AsyncAPI.Writers;
+
+    public abstract class AvroLogicalType : AvroPrimitive
+    {
+        protected AvroLogicalType(AvroPrimitiveType type)
+            : base(type)
+        {
+        }
+
+        public abstract LogicalType LogicalType { get; }
+
+        public virtual void SerializeV2Core(IAsyncApiWriter writer)
+        {
+        }
+
+        public override void SerializeV2(IAsyncApiWriter writer)
+        {
+            writer.WriteStartObject();
+            writer.WriteOptionalProperty("type", this.Type);
+            writer.WriteOptionalProperty("logicalType", this.LogicalType.GetDisplayName());
+
+            this.SerializeV2Core(writer);
+
+            if (this.Metadata.Any())
+            {
+                foreach (var item in this.Metadata)
+                {
+                    writer.WritePropertyName(item.Key);
+                    if (item.Value == null)
+                    {
+                        writer.WriteNull();
+                    }
+                    else
+                    {
+                        writer.WriteAny(item.Value);
+                    }
+                }
+            }
+
+            writer.WriteEndObject();
+        }
+    }
+}

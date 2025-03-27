@@ -1,0 +1,43 @@
+﻿namespace ByteBard.AsyncAPI.Models
+{
+    using System.Collections.Generic;
+    using ByteBard.AsyncAPI.Models.Interfaces;
+
+    /// <summary>
+    /// Comparer for AsyncApiSecurityScheme that only considers the Id in the Reference
+    /// (i.e. the string that will actually be displayed in the written document).
+    /// </summary>
+    public class AsyncApiReferenceEqualityComparer : IEqualityComparer<IAsyncApiReferenceable>
+    {
+        /// <summary>
+        /// Determines whether the specified objects are equal.
+        /// </summary>
+        public bool Equals(IAsyncApiReferenceable x, IAsyncApiReferenceable y)
+        {
+            if (x == null && y == null)
+            {
+                return true;
+            }
+
+            if (x == null || y == null)
+            {
+                return false;
+            }
+
+            if (x.Reference == null || y.Reference == null)
+            {
+                return false;
+            }
+
+            return x.Reference.FragmentId == y.Reference.FragmentId;
+        }
+
+        /// <summary>
+        /// Returns a hash code for the specified object.
+        /// </summary>
+        public int GetHashCode(IAsyncApiReferenceable obj)
+        {
+            return obj?.Reference?.FragmentId == null ? 0 : obj.Reference.FragmentId.GetHashCode();
+        }
+    }
+}

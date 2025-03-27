@@ -1,0 +1,69 @@
+﻿namespace ByteBard.AsyncAPI.Models
+{
+    using System.Collections.Generic;
+    using System.Linq;
+    using ByteBard.AsyncAPI.Writers;
+
+    public class AvroArray : AsyncApiAvroSchema
+    {
+        public override string Type { get; } = "array";
+
+        /// <summary>
+        /// The schema of the array's items.
+        /// </summary>
+        public AsyncApiAvroSchema Items { get; set; }
+
+        /// <summary>
+        /// A map of properties not in the schema, but added as additional metadata.
+        /// </summary>
+        public override IDictionary<string, AsyncApiAny> Metadata { get; set; } = new Dictionary<string, AsyncApiAny>();
+
+        public override void SerializeV2(IAsyncApiWriter writer)
+        {
+            writer.WriteStartObject();
+            writer.WriteOptionalProperty("type", this.Type);
+            writer.WriteRequiredObject("items", this.Items, (w, f) => f.SerializeV2(w));
+            if (this.Metadata.Any())
+            {
+                foreach (var item in this.Metadata)
+                {
+                    writer.WritePropertyName(item.Key);
+                    if (item.Value == null)
+                    {
+                        writer.WriteNull();
+                    }
+                    else
+                    {
+                        writer.WriteAny(item.Value);
+                    }
+                }
+            }
+
+            writer.WriteEndObject();
+        }
+
+        public override void SerializeV3(IAsyncApiWriter writer)
+        {
+            writer.WriteStartObject();
+            writer.WriteOptionalProperty("type", this.Type);
+            writer.WriteRequiredObject("items", this.Items, (w, f) => f.SerializeV3(w));
+            if (this.Metadata.Any())
+            {
+                foreach (var item in this.Metadata)
+                {
+                    writer.WritePropertyName(item.Key);
+                    if (item.Value == null)
+                    {
+                        writer.WriteNull();
+                    }
+                    else
+                    {
+                        writer.WriteAny(item.Value);
+                    }
+                }
+            }
+
+            writer.WriteEndObject();
+        }
+    }
+}

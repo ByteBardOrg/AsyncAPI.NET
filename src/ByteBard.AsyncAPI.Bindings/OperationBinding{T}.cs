@@ -1,0 +1,14 @@
+﻿namespace ByteBard.AsyncAPI.Bindings
+{
+    using ByteBard.AsyncAPI.Models.Interfaces;
+    using ByteBard.AsyncAPI.Readers;
+    using ByteBard.AsyncAPI.Readers.ParseNodes;
+
+    public abstract class OperationBinding<T> : Binding<T>, IOperationBinding
+        where T : IOperationBinding, new()
+    {
+        protected abstract FixedFieldMap<T> FixedFieldMap { get; }
+
+        public override T LoadBinding(PropertyNode node) => BindingDeserializer.LoadBinding("OperationBinding", node.Value, this.FixedFieldMap);
+    }
+}

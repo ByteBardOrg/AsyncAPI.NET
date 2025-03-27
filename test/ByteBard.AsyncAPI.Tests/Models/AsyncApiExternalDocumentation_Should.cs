@@ -1,0 +1,20 @@
+namespace ByteBard.AsyncAPI.Tests.Models
+{
+    using System;
+    using ByteBard.AsyncAPI.Models;
+    using NUnit.Framework;
+
+    public class AsyncApiExternalDocumentation_Should
+    {
+        [Test]
+        public void V2_SerializeV2_WithNullWriter_Throws()
+        {
+            // Arrange
+            var asyncApiExternalDocumentation = new AsyncApiExternalDocumentation();
+
+            // Act
+            // Assert
+            Assert.Throws<ArgumentNullException>(() => { asyncApiExternalDocumentation.SerializeV2(null); });
+        }
+    }
+}

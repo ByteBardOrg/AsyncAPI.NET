@@ -1,0 +1,33 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="../../Common.Build.props" />
+  <PropertyGroup>
+	  <Description>AsyncAPI.NET Bindings</Description>
+	  <PackageId>AsyncAPI.NET.Bindings</PackageId>
+	  <AssemblyName>ByteBard.AsyncAPI.Bindings</AssemblyName>
+	  <RootNamespace>ByteBard.AsyncAPI.Bindings</RootNamespace>
+	  <TargetFrameworks>netstandard2.1;net8</TargetFrameworks>
+  </PropertyGroup>
+  <ItemGroup>
+    <None Remove="stylecop.json" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <AdditionalFiles Include="stylecop.json" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="StyleCop.Analyzers" Version="1.2.0-beta.556">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="System.Text.Json" Version="9.0.1" Condition="'$(TargetFramework)' == 'netstandard2.1'" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\ByteBard.AsyncAPI.Readers\ByteBard.AsyncAPI.Readers.csproj" />
+    <ProjectReference Include="..\ByteBard.AsyncAPI\ByteBard.AsyncAPI.csproj" />
+    <ProjectReference Include="..\LEGO.AsyncAPI.Readers\ByteBard.AsyncAPI.Readers.csproj" />
+    <ProjectReference Include="..\LEGO.AsyncAPI\ByteBard.AsyncAPI.csproj" />
+  </ItemGroup>
+
+</Project>

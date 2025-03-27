@@ -1,0 +1,15 @@
+﻿namespace ByteBard.AsyncAPI.Writers
+{
+    public enum ReferenceInlineSetting
+    {
+        /// <summary>
+        /// Render all references as $ref.
+        /// </summary>
+        DoNotInlineReferences,
+
+        /// <summary>
+        /// Render references as inline objects.
+        /// </summary>
+        InlineReferences,
+    }
+}
