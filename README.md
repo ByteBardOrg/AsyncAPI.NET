@@ -3,7 +3,7 @@ This serves as the official future of AsyncAPI.NET.
 To be able to give the level of support I want, I have had to fork my original work from the ByteBard Group, and create my own.
 This is unfortunate, but after much back and not a lot of forth, I have decided that it was time.
 
-![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/ByteBard/AsyncAPI.NET/ci.yml?label=Build%20%26%20Test&style=for-the-badge)  
+[![Build & Test](https://github.com/ByteBardOrg/AsyncAPI.NET/actions/workflows/ci.yml/badge.svg)](https://github.com/ByteBardOrg/AsyncAPI.NET/actions/workflows/ci.yml)
 
 
 The AsyncAPI.NET SDK contains a useful object model for the AsyncAPI specification in .NET along with common serializers to extract raw AsyncAPI JSON and YAML documents from the model as well.
@@ -12,19 +12,30 @@ The AsyncAPI.NET SDK contains a useful object model for the AsyncAPI specificati
 [Wiki and getting started guide](https://github.com/ByteBardOrg/AsyncAPI.NET/wiki)
 
 ## Installation
+Generally you wan't to use Readers and Bindings.
+They have however been split to allow for different scenarios without polluting with unnecesary packages.
 
 Install the NuGet packages:
-TODO
+### ByteBard.AsyncAPI.NET
+[![Nuget](https://img.shields.io/nuget/v/ByteBard.AsyncAPI.NET?label=ByteBard.AsyncAPI.NET&style=for-the-badge)](https://www.nuget.org/packages/ByteBard.AsyncAPI.NET/)  
+[![Nuget](https://img.shields.io/nuget/vpre/ByteBard.AsyncAPI.NET?label=ByteBard.AsyncAPI.NET-Preview&style=for-the-badge)](https://www.nuget.org/packages/ByteBard.AsyncAPI.NET/)  
 
-## Example Usage
+### ByteBard.AsyncAPI.Readers
+[![Nuget](https://img.shields.io/nuget/v/ByteBard.AsyncAPI.NET.Readers?label=ByteBard.AsyncAPI.Readers&style=for-the-badge)](https://www.nuget.org/packages/AsyncAPI.NET.Readers/)  
+[![Nuget](https://img.shields.io/nuget/vpre/ByteBard.AsyncAPI.NET.Readers?label=ByteBard.AsyncAPI.Readers-Preview&style=for-the-badge)](https://www.nuget.org/packages/AsyncAPI.NET.Readers/)  
 
+### ByteBard.AsyncAPI.Bindings
+[![Nuget](https://img.shields.io/nuget/v/ByteBard.AsyncAPI.NET.Bindings?label=ByteBard.AsyncAPI.Bindings&style=for-the-badge)](https://www.nuget.org/packages/ByteBard.AsyncAPI.NET.Bindings/)  
+[![Nuget](https://img.shields.io/nuget/vpre/ByteBard.AsyncAPI.NET.Bindings?label=ByteBard.AsyncAPI.Bindings-Preview&style=for-the-badge)](https://www.nuget.org/packages/ByteBard.AsyncAPI.NET.Bindings/)  
+
+# Example Usage
 Main classes to know:
 
 * AsyncApiStringReader
 * AsyncApiStringWriter
   * There is an extension on the AsyncApiDocument type which allows Serializing as well (`new AsyncApiDocument().SerializeAsJson()` or `new AsyncApiDocument().SerializeAsYaml()`
 
-### Writing
+## Writing
 
 ```csharp
  var myFirstAsyncApi = new AsyncApiDocument
@@ -83,7 +94,7 @@ var yaml = myFirstAsyncApi.SerializeAsYaml(AsyncApi);
 ```
 
 
-### Reading
+## Reading
 
 There are 3 reader types
 1. AsyncApiStringReader
@@ -128,8 +139,8 @@ var asyncApiDocument = new AsyncApiStringReader().Read(yaml, out var diagnostic)
 All readers will write warnings and errors to the diagnostics.
 
 
-### Reference Resolution
-Internal references are resolved by default. This includes component and non-component references e.g `#/components/messages/MyMessage` and `#/servers/0`.  
+## Reference Resolution
+Internal references are resolved by default. This includes component and non-component references e.g `#/components/messages/MyMessage` and `#/servers/0`.
 External references can be resolved by setting `ReferenceResolution` to `ResolveAllReferences`.
 The default implementation will resolve anything prefixed with `file://`, `http://` & `https://`, however a custom implementation can be made, by inhereting from the `IStreamLoader` interface and setting the `ExternalReferenceLoader` in the `AsyncApiReaderSettings`.
 External references are always force converted to Json during resolution. This means that both yaml and json is supported - but not other serialization languages.
@@ -139,11 +150,9 @@ var settings = new AsyncApiReaderSettings { ReferenceResolution = ReferenceResol
 var document = new AsyncApiStringReader(settings).Read(json, out var diagnostics);
 ```
 
-
-
 Reference resolution can be disabled by setting `ReferenceResolution` to `DoNotResolveReferences`. 
 
-### Bindings
+## Bindings
 To add support for reading bindings, simply add the bindings you wish to support, to the `Bindings` collection of `AsyncApiReaderSettings`.
 There is a nifty helper to add different types of bindings, or like in the example `All` of them.
 
@@ -158,7 +167,7 @@ var asyncApiDocument = new AsyncApiStringReader(settings).Read(yaml, out var dia
 * [OpenAPI.Net](https://github.com/microsoft/OpenAPI.NET) - [MIT License](https://github.com/microsoft/OpenAPI.NET/blob/vnext/LICENSE)
 * [YamlDotNet](https://github.com/aaubry/YamlDotNet) - [MIT License](https://github.com/aaubry/YamlDotNet/blob/master/LICENSE.txt)
 * [JsonPointer.Net](https://github.com/json-everything/json-everything) - [MIT License](https://github.com/json-everything/json-everything/blob/master/LICENSE)
-
+  
 ## Contribution
 
 This project welcomes contributions and suggestions.
