@@ -3,27 +3,19 @@
   <PropertyGroup>
     <Nullable>disable</Nullable>
 	  <Description>AsyncAPI.NET Readers for JSON and YAML documents</Description>
-	  <PackageId>AsyncAPI.NET.Readers</PackageId>
+	  <PackageId>ByteBard.AsyncAPI.NET.Readers</PackageId>
 	  <AssemblyName>ByteBard.AsyncAPI.Readers</AssemblyName>
 	  <RootNamespace>ByteBard.AsyncAPI.Readers</RootNamespace>
 	  <TargetFrameworks>netstandard2.0;net8</TargetFrameworks>
   </PropertyGroup>	
 
   <ItemGroup>
-    <None Remove="stylecop.json" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <AdditionalFiles Include="stylecop.json" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <PackageReference Include="JsonPointer.Net" Version="5.3.0" />
+    <PackageReference Include="JsonPointer.Net" Version="5.0.2" />
     <PackageReference Include="StyleCop.Analyzers" Version="1.2.0-beta.556">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="System.Text.Json" Version="9.0.1" />
+    <PackageReference Include="System.Text.Json" Version="8.0.5" Condition="'$(TargetFramework)' == 'netstandard2.0'" />
     <PackageReference Include="YamlDotNet" Version="13.0.1" />
   </ItemGroup>
 

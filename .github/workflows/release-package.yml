@@ -24,6 +24,7 @@ jobs:
       if: steps.semantic.outputs.new_release_published == 'true'
       env:
         GITHUB_TOKEN: ${{ steps.GITHUB_TOKEN }}
+        GH_TOKEN: ${{ github.token }}
         FILE_TO_COMMIT: CHANGELOG.md
         DESTINATION_BRANCH: ${{ github.ref }}
       run: |

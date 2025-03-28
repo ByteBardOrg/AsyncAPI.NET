@@ -2,7 +2,7 @@
   <Import Project="../../Common.Build.props" />
   <PropertyGroup>
 	  <Description>AsyncAPI.NET models</Description>
-	  <PackageId>AsyncAPI.NET</PackageId>
+	  <PackageId>ByteBard.AsyncAPI.NET</PackageId>
 	  <AssemblyName>ByteBard.AsyncAPI</AssemblyName>
 	  <RootNamespace>ByteBard.AsyncAPI</RootNamespace>
 	  <TargetFrameworks>netstandard2.0;net8</TargetFrameworks>
