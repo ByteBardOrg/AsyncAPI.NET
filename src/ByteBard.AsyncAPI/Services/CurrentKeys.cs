@@ -23,5 +23,6 @@
         public string Parameter { get; set; }
 
         public string Message { get; set; }
+        public string Operation { get; set; }
     }
 }

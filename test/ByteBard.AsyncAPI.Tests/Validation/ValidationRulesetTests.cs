@@ -6,7 +6,7 @@
     public class ValidationRuleSetTests
     {
         [Test]
-        public void DefaultRuleSet_ReturnsTheCorrectRules()
+        public void V2_DefaultRuleSet_ReturnsTheCorrectRules()
         {
             // Arrange
             var ruleSet = new ValidationRuleSet();
@@ -20,7 +20,7 @@
         }
 
         [Test]
-        public void DefaultRuleSet_PropertyReturnsTheCorrectRules()
+        public void V2_DefaultRuleSet_PropertyReturnsTheCorrectRules()
         {
             // Arrange & Act
             var ruleSet = ValidationRuleSet.GetDefaultRuleSet();
@@ -33,7 +33,7 @@
             Assert.IsNotEmpty(rules);
 
             // Update the number if you add new default rule(s).
-            Assert.AreEqual(18, rules.Count);
+            Assert.AreEqual(26, rules.Count);
         }
     }
 }

@@ -1,4 +1,4 @@
-﻿namespace ByteBard.AsyncAPI.Tests
+namespace ByteBard.AsyncAPI.Tests
 {
     using System;
     using System.Collections.Generic;
@@ -25,7 +25,7 @@
     public class AsyncApiDocumentV2Tests : TestBase
     {
         [Test]
-        public void AsyncApiDocument_WithStreetLightsExample_SerializesAndDeserializes()
+        public void V2_AsyncApiDocument_WithStreetLightsExample_SerializesAndDeserializes()
         {
             // Arrange
             var expected =
@@ -70,7 +70,6 @@
                   'smartylighting.streetlights.1.0.event.{streetlightId}.lighting.measured':
                     description: The topic on which measured values may be produced and consumed.
                     publish:
-                      operationId: receiveLightMeasurement
                       summary: Inform about environmental lighting conditions of a particular streetlight.
                       traits:
                         - $ref: '#/components/operationTraits/kafka'
@@ -81,7 +80,6 @@
                         $ref: '#/components/parameters/streetlightId'
                   'smartylighting.streetlights.1.0.action.{streetlightId}.turn.on':
                     subscribe:
-                      operationId: turnOn
                       traits:
                         - $ref: '#/components/operationTraits/kafka'
                       message:
@@ -91,7 +89,6 @@
                         $ref: '#/components/parameters/streetlightId'
                   'smartylighting.streetlights.1.0.action.{streetlightId}.turn.off':
                     subscribe:
-                      operationId: turnOff
                       traits:
                         - $ref: '#/components/operationTraits/kafka'
                       message:
@@ -101,7 +98,6 @@
                         $ref: '#/components/parameters/streetlightId'
                   'smartylighting.streetlights.1.0.action.{streetlightId}.dim':
                     subscribe:
-                      operationId: dimLight
                       traits:
                         - $ref: '#/components/operationTraits/kafka'
                       message:
@@ -182,7 +178,7 @@
                     streetlightId:
                       description: The ID of the streetlight.
                       schema:
-                        type: string
+                        default: '1'
                   operationTraits:
                     kafka:
                       bindings:
@@ -216,17 +212,12 @@
                 })
                 .WithServer("scram-connections", new AsyncApiServer
                 {
-                    Url = "test.mykafkacluster.org:18092",
+                    Host = "test.mykafkacluster.org:18092",
                     Protocol = "kafka-secure",
                     Description = "Test broker secured with scramSha256",
-                    Security = new List<AsyncApiSecurityRequirement>
+                    Security = new List<AsyncApiSecurityScheme>
                     {
-                    new AsyncApiSecurityRequirement
-                    {
-                        {
-                            new AsyncApiSecuritySchemeReference("saslScram"), new List<string>()
-                        },
-                    },
+                        new AsyncApiSecuritySchemeReference("#/components/securitySchemes/saslScram"),
                     },
                     Tags = new List<AsyncApiTag>
                     {
@@ -249,17 +240,12 @@
                 })
                 .WithServer("mtls-connections", new AsyncApiServer
                 {
-                    Url = "test.mykafkacluster.org:28092",
+                    Host = "test.mykafkacluster.org:28092",
                     Protocol = "kafka-secure",
                     Description = "Test broker secured with X509",
-                    Security = new List<AsyncApiSecurityRequirement>
+                    Security = new List<AsyncApiSecurityScheme>
                     {
-                    new AsyncApiSecurityRequirement
-                    {
-                        {
-                            new AsyncApiSecuritySchemeReference("certs"), new List<string>()
-                        },
-                    },
+                        new AsyncApiSecuritySchemeReference("#/components/securitySchemes/certs"),
                     },
                     Tags = new List<AsyncApiTag>
                     {
@@ -282,9 +268,10 @@
                 })
                 .WithDefaultContentType()
                 .WithChannel(
-                "smartylighting.streetlights.1.0.event.{streetlightId}.lighting.measured",
+                "lighting.measured",
                 new AsyncApiChannel()
                 {
+                    Address = "smartylighting.streetlights.1.0.event.{streetlightId}.lighting.measured",
                     Description = "The topic on which measured values may be produced and consumed.",
                     Parameters = new Dictionary<string, AsyncApiParameter>
                     {
@@ -292,87 +279,94 @@
                         "streetlightId", new AsyncApiParameterReference("#/components/parameters/streetlightId")
                     },
                     },
-                    Publish = new AsyncApiOperation()
-                    {
-                        Summary = "Inform about environmental lighting conditions of a particular streetlight.",
-                        OperationId = "receiveLightMeasurement",
-                        Traits = new List<AsyncApiOperationTrait>
-                        {
-                        new AsyncApiOperationTraitReference("#/components/operationTraits/kafka"),
-                        },
-                        Message = new List<AsyncApiMessage>
-                        {
-                        new AsyncApiMessageReference("#/components/messages/lightMeasured"),
-                        },
-                    },
                 })
                 .WithChannel(
-                "smartylighting.streetlights.1.0.action.{streetlightId}.turn.on",
+                "turn.on",
                 new AsyncApiChannel()
                 {
+                    Address = "smartylighting.streetlights.1.0.action.{streetlightId}.turn.on",
                     Parameters = new Dictionary<string, AsyncApiParameter>
                     {
                     {
                         "streetlightId", new AsyncApiParameterReference("#/components/parameters/streetlightId")
                     },
                     },
-                    Subscribe = new AsyncApiOperation()
-                    {
-                        OperationId = "turnOn",
-                        Traits = new List<AsyncApiOperationTrait>
-                        {
-                            new AsyncApiOperationTraitReference("#/components/operationTraits/kafka"),
-                        },
-                        Message = new List<AsyncApiMessage>
-                        {
-                            new AsyncApiMessageReference("#/components/messages/turnOnOff"),
-                        },
-                    },
                 })
                 .WithChannel(
-                "smartylighting.streetlights.1.0.action.{streetlightId}.turn.off",
+                "turn.off",
                 new AsyncApiChannel()
                 {
+                    Address = "smartylighting.streetlights.1.0.action.{streetlightId}.turn.off",
                     Parameters = new Dictionary<string, AsyncApiParameter>
                     {
                     {
                         "streetlightId", new AsyncApiParameterReference("#/components/parameters/streetlightId")
                     },
                     },
-                    Subscribe = new AsyncApiOperation()
-                    {
-                        OperationId = "turnOff",
-                        Traits = new List<AsyncApiOperationTrait>
-                        {
-                        new AsyncApiOperationTraitReference("#/components/operationTraits/kafka"),
-                        },
-                        Message = new List<AsyncApiMessage>
-                        {
-                        new AsyncApiMessageReference("#/components/messages/turnOnOff"),
-                        },
-                    },
                 })
                 .WithChannel(
-                "smartylighting.streetlights.1.0.action.{streetlightId}.dim",
+                "dim",
                 new AsyncApiChannel()
                 {
+                    Address = "smartylighting.streetlights.1.0.action.{streetlightId}.dim",
                     Parameters = new Dictionary<string, AsyncApiParameter>
                     {
                     {
                         "streetlightId", new AsyncApiParameterReference("#/components/parameters/streetlightId")
                     },
                     },
-                    Subscribe = new AsyncApiOperation()
+                })
+                .WithOperation("receiveLightMeasurement", new AsyncApiOperation()
+                {
+                    Action = AsyncApiAction.Receive,
+                    Summary = "Inform about environmental lighting conditions of a particular streetlight.",
+                    Channel = new AsyncApiChannelReference("#/channels/lighting.measured"),
+                    Traits = new List<AsyncApiOperationTrait>
                     {
-                        OperationId = "dimLight",
-                        Traits = new List<AsyncApiOperationTrait>
-                        {
                         new AsyncApiOperationTraitReference("#/components/operationTraits/kafka"),
-                        },
-                        Message = new List<AsyncApiMessage>
-                        {
-                            new AsyncApiMessageReference("#/components/messages/dimLight"),
-                        },
+                    },
+                    Messages = new List<AsyncApiMessageReference>
+                    {
+                        new("#/components/messages/lightMeasured"),
+                    },
+                })
+                .WithOperation("turnOn", new AsyncApiOperation()
+                {
+                    Action = AsyncApiAction.Send,
+                    Channel = new AsyncApiChannelReference("#/channels/turn.on"),
+                    Traits = new List<AsyncApiOperationTrait>
+                    {
+                        new AsyncApiOperationTraitReference("#/components/operationTraits/kafka"),
+                    },
+                    Messages = new List<AsyncApiMessageReference>
+                    {
+                        new("#/components/messages/turnOnOff"),
+                    },
+                })
+                .WithOperation("turnOff", new AsyncApiOperation()
+                {
+                    Action = AsyncApiAction.Send,
+                    Channel = new AsyncApiChannelReference("#/channels/turn.off"),
+                    Traits = new List<AsyncApiOperationTrait>
+                    {
+                        new AsyncApiOperationTraitReference("#/components/operationTraits/kafka"),
+                    },
+                    Messages = new List<AsyncApiMessageReference>
+                    {
+                        new("#/components/messages/turnOnOff"),
+                    },
+                })
+                .WithOperation("dimLight", new AsyncApiOperation()
+                {
+                    Action = AsyncApiAction.Send,
+                    Channel = new AsyncApiChannelReference("#/channels/dim"),
+                    Traits = new List<AsyncApiOperationTrait>
+                    {
+                        new AsyncApiOperationTraitReference("#/components/operationTraits/kafka"),
+                    },
+                    Messages = new List<AsyncApiMessageReference>
+                    {
+                        new("#/components/messages/dimLight"),
                     },
                 })
                 .WithComponent("lightMeasured", new AsyncApiMessage()
@@ -474,23 +468,12 @@
                     Format = "date-time",
                     Description = "Date and time when the message was sent.",
                 })
-                .WithComponent("saslScram", new AsyncApiSecurityScheme
-                {
-                    Type = SecuritySchemeType.ScramSha256,
-                    Description = "Provide your username and password for SASL/SCRAM authentication",
-                })
-                .WithComponent("certs", new AsyncApiSecurityScheme
-                {
-                    Type = SecuritySchemeType.X509,
-                    Description = "Download the certificate files from service provider",
-                })
+                .WithComponent("saslScram", AsyncApiSecurityScheme.ScramSha256("Provide your username and password for SASL/SCRAM authentication"))
+                .WithComponent("certs", AsyncApiSecurityScheme.X509("Download the certificate files from service provider"))
                 .WithComponent("streetlightId", new AsyncApiParameter()
                 {
                     Description = "The ID of the streetlight.",
-                    Schema = new AsyncApiJsonSchema()
-                    {
-                        Type = SchemaType.String,
-                    },
+                    Default = "1",
                 })
                 .WithComponent("commonHeaders", new AsyncApiMessageTrait()
                 {
@@ -539,14 +522,14 @@
         }
 
         [Test]
-        public void SerializeV2_WithFullSpec_Serializes()
+        public void V2_SerializeV2_WithFullSpec_Serializes()
         {
             var expected =
                 """
                 asyncapi: 2.6.0
                 info:
                   title: apiTitle
-                  version: apiVersion
+                  version: 1.0.0
                   description: description
                   termsOfService: https://example.com/termsOfService
                   contact:
@@ -561,18 +544,16 @@
                 id: documentId
                 servers:
                   myServer:
-                    url: https://example.com/server
+                    url: example.com/server
                     protocol: KafkaProtocol
                     protocolVersion: protocolVersion
                     description: serverDescription
                     security:
-                      - securitySchemeName:
-                          - requirementItem
+                      - securitySchemeName: []
                 channels:
                   channel1:
                     description: channelDescription
                     subscribe:
-                      operationId: myOperation
                       summary: operationSummary
                       description: operationDescription
                       tags:
@@ -582,8 +563,7 @@
                         description: externalDocsDescription
                         url: https://example.com/externalDocs
                       traits:
-                        - operationId: myOperation
-                          summary: traitSummary
+                        - summary: traitSummary
                           description: traitDescription
                           tags:
                             - name: tagName
@@ -603,7 +583,6 @@
                               description: correlationDescription
                               location: correlationLocation
                               x-extension: value
-                            schemaFormat: schemaFormat
                             contentType: contentType
                             name: messageName
                             title: messageTitle
@@ -662,7 +641,7 @@
             string licenseUri = "https://example.com/license";
             string extensionKey = "x-extension";
             string extensionString = "value";
-            string apiVersion = "apiVersion";
+            string apiVersion = "1.0.0";
             string termsOfServiceUri = "https://example.com/termsOfService";
             string channelKey = "channel1";
             string channelDescription = "channelDescription";
@@ -675,6 +654,8 @@
             string messageTitle = "messageTitle";
             string messageSummary = "messageSummary";
             string messageName = "messageName";
+            string messageKeyOne = "messageKeyOne";
+            string messageKeyTwo = "messageKeyTwo";
             string contentType = "contentType";
             string schemaFormat = "schemaFormat";
             string correlationLocation = "correlationLocation";
@@ -695,7 +676,7 @@
             string serverKey = "myServer";
             string serverDescription = "serverDescription";
             string protocolVersion = "protocolVersion";
-            string serverUrl = "https://example.com/server";
+            string serverHost = "example.com/server";
             string protocol = "KafkaProtocol";
             string securirySchemeDescription = "securitySchemeDescription";
             string securitySchemeName = "securitySchemeName";
@@ -727,7 +708,7 @@
                                 {
                                     Implicit = new AsyncApiOAuthFlow
                                     {
-                                        Scopes = new Dictionary<string, string>
+                                        AvailableScopes = new Dictionary<string, string>
                                         {
                                             { scopeKey, scopeValue },
                                         },
@@ -751,20 +732,11 @@
                         {
                             Description = serverDescription,
                             ProtocolVersion = protocolVersion,
-                            Url = serverUrl,
+                            Host = serverHost,
                             Protocol = protocol,
-                            Security = new List<AsyncApiSecurityRequirement>
+                            Security = new List<AsyncApiSecurityScheme>
                             {
-                                new AsyncApiSecurityRequirement
-                                {
-                                    {
-                                        new AsyncApiSecuritySchemeReference(securitySchemeName),
-                                        new List<string>
-                                        {
-                                            requirementString,
-                                        }
-                                    },
-                                },
+                                new AsyncApiSecuritySchemeReference($"#/components/securitySchemes/{securitySchemeName}"),
                             },
                         }
                     },
@@ -801,147 +773,159 @@
                         channelKey, new AsyncApiChannel
                         {
                             Description = channelDescription,
-                            Subscribe = new AsyncApiOperation
+                            Messages = new Dictionary<string, AsyncApiMessage>()
                             {
-                                Description = operationDescription,
-                                OperationId = operationId,
-                                Summary = operationSummary,
-                                ExternalDocs = new AsyncApiExternalDocumentation
                                 {
-                                    Url = new Uri(externalDocsUri),
-                                    Description = externalDocsDescription,
+                                    messageKeyOne, new AsyncApiMessage
+                                    {
+                                        Description = messageDescription,
+                                        Title = messageTitle,
+                                        Summary = messageSummary,
+                                        Name = messageName,
+                                        ContentType = contentType,
+                                    }
                                 },
-                                Message = new List<AsyncApiMessage>
                                 {
+                                    messageKeyTwo, new AsyncApiMessage
                                     {
-                                    new AsyncApiMessage
+                                        Description = messageDescription,
+                                        Title = messageTitle,
+                                        Summary = messageSummary,
+                                        Name = messageName,
+                                        ContentType = contentType,
+                                        CorrelationId = new AsyncApiCorrelationId
                                         {
-                                            Description = messageDescription,
-                                            Title = messageTitle,
-                                            Summary = messageSummary,
-                                            Name = messageName,
-                                            ContentType = contentType,
-                                        }
-                                    },
-                                    {
-                                        new AsyncApiMessage
-                                        {
-                                            Description = messageDescription,
-                                            Title = messageTitle,
-                                            Summary = messageSummary,
-                                            Name = messageName,
-                                            ContentType = contentType,
-                                            SchemaFormat = schemaFormat,
-                                            CorrelationId = new AsyncApiCorrelationId
+                                            Location = correlationLocation,
+                                            Description = correlationDescription,
+                                            Extensions = new Dictionary<string, IAsyncApiExtension>
                                             {
-                                                Location = correlationLocation,
-                                                Description = correlationDescription,
+                                                { extensionKey, new AsyncApiAny(extensionString) },
+                                            },
+                                        },
+                                        Traits = new List<AsyncApiMessageTrait>
+                                        {
+                                            new AsyncApiMessageTrait
+                                            {
+                                                Name = traitName,
+                                                Title = traitTitle,
+                                                Headers = new AsyncApiJsonSchema
+                                                {
+                                                    Title = schemaTitle,
+                                                    WriteOnly = true,
+                                                    Description = schemaDescription,
+                                                    Examples = new List<AsyncApiAny>
+                                                    {
+                                                        new AsyncApiAny(new ExtensionClass
+                                                        {
+                                                            Key = anyStringValue,
+                                                            OtherKey = anyLongValue,
+                                                        }),
+                                                    },
+                                                },
+                                                Examples = new List<AsyncApiMessageExample>
+                                                {
+                                                    new AsyncApiMessageExample
+                                                    {
+                                                        Summary = exampleSummary,
+                                                        Name = exampleName,
+                                                        Payload = new AsyncApiAny(new ExtensionClass
+                                                        {
+                                                            Key = anyStringValue,
+                                                            OtherKey = anyLongValue,
+                                                        }),
+                                                        Extensions = new Dictionary<string, IAsyncApiExtension>
+                                                        {
+                                                            { extensionKey, new AsyncApiAny(extensionString) },
+                                                        },
+                                                    },
+                                                },
+                                                Description = traitDescription,
+                                                Summary = traitSummary,
+                                                Tags = new List<AsyncApiTag>
+                                                {
+                                                    new AsyncApiTag
+                                                    {
+                                                        Name = tagName,
+                                                        Description = tagDescription,
+                                                    },
+                                                },
+                                                ExternalDocs = new AsyncApiExternalDocumentation
+                                                {
+                                                    Url = new Uri(externalDocsUri),
+                                                    Description = externalDocsDescription,
+                                                },
                                                 Extensions = new Dictionary<string, IAsyncApiExtension>
                                                 {
                                                     { extensionKey, new AsyncApiAny(extensionString) },
                                                 },
                                             },
-                                            Traits = new List<AsyncApiMessageTrait>
-                                            {
-                                                new AsyncApiMessageTrait
-                                                {
-                                                    Name = traitName,
-                                                    Title = traitTitle,
-                                                    Headers = new AsyncApiJsonSchema
-                                                    {
-                                                        Title = schemaTitle,
-                                                        WriteOnly = true,
-                                                        Description = schemaDescription,
-                                                        Examples = new List<AsyncApiAny>
-                                                        {
-                                                            new AsyncApiAny(new ExtensionClass
-                                                            {
-                                                                Key = anyStringValue,
-                                                                OtherKey = anyLongValue,
-                                                            }),
-                                                        },
-                                                    },
-                                                    Examples = new List<AsyncApiMessageExample>
-                                                    {
-                                                        new AsyncApiMessageExample
-                                                        {
-                                                            Summary = exampleSummary,
-                                                            Name = exampleName,
-                                                            Payload = new AsyncApiAny(new ExtensionClass
-                                                            {
-                                                                Key = anyStringValue,
-                                                                OtherKey = anyLongValue,
-                                                            }),
-                                                            Extensions = new Dictionary<string, IAsyncApiExtension>
-                                                            {
-                                                                { extensionKey, new AsyncApiAny(extensionString) },
-                                                            },
-                                                        },
-                                                    },
-                                                    Description = traitDescription,
-                                                    Summary = traitSummary,
-                                                    Tags = new List<AsyncApiTag>
-                                                    {
-                                                        new AsyncApiTag
-                                                        {
-                                                            Name = tagName,
-                                                            Description = tagDescription,
-                                                        },
-                                                    },
-                                                    ExternalDocs = new AsyncApiExternalDocumentation
-                                                    {
-                                                        Url = new Uri(externalDocsUri),
-                                                        Description = externalDocsDescription,
-                                                    },
-                                                    Extensions = new Dictionary<string, IAsyncApiExtension>
-                                                    {
-                                                        { extensionKey, new AsyncApiAny(extensionString) },
-                                                    },
-                                                },
-                                            },
-                                            Extensions = new Dictionary<string, IAsyncApiExtension>
-                                            {
-                                                { extensionKey, new AsyncApiAny(extensionString) },
-                                            },
-                                        }
-                                    },
-                                },
-                                Extensions = new Dictionary<string, IAsyncApiExtension>
-                                {
-                                    { extensionKey, new AsyncApiAny(extensionString) },
-                                },
-                                Tags = new List<AsyncApiTag>
-                                {
-                                    new AsyncApiTag
-                                    {
-                                        Name = tagName,
-                                        Description = tagDescription,
-                                    },
-                                },
-                                Traits = new List<AsyncApiOperationTrait>
-                                {
-                                    new AsyncApiOperationTrait
-                                    {
-                                        Description = traitDescription,
-                                        Summary = traitSummary,
-                                        Tags = new List<AsyncApiTag>
-                                        {
-                                            new AsyncApiTag
-                                            {
-                                                Name = tagName,
-                                                Description = tagDescription,
-                                            },
                                         },
-                                        ExternalDocs = new AsyncApiExternalDocumentation
-                                        {
-                                            Url = new Uri(externalDocsUri),
-                                            Description = externalDocsDescription,
-                                        },
-                                        OperationId = operationId,
                                         Extensions = new Dictionary<string, IAsyncApiExtension>
                                         {
                                             { extensionKey, new AsyncApiAny(extensionString) },
                                         },
+                                    }
+                                },
+                            },
+                        }
+                    },
+                },
+                Operations = new Dictionary<string, AsyncApiOperation>()
+                {
+                    {
+                        operationId, new AsyncApiOperation()
+                        {
+                            Description = operationDescription,
+                            Summary = operationSummary,
+                            Channel = new AsyncApiChannelReference($"#/channels/{channelKey}"),
+                            ExternalDocs = new AsyncApiExternalDocumentation
+                            {
+                                Url = new Uri(externalDocsUri),
+                                Description = externalDocsDescription,
+                            },
+                            Messages = new List<AsyncApiMessageReference>
+                            {
+                                {
+                                    new($"#/channels/channel1/messages/{messageKeyOne}")
+                                },
+                                {
+                                    new($"#/channels/channel1/messages/{messageKeyTwo}")
+                                },
+                            },
+                            Extensions = new Dictionary<string, IAsyncApiExtension>
+                            {
+                                { extensionKey, new AsyncApiAny(extensionString) },
+                            },
+                            Tags = new List<AsyncApiTag>
+                            {
+                                new AsyncApiTag
+                                {
+                                    Name = tagName,
+                                    Description = tagDescription,
+                                },
+                            },
+                            Traits = new List<AsyncApiOperationTrait>
+                            {
+                                new AsyncApiOperationTrait
+                                {
+                                    Description = traitDescription,
+                                    Summary = traitSummary,
+                                    Tags = new List<AsyncApiTag>
+                                    {
+                                        new AsyncApiTag
+                                        {
+                                            Name = tagName,
+                                            Description = tagDescription,
+                                        },
+                                    },
+                                    ExternalDocs = new AsyncApiExternalDocumentation
+                                    {
+                                        Url = new Uri(externalDocsUri),
+                                        Description = externalDocsDescription,
+                                    },
+                                    Extensions = new Dictionary<string, IAsyncApiExtension>
+                                    {
+                                        { extensionKey, new AsyncApiAny(extensionString) },
                                     },
                                 },
                             },
@@ -963,7 +947,7 @@
         }
 
         [Test]
-        public void Read_WithAvroSchemaPayload_NoErrors()
+        public void V2_Read_WithAvroSchemaPayload_NoErrors()
         {
             // Arrange
             var yaml =
@@ -1008,12 +992,12 @@
 
             // Assert
             diagnostics.Errors.Should().HaveCount(0);
-            result.Channels.First().Value.Publish.Message.First().Payload.As<AsyncApiAvroSchema>().TryGetAs<AvroRecord>(out var record).Should().BeTrue();
+            result.Operations.Values.FirstOrDefault(op => op.Action == AsyncApiAction.Receive)!.Messages.First().Payload.Schema.As<AsyncApiAvroSchema>().TryGetAs<AvroRecord>(out var record).Should().BeTrue();
             record.Name.Should().Be("UserSignedUp");
         }
 
         [Test]
-        public void Read_WithJsonSchemaReference_NoErrors()
+        public void V2_Read_WithJsonSchemaReference_NoErrors()
         {
             // Arrange
             var yaml =
@@ -1060,17 +1044,21 @@
 
             // Assert
             diagnostics.Errors.Should().HaveCount(0);
-            result.Channels.First().Value.Publish.Message.First().Title.Should().Be("Message for schema validation testing that is a json object");
-            result.Channels.First().Value.Publish.Message.First().Payload.As<AsyncApiJsonSchema>().Properties.Should().HaveCount(1);
+
+            var message = result.Operations.Values.FirstOrDefault(op => op.Action == AsyncApiAction.Send)!.Messages.First();
+            message.Title.Should().Be("Message for schema validation testing that is a json object");
+            message.Payload.Schema.As<AsyncApiJsonSchema>().Properties.Should().HaveCount(1);
         }
 
         [Test]
-        public void Serialize_WithBindingReferences_SerializesDeserializes()
+        public void V2_Serialize_WithBindingReferences_SerializesDeserializes()
         {
             var expected =
                 """
                 asyncapi: 2.6.0
                 info:
+                  title: test
+                  version: 1.0.0
                   description: test description
                 servers:
                   production:
@@ -1080,13 +1068,16 @@
                     bindings:
                       $ref: '#/components/serverBindings/bindings'
                 channels:
-                  testChannel:
+                  'testChannel/{some}':
                     $ref: '#/components/channels/otherchannel'
                 components:
                   channels:
                     otherchannel:
                       publish:
                         description: test
+                      parameters:
+                        some:
+                          description: a parameter
                       bindings:
                         $ref: '#/components/channelBindings/bindings'
                   serverBindings:
@@ -1102,15 +1093,24 @@
             var doc = new AsyncApiDocument();
             doc.Info = new AsyncApiInfo()
             {
+                Title = "test",
+                Version = "1.0.0",
                 Description = "test description",
             };
             doc.Servers.Add("production", new AsyncApiServer
             {
                 Description = "test description",
                 Protocol = "pulsar+ssl",
-                Url = "example.com",
-                Bindings = new AsyncApiBindingsReference<IServerBinding>("#/components/serverBindings/bindings")
+                Host = "example.com",
+                Bindings = new AsyncApiBindingsReference<IServerBinding>("#/components/serverBindings/bindings"),
             });
+            doc.Channels.Add(
+                "testChannel",
+                new AsyncApiChannelReference("#/components/channels/otherchannel"));
+            doc.Operations.Add(
+                "operation",
+                new AsyncApiOperationReference("#/components/operations/otherOperation"));
+
             doc.Components = new AsyncApiComponents()
             {
                 Channels = new Dictionary<string, AsyncApiChannel>()
@@ -1118,11 +1118,16 @@
                     {
                         "otherchannel", new AsyncApiChannel()
                         {
-                            Publish = new AsyncApiOperation()
+                            Address = "testChannel/{some}",
+                            Parameters = new Dictionary<string, AsyncApiParameter>
                             {
-                                Description = "test",
+                                { "some", new AsyncApiParameter
+                                    {
+                                       Description = "a parameter",
+                                    }
+                                },
                             },
-                            Bindings = new AsyncApiBindingsReference<IChannelBinding>("#/components/channelBindings/bindings")
+                            Bindings = new AsyncApiBindingsReference<IChannelBinding>("#/components/channelBindings/bindings"),
                         }
                     },
                 },
@@ -1151,15 +1156,26 @@
                         }
                     },
                 },
+                Operations = new Dictionary<string, AsyncApiOperation>()
+                {
+                    {
+                        "otherOperation", new AsyncApiOperation()
+                        {
+                            Action = AsyncApiAction.Receive,
+                            Description = "test",
+                            Channel = new AsyncApiChannelReference("#/channels/testChannel"),
+                        }
+                    },
+                },
             };
-            doc.Channels.Add(
-                "testChannel",
-                new AsyncApiChannelReference("#/components/channels/otherchannel"));
+
             var actual = doc.Serialize(AsyncApiVersion.AsyncApi2_0, AsyncApiFormat.Yaml);
             actual.Should().BePlatformAgnosticEquivalentTo(expected);
 
-            var settings = new AsyncApiReaderSettings();
-            settings.Bindings = BindingsCollection.Pulsar;
+            var settings = new AsyncApiReaderSettings
+            {
+                Bindings = BindingsCollection.Pulsar,
+            };
             var reader = new AsyncApiStringReader(settings);
             var deserialized = reader.Read(actual, out var diagnostic);
             var serverBindings = deserialized.Servers.First().Value.Bindings;
@@ -1171,11 +1187,13 @@
         }
 
         [Test]
-        public void Serializev2_WithBindings_Serializes()
+        public void V2_SerializeV2_WithBindings_Serializes()
         {
             var expected = """
                 asyncapi: 2.6.0
                 info:
+                  title: test
+                  version: 1.0.0
                   description: test description
                 servers:
                   production:
@@ -1197,18 +1215,21 @@
                       kafka:
                         partitions: 2
                         replicas: 1
+                components: { }
                 """;
 
             var doc = new AsyncApiDocument();
             doc.Info = new AsyncApiInfo()
             {
+                Title = "test",
+                Version = "1.0.0",
                 Description = "test description",
             };
             doc.Servers.Add("production", new AsyncApiServer
             {
                 Description = "test description",
                 Protocol = "pulsar+ssl",
-                Url = "example.com",
+                Host = "example.com",
             });
             doc.Channels.Add(
                 "testChannel",
@@ -1224,52 +1245,60 @@
                             }
                         },
                     },
-                    Publish = new AsyncApiOperation
-                    {
-                        Message = new List<AsyncApiMessage>
-                        {
-                            {
-                                new AsyncApiMessage
-                                {
-                                    Bindings = new AsyncApiBindings<IMessageBinding>
-                                    {
-                                        {
-                                            new HttpMessageBinding
-                                            {
-                                                Headers = new AsyncApiJsonSchema
-                                                {
-                                                    Description = "this mah binding",
-                                                },
-                                            }
-                                        },
-                                        {
-                                            new KafkaMessageBinding
-                                            {
-                                                Key = new AsyncApiJsonSchema
-                                                {
-                                                    Description = "this mah other binding",
-                                                },
-                                            }
-                                        },
-                                    },
-                                }
-                            },
-                        },
-                    },
                 });
-            var actual = doc.Serialize(AsyncApiVersion.AsyncApi2_0, AsyncApiFormat.Yaml);
+            doc.Operations.Add("firstOperation", new AsyncApiOperation()
+            {
+                Channel = new AsyncApiChannelReference("#/channels/testChannel"),
+                Action = AsyncApiAction.Receive,
+                Messages = new List<AsyncApiMessageReference>
+                {
+                    new("#/components/messages/firstMessage"),
+                },
+            });
 
-            var settings = new AsyncApiReaderSettings();
-            settings.Bindings = BindingsCollection.All;
+            doc.Components.Messages.Add("firstMessage", new AsyncApiMessage
+            {
+                Bindings = new AsyncApiBindings<IMessageBinding>
+                {
+                    {
+                        new HttpMessageBinding
+                        {
+                            Headers = new AsyncApiJsonSchema
+                            {
+                                Description = "this mah binding",
+                            },
+                        }
+                    },
+                    {
+                        new KafkaMessageBinding
+                        {
+                            Key = new AsyncApiJsonSchema
+                            {
+                                Description = "this mah other binding",
+                            },
+                        }
+                    },
+                },
+            });
+
+            var outputString = new StringWriter();
+            var writer = new AsyncApiYamlWriter(outputString, new AsyncApiWriterSettings { ReferenceInline = ReferenceInlineSetting.InlineReferences });
+            doc.SerializeV2(writer);
+            var actual = outputString.ToString();
+
+            var settings = new AsyncApiReaderSettings
+            {
+                Bindings = BindingsCollection.All,
+            };
             var reader = new AsyncApiStringReader(settings);
             var deserialized = reader.Read(actual, out var diagnostic);
 
             // Assert
             actual.Should()
                   .BePlatformAgnosticEquivalentTo(expected);
-            Assert.AreEqual(2, deserialized.Channels.First().Value.Publish.Message.First().Bindings.Count);
+            Assert.AreEqual(2, deserialized.Operations.First().Value.Messages.First().Bindings.Count);
 
-            var binding = deserialized.Channels.First().Value.Publish.Message.First().Bindings.First();
+            var binding = deserialized.Operations.First().Value.Messages.First().Bindings.First();
             Assert.AreEqual("http", binding.Key);
             var httpBinding = binding.Value as HttpMessageBinding;
 

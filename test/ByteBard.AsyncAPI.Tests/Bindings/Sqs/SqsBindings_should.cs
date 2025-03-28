@@ -14,7 +14,7 @@ namespace ByteBard.AsyncAPI.Tests.Bindings.Sqs
     internal class SqsBindings_should
     {
         [Test]
-        public void SqsChannelBinding_WithFilledObject_SerializesAndDeserializes()
+        public void V2_SqsChannelBinding_WithFilledObject_SerializesAndDeserializes()
         {
             // Arrange
             var expected =
@@ -267,7 +267,7 @@ namespace ByteBard.AsyncAPI.Tests.Bindings.Sqs
         }
 
         [Test]
-        public void SqsOperationBinding_WithFilledObject_SerializesAndDeserializes()
+        public void V2_SqsOperationBinding_WithFilledObject_SerializesAndDeserializes()
         {
             // Arrange
             var expected =

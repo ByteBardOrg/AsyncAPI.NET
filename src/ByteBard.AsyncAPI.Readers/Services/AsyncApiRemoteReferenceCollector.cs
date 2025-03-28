@@ -14,6 +14,7 @@
         {
             this.workspace = workspace;
         }
+
         /// <summary>
         /// List of all external references collected from AsyncApiDocument.
         /// </summary>

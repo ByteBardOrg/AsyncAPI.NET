@@ -1,11 +1,10 @@
 ﻿namespace ByteBard.AsyncAPI.Models
 {
-    using System;
     using System.Collections.Generic;
     using ByteBard.AsyncAPI.Models.Interfaces;
     using ByteBard.AsyncAPI.Writers;
 
-    public abstract class AsyncApiAvroSchema : IAsyncApiSerializable, IAsyncApiMessagePayload
+    public abstract class AsyncApiAvroSchema : IAsyncApiSerializable, IAsyncApiSchema
     {
         public abstract string Type { get; }
 
@@ -20,6 +19,8 @@
         }
 
         public abstract void SerializeV2(IAsyncApiWriter writer);
+
+        public abstract void SerializeV3(IAsyncApiWriter writer);
 
         public virtual bool TryGetAs<T>(out T result)
             where T : AsyncApiAvroSchema

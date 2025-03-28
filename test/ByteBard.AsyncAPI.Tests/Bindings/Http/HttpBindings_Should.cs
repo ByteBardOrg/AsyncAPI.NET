@@ -10,7 +10,7 @@
     internal class HttpBindings_Should : TestBase
     {
         [Test]
-        public void HttpMessageBinding_FilledObject_SerializesAndDeserializes()
+        public void V2_HttpMessageBinding_FilledObject_SerializesAndDeserializes()
         {
             // Arrange
             var expected =
@@ -44,7 +44,7 @@
         }
 
         [Test]
-        public void HttpOperationBinding_FilledObject_SerializesAndDeserializes()
+        public void V2_HttpOperationBinding_FilledObject_SerializesAndDeserializes()
         {
             // Arrange
             var expected =

@@ -43,14 +43,18 @@
         /// </summary>
         /// <typeparam name="T">The type to return.</typeparam>
         /// <param name="resourceName">The name of the resource file with an optional extension.</param>
-        /// <returns>The result.</returns>
-        protected T GetTestData<T>([CallerMemberName] string resourceName = "")
+        /// <param name="version">The version.</param>
+        /// <returns>
+        /// The result.
+        /// </returns>
+        /// <exception cref="System.NotImplementedException">No case has been defined to convering a resource into '{resultType.FullName}'. You can add a new one.</exception>
+        protected T GetTestData<T>(AsyncApiVersion version, [CallerMemberName] string resourceName = "")
         {
             string searchPattern = string.IsNullOrWhiteSpace(Path.GetExtension(resourceName))
                 ? $"{resourceName}.*"
                 : resourceName;
-
-            string testDataDirectory = Path.Combine(Environment.CurrentDirectory, "TestData");
+            var versionFolder = version == AsyncApiVersion.AsyncApi2_0 ? "V2_TestData" : "V3_TestData";
+            string testDataDirectory = Path.Combine(Environment.CurrentDirectory, versionFolder);
 
             string? testDataPath = Directory.GetFiles(testDataDirectory, searchPattern)
                 .FirstOrDefault();

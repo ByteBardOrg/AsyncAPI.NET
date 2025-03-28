@@ -10,7 +10,7 @@
     public class WebSocketBindings_Should : TestBase
     {
         [Test]
-        public void WebSocketChannelBinding_WithFilledObject_SerializesAndDeserializes()
+        public void V2_WebSocketChannelBinding_WithFilledObject_SerializesAndDeserializes()
         {
             // Arrange
             var expected =

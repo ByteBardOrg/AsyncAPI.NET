@@ -13,7 +13,7 @@
     public class AsyncApiChannel_Should : TestBase
     {
         [Test]
-        public void AsyncApiChannel_WithInlineParameter_DoesNotCreateReference()
+        public void V2_AsyncApiChannel_WithInlineParameter_DoesNotCreateReference()
         {
             var input =
                 """
@@ -32,7 +32,7 @@
         }
 
         [Test]
-        public void AsyncApiChannel_WithWebSocketsBinding_Serializes()
+        public void V2_AsyncApiChannel_WithWebSocketsBinding_Serializes()
         {
             var expected = """
                 bindings:
@@ -95,7 +95,7 @@
         }
 
         [Test]
-        public void AsyncApiChannel_WithKafkaBinding_Serializes()
+        public void V2_AsyncApiChannel_WithKafkaBinding_Serializes()
         {
             var expected =
                 """
@@ -126,6 +126,79 @@
             // Assert
             actual.Should()
                   .BePlatformAgnosticEquivalentTo(expected);
+        }
+
+        [Test]
+        public void V2_AsyncApiChannel_UpgradesAndNormalizesKey()
+        {
+            var yaml =
+                """
+                asyncapi: 2.6.0
+                info:
+                  title: test spec
+                  version: 1.0.0
+                channels:
+                  'mychannel/{param}':
+                    description: test channel
+                    parameters:
+                      param:
+                        description: some parameter
+                """;
+
+            var document = new AsyncApiStringReader().Read(yaml, out var diag);
+
+            document.Channels.First().Key.Should().Be("mychannelparam");
+            document.Channels.First().Value.Address.Should().Be("mychannel/{param}");
+            document.Channels.First().Value.Parameters.First().Key.Should().Be("param");
+
+            var reserialized = document.SerializeAsYaml(AsyncApiVersion.AsyncApi2_0);
+
+            reserialized.Should().BePlatformAgnosticEquivalentTo(yaml);
+        }
+
+        [Test]
+        public void V2_AsyncApiChannel_reserializes()
+        {
+            var expected =
+                """
+                asyncapi: 2.6.0
+                info:
+                  title: test spec
+                  version: 1.0.0
+                channels:
+                  mychannel:
+                    description: test channel
+                    subscribe:
+                      description: what ever
+                      message:
+                        $ref: '#/components/messages/anonymous-message-1'
+                components:
+                  messages:
+                    anonymous-message-1:
+                      payload:
+                        type: string
+                """;
+
+            var yaml =
+                """
+                asyncapi: 2.6.0
+                info:
+                  title: test spec
+                  version: 1.0.0
+                channels:
+                  mychannel:
+                    description: test channel
+                    subscribe:
+                      description: what ever
+                      message:
+                        payload:
+                          type: string
+                """;
+
+            var document = new AsyncApiStringReader().Read(yaml, out var diag);
+            var reserialized = document.SerializeAsYaml(AsyncApiVersion.AsyncApi2_0);
+
+            reserialized.Should().BePlatformAgnosticEquivalentTo(expected);
         }
     }
 }

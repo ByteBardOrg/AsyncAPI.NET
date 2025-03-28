@@ -13,7 +13,7 @@ namespace ByteBard.AsyncAPI.Tests.Bindings.Sns
     internal class SnsBindings_Should : TestBase
     {
         [Test]
-        public void SnsChannelBinding_WithFilledObject_SerializesAndDeserializes()
+        public void V2_SnsChannelBinding_WithFilledObject_SerializesAndDeserializes()
         {
             // Arrange
             var expected =
@@ -180,7 +180,7 @@ namespace ByteBard.AsyncAPI.Tests.Bindings.Sns
         }
 
         [Test]
-        public void SnsOperationBinding_WithFilledObject_SerializesAndDeserializes()
+        public void V2_SnsOperationBinding_WithFilledObject_SerializesAndDeserializes()
         {
             // Arrange
             var expected =

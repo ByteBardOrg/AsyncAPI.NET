@@ -3,6 +3,7 @@ namespace ByteBard.AsyncAPI.Readers
     using ByteBard.AsyncAPI.Extensions;
     using ByteBard.AsyncAPI.Models;
     using ByteBard.AsyncAPI.Readers.ParseNodes;
+    using System;
 
     /// <summary>
     /// Class containing logic to deserialize AsyncApi document into
@@ -13,7 +14,7 @@ namespace ByteBard.AsyncAPI.Readers
         private static readonly FixedFieldMap<AsyncApiServer> serverFixedFields = new()
         {
             {
-                "url", (a, n) => { a.Url = n.GetScalarValue(); }
+                "url", (a, n) => { SetHostAndPathname(a, n); }
             },
             {
                 "description", (a, n) => { a.Description = n.GetScalarValue(); }
@@ -37,6 +38,26 @@ namespace ByteBard.AsyncAPI.Readers
                 "protocol", (a, n) => { a.Protocol = n.GetScalarValue(); }
             },
         };
+
+        private static void SetHostAndPathname(AsyncApiServer a, ParseNode n)
+        {
+            var value = n.GetScalarValue();
+            if (!value.Contains("://"))
+            {
+                // Set arbitrary protocol.
+                value = "unknown://" + value;
+            }
+
+            if (Uri.TryCreate(value, UriKind.RelativeOrAbsolute, out var uri))
+            {
+                a.Host = uri.Authority;
+                a.PathName = uri.LocalPath == "/" ? null : uri.LocalPath;
+            }
+            else
+            {
+                a.Host = n.GetScalarValue();
+            }
+        }
 
         private static readonly PatternFieldMap<AsyncApiServer> serverPatternFields =
             new()

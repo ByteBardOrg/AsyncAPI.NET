@@ -17,19 +17,19 @@ namespace ByteBard.AsyncAPI.Readers
         private static readonly FixedFieldMap<AsyncApiMessage> messageFixedFields = new()
         {
             {
-                "messageId", (a, n) => { a.MessageId = n.GetScalarValue(); }
+                "messageId", (a, n) => { }
             },
             {
-                "headers", (a, n) => { a.Headers = AsyncApiSchemaDeserializer.LoadSchema(n); }
+                "headers", (a, n) => { /* Loaded later */ }
             },
             {
-                "payload", (a, n) => { a.Payload = null; /* resolved after the initial run */ }
+                "payload", (a, n) => { /* a.Payload = new AsyncApiMultiFormatSchema(); */ }
             },
             {
                 "correlationId", (a, n) => { a.CorrelationId = LoadCorrelationId(n); }
             },
             {
-                "schemaFormat", (a, n) => { a.SchemaFormat = LoadSchemaFormat(n.GetScalarValue()); }
+                "schemaFormat", (a, n) => { /* a.Payload.SchemaFormat = n.GetScalarValue(); */ }
             },
             {
                 "contentType", (a, n) => { a.ContentType = n.GetScalarValue(); }
@@ -63,19 +63,18 @@ namespace ByteBard.AsyncAPI.Readers
             },
         };
 
-        public static IAsyncApiMessagePayload LoadJsonSchemaPayload(ParseNode n)
+        public static IAsyncApiSchema LoadJsonSchemaPayload(ParseNode n)
         {
             return LoadPayload(n, null);
         }
 
-        public static IAsyncApiMessagePayload LoadAvroPayload(ParseNode n)
+        public static IAsyncApiSchema LoadAvroPayload(ParseNode n)
         {
             return LoadPayload(n, "application/vnd.apache.avro");
         }
 
-        private static IAsyncApiMessagePayload LoadPayload(ParseNode n, string format)
+        private static IAsyncApiSchema LoadPayload(ParseNode n, string format)
         {
-
             if (n == null)
             {
                 return null;
@@ -91,7 +90,7 @@ namespace ByteBard.AsyncAPI.Readers
                     return AsyncApiAvroSchemaDeserializer.LoadSchema(n);
                 default:
                     var supportedFormats = SupportedJsonSchemaFormats.Concat(SupportedAvroSchemaFormats);
-                    throw new AsyncApiException($"'Could not deserialize Payload. Supported formats are {string.Join(", ", supportedFormats)}");
+                    throw new AsyncApiException($"Could not deserialize Payload. Supported formats are {string.Join(", ", supportedFormats)}");
             }
         }
 
@@ -141,7 +140,25 @@ namespace ByteBard.AsyncAPI.Readers
             var message = new AsyncApiMessage();
 
             ParseMap(mapNode, message, messageFixedFields, messagePatternFields);
-            message.Payload = LoadPayload(mapNode["payload"]?.Value, message.SchemaFormat);
+
+            if (mapNode["headers"] != null)
+            {
+                message.Headers = new AsyncApiMultiFormatSchema { Schema = AsyncApiSchemaDeserializer.LoadSchema(mapNode["headers"].Value) };
+            }
+
+            if (mapNode["payload"] != null)
+            {
+                var schema = mapNode["schemaFormat"]?.Value.GetScalarValue();
+                var payload = LoadPayload(mapNode["payload"].Value, schema);
+                if (payload is IAsyncApiReferenceable reference && !reference.Reference.IsExternal)
+                {
+                    message.Payload = new AsyncApiMultiFormatSchemaReference(reference.Reference.Reference);
+                }
+                else
+                {
+                    message.Payload = new AsyncApiMultiFormatSchema { Schema = payload, SchemaFormat = schema };
+                }
+            }
 
             return message;
         }

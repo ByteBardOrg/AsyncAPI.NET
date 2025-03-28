@@ -63,7 +63,7 @@
     public class CustomBinding_Should : TestBase
     {
         [Test]
-        public void CustomBinding_SerializesDeserializes()
+        public void V2_CustomBinding_SerializesDeserializes()
         {
             // Arrange
             var expected =

@@ -28,7 +28,6 @@
             }
             catch (Exception ex)
             {
-
                 throw new AsyncApiReaderException($"Something went wrong trying to fetch '{uri.OriginalString}. {ex.Message}'", ex);
             }
         }
@@ -50,7 +49,6 @@
             }
             catch (Exception ex)
             {
-
                 throw new AsyncApiReaderException($"Something went wrong trying to fetch '{uri.OriginalString}'. {ex.Message}", ex);
             }
         }

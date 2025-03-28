@@ -71,10 +71,5 @@ namespace ByteBard.AsyncAPI.Readers
         /// External reference reader implementation provided by users for reading external resources.
         /// </summary>
         public IStreamLoader ExternalReferenceLoader { get; set; } = null;
-
-        /// <summary>
-        /// URL where relative references should be resolved from if.
-        /// </summary>
-        public Uri BaseUrl { get; set; }
     }
 }

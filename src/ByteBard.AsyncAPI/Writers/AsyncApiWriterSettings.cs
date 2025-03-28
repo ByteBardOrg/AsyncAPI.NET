@@ -56,7 +56,7 @@
         /// <summary>
         /// Gets or sets a value indicating whether indicates if local references should be rendered as an inline object.
         /// </summary>
-        public bool InlineLocalReferences { get; set; }
+        public bool InlineLocalReferences { get; private set; }
 
         /// <summary>
         /// Figures out if a loop exists.
@@ -66,7 +66,7 @@
         /// <summary>
         /// Returns back if the refernece should be inlined or not.
         /// </summary>
-        /// <param name="reference">The refernece.</param>
+        /// <param name="reference">The reference.</param>
         /// <returns>True if it should be inlined otherwise false.</returns>
         public bool ShouldInlineReference(AsyncApiReference reference)
         {

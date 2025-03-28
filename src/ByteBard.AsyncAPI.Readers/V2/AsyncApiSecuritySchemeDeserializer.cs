@@ -4,7 +4,6 @@ namespace ByteBard.AsyncAPI.Readers
     using ByteBard.AsyncAPI.Extensions;
     using ByteBard.AsyncAPI.Models;
     using ByteBard.AsyncAPI.Readers.ParseNodes;
-    using ByteBard.AsyncAPI.Writers;
 
     /// <summary>
     /// Class containing logic to deserialize AsyncApi document into

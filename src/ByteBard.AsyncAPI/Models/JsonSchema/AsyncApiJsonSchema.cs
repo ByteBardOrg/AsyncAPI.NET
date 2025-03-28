@@ -9,7 +9,7 @@
     /// <summary>
     /// The Schema Object allows the definition of input and output data types.
     /// </summary>
-    public class AsyncApiJsonSchema : IAsyncApiExtensible, IAsyncApiSerializable, IAsyncApiMessagePayload
+    public class AsyncApiJsonSchema : IAsyncApiExtensible, IAsyncApiSerializable, IAsyncApiSchema
     {
         /// <summary>
         /// follow JSON Schema definition. Short text providing information about the data.
@@ -248,7 +248,19 @@
 
         public virtual IDictionary<string, IAsyncApiExtension> Extensions { get; set; } = new Dictionary<string, IAsyncApiExtension>();
 
+        public static implicit operator AsyncApiMultiFormatSchema(AsyncApiJsonSchema schema) => new AsyncApiMultiFormatSchema { Schema = schema };
+
         public virtual void SerializeV2(IAsyncApiWriter writer)
+        {
+            this.SerializeCore(writer);
+        }
+
+        public virtual void SerializeV3(IAsyncApiWriter writer)
+        {
+            this.SerializeCore(writer);
+        }
+
+        private void SerializeCore(IAsyncApiWriter writer)
         {
             writer.WriteStartObject();
 

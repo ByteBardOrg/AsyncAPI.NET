@@ -4,17 +4,17 @@ namespace ByteBard.AsyncAPI.Tests
     using System.IO;
     using System.Linq;
     using System.Threading.Tasks;
-    using FluentAssertions;
     using ByteBard.AsyncAPI.Models;
     using ByteBard.AsyncAPI.Readers;
     using ByteBard.AsyncAPI.Readers.Interface;
     using ByteBard.AsyncAPI.Readers.V2;
+    using FluentAssertions;
     using NUnit.Framework;
 
     public class AsyncApiReference_Should : TestBase
     {
         [Test]
-        public void ReferencePointers()
+        public void V2_ReferencePointers()
         {
             var diag = new AsyncApiDiagnostic();
             var versionService = new AsyncApiV2VersionService(diag);
@@ -47,7 +47,7 @@ namespace ByteBard.AsyncAPI.Tests
         }
 
         [Test]
-        public void Reference()
+        public void V2_Reference()
         {
             var json =
                 """
@@ -70,14 +70,14 @@ namespace ByteBard.AsyncAPI.Tests
         }
 
         [Test]
-        public void ExternalFragmentReference_ResolvesFragtment()
+        public void V2_ExternalFragmentReference_ResolvesFragtment()
         {
             var externalJson =
                 """
                 {
                     "servers": [
                         {
-                            "url": "wss://production.gigantic-server.com:443",
+                            "url": "production.gigantic-server.com:443",
                             "protocol": "wss",
                             "protocolVersion": "1.0.0",
                             "description": "The production API server",
@@ -113,56 +113,58 @@ namespace ByteBard.AsyncAPI.Tests
             var reference = doc.Servers.First().Value as AsyncApiServerReference;
             reference.Reference.FragmentId.Should().Be("/servers/0");
             reference.Reference.IsFragment.Should().BeTrue();
-            reference.Url.Should().Be("wss://production.gigantic-server.com:443");
+            reference.Host.Should().Be("production.gigantic-server.com:443");
+            reference.Protocol.Should().Be("wss");
         }
 
         [Test]
-        public void ServerReference_WithComponentReference_ResolvesReference()
+        public void V2_ServerReference_WithComponentReference_ResolvesReference()
         {
             var json =
                 """
-        {
-          "asyncapi": "2.6.0",
-          "info": { },
-          "servers": {
-            "production": {
-              "$ref": "#/components/servers/whatever"
-            }
-          },
-          "components": {
-            "servers": {
-                "whatever": {
-                  "url": "wss://production.gigantic-server.com:443",
-                  "protocol": "wss",
-                  "protocolVersion": "1.0.0",
-                  "description": "The production API server",
-                  "variables": {
-                    "username": {
-                      "default": "demo",
-                      "description": "This value is assigned by the service provider"
-                    },
-                    "password": {
-                      "default": "demo",
-                      "description": "This value is assigned by the service provider"
+                {
+                  "asyncapi": "2.6.0",
+                  "info": { },
+                  "servers": {
+                    "production": {
+                      "$ref": "#/components/servers/whatever"
+                    }
+                  },
+                  "components": {
+                    "servers": {
+                        "whatever": {
+                          "url": "production.gigantic-server.com:443",
+                          "protocol": "wss",
+                          "protocolVersion": "1.0.0",
+                          "description": "The production API server",
+                          "variables": {
+                            "username": {
+                              "default": "demo",
+                              "description": "This value is assigned by the service provider"
+                            },
+                            "password": {
+                              "default": "demo",
+                              "description": "This value is assigned by the service provider"
+                            }
+                          }
+                        }
                     }
                   }
                 }
-            }
-          }
-        }
-        """;
+                """;
 
             var doc = new AsyncApiStringReader().Read(json, out var diag);
             var reference = doc.Servers.First().Value as AsyncApiServerReference;
             reference.Reference.ExternalResource.Should().BeNull();
             reference.Reference.FragmentId.Should().Be("/components/servers/whatever");
             reference.Reference.IsFragment.Should().BeTrue();
-            reference.Url.Should().Be("wss://production.gigantic-server.com:443");
+            reference.Host.Should().Be("production.gigantic-server.com:443");
+            reference.Protocol.Should().Be("wss");
 
         }
 
         [Test]
-        public void AsyncApiReference_WithExternalFragmentUriReference_AllowReference()
+        public void V2_AsyncApiReference_WithExternalFragmentUriReference_AllowReference()
         {
             // Arrange
             var actual = """
@@ -176,7 +178,7 @@ namespace ByteBard.AsyncAPI.Tests
 
             // Assert
             diagnostic.Errors.Should().BeEmpty();
-            var payload = deserialized.Payload.As<AsyncApiJsonSchemaReference>();
+            var payload = deserialized.Payload.Schema.As<AsyncApiJsonSchemaReference>();
             payload.UnresolvedReference.Should().BeTrue();
 
             var reference = payload.Reference;
@@ -191,7 +193,7 @@ namespace ByteBard.AsyncAPI.Tests
         }
 
         [Test]
-        public void AsyncApiReference_WithFragmentReference_AllowReference()
+        public void V2_AsyncApiReference_WithFragmentReference_AllowReference()
         {
             // Arrange
             var actual = """
@@ -205,7 +207,7 @@ namespace ByteBard.AsyncAPI.Tests
 
             // Assert
             diagnostic.Errors.Should().BeEmpty();
-            var payload = deserialized.Payload.As<AsyncApiJsonSchemaReference>();
+            var payload = deserialized.Payload.Schema.As<AsyncApiJsonSchemaReference>();
             payload.UnresolvedReference.Should().BeTrue();
 
             var reference = payload.Reference;
@@ -220,35 +222,7 @@ namespace ByteBard.AsyncAPI.Tests
         }
 
         [Test]
-        public void AsyncApiReference_WithInternalComponentReference_AllowReference()
-        {
-            // Arrange
-            var actual = """
-                payload:
-                  $ref: '#/components/schemas/test'
-                """;
-            var reader = new AsyncApiStringReader();
-
-            // Act
-            var deserialized = reader.ReadFragment<AsyncApiMessage>(actual, AsyncApiVersion.AsyncApi2_0, out var diagnostic);
-
-            // Assert
-            diagnostic.Errors.Should().BeEmpty();
-            var payload = deserialized.Payload.As<AsyncApiJsonSchemaReference>();
-            var reference = payload.Reference;
-            reference.ExternalResource.Should().BeNull();
-            reference.Type.Should().Be(ReferenceType.Schema);
-            reference.FragmentId.Should().Be("/components/schemas/test");
-            reference.IsFragment.Should().BeTrue();
-            reference.IsExternal.Should().BeFalse();
-
-            var expected = deserialized.SerializeAsYaml(AsyncApiVersion.AsyncApi2_0);
-            actual.Should()
-                  .BePlatformAgnosticEquivalentTo(expected);
-        }
-
-        [Test]
-        public void AsyncApiReference_WithExternalFragmentReference_AllowReference()
+        public void V2_AsyncApiReference_WithExternalFragmentReference_AllowReference()
         {
             // Arrange
             var actual = """
@@ -262,7 +236,7 @@ namespace ByteBard.AsyncAPI.Tests
 
             // Assert
             diagnostic.Errors.Should().BeEmpty();
-            var payload = deserialized.Payload.As<AsyncApiJsonSchemaReference>();
+            var payload = deserialized.Payload.Schema.As<AsyncApiJsonSchemaReference>();
             var reference = payload.Reference;
             reference.ExternalResource.Should().Be("./myjsonfile.json");
             reference.FragmentId.Should().Be("/fragment");
@@ -275,7 +249,7 @@ namespace ByteBard.AsyncAPI.Tests
         }
 
         [Test]
-        public void AsyncApiReference_WithExternalComponentReference_AllowReference()
+        public void V2_AsyncApiReference_WithExternalComponentReference_AllowReference()
         {
             // Arrange
             var actual = """
@@ -289,7 +263,7 @@ namespace ByteBard.AsyncAPI.Tests
 
             // Assert
             diagnostic.Errors.Should().BeEmpty();
-            var payload = deserialized.Payload.As<AsyncApiJsonSchemaReference>();
+            var payload = deserialized.Payload.Schema.As<AsyncApiJsonSchemaReference>();
             var reference = payload.Reference;
             reference.ExternalResource.Should().Be("./someotherdocument.json");
             reference.Type.Should().Be(ReferenceType.Schema);
@@ -303,7 +277,7 @@ namespace ByteBard.AsyncAPI.Tests
         }
 
         [Test]
-        public void AsyncApiDocument_WithInternalComponentReference_ResolvesReference()
+        public void V2_AsyncApiDocument_WithInternalComponentReference_ResolvesReference()
         {
             // Arrange
             var actual = """
@@ -342,7 +316,7 @@ namespace ByteBard.AsyncAPI.Tests
         }
 
         [Test]
-        public void AsyncApiDocument_WithExternalReferenceOnlySetToResolveInternalReferences_DoesNotResolve()
+        public void V2_AsyncApiDocument_WithExternalReferenceOnlySetToResolveInternalReferences_DoesNotResolve()
         {
             // Arrange
             var actual = """
@@ -378,7 +352,7 @@ namespace ByteBard.AsyncAPI.Tests
         }
 
         [Test]
-        public void AsyncApiReference_WithExternalReference_AllowsReferenceDoesNotResolve()
+        public void V2_AsyncApiReference_WithExternalReference_AllowsReferenceDoesNotResolve()
         {
             // Arrange
             var actual = """
@@ -392,7 +366,7 @@ namespace ByteBard.AsyncAPI.Tests
 
             // Assert
             diagnostic.Errors.Should().BeEmpty();
-            var payload = deserialized.Payload.As<AsyncApiJsonSchemaReference>();
+            var payload = deserialized.Payload.Schema.As<AsyncApiJsonSchemaReference>();
             var reference = payload.Reference;
             reference.ExternalResource.Should().Be("http://example.com/json.json");
             reference.FragmentId.Should().BeNull();
@@ -408,7 +382,7 @@ namespace ByteBard.AsyncAPI.Tests
         }
 
         [Test]
-        public void AsyncApiReference_WithExternalResourcesInterface_DeserializesCorrectly()
+        public void V2_AsyncApiReference_WithExternalResourcesInterface_DeserializesCorrectly()
         {
             var yaml = """
                        asyncapi: 2.3.0
@@ -428,14 +402,14 @@ namespace ByteBard.AsyncAPI.Tests
             };
             var reader = new AsyncApiStringReader(settings);
             var doc = reader.Read(yaml, out var diagnostic);
-            var message = doc.Channels["workspace"].Publish.Message.First();
+            var message = doc.Channels["workspace"].Messages.Values.First();
             message.Name.Should().Be("Test");
-            var payload = message.Payload.As<AsyncApiJsonSchema>();
+            var payload = message.Payload.Schema.As<AsyncApiJsonSchema>();
             payload.Properties.Count.Should().Be(1);
         }
 
         [Test]
-        public void AsyncApiReference_DocumentLevelReferencePointer_DeserializesCorrectly()
+        public void V2_AsyncApiReference_DocumentLevelReferencePointer_DeserializesCorrectly()
         {
             var yaml = """
                asyncapi: 2.3.0
@@ -454,12 +428,34 @@ namespace ByteBard.AsyncAPI.Tests
             var reader = new AsyncApiStringReader();
             var doc = reader.Read(yaml, out var diagnostic);
             doc.Channels.Should().HaveCount(2);
-            doc.Channels["other"].Publish.Message.First().Title.Should().Be("test message");
+            doc.Channels["other"].Messages.Values.First().Title.Should().Be("test message");
         }
 
         [Test]
-        public void AsyncApiReference_WithExternalAvroResource_DeserializesCorrectly()
+        public void V2_AsyncApiReference_WithExternalAvroResource_DeserializesCorrectlyAndUpgrades()
         {
+            var expected =
+                """
+                asyncapi: 2.6.0
+                info:
+                  title: test
+                  version: 1.0.0
+                channels:
+                  workspace:
+                    publish:
+                      message:
+                        $ref: '#/components/messages/anonymous-message-1'
+                components:
+                  messages:
+                    anonymous-message-1:
+                      payload:
+                        $ref: ./some/path/to/external/payload.json
+                      schemaFormat: application/vnd.apache.avro
+                      name: Test
+                      title: Test message
+                      summary: Test.
+                """;
+
             var avroPayload =
                 """
                 {
@@ -510,12 +506,12 @@ namespace ByteBard.AsyncAPI.Tests
             };
             var reader = new AsyncApiStringReader(settings);
             var doc = reader.Read(yaml, out var diagnostic);
-            var message = doc.Channels["workspace"].Publish.Message.First();
-            var payload = message.Payload.As<AsyncApiAvroSchema>();
+            var message = doc.Channels["workspace"].Messages.Values.First();
+            var payload = message.Payload.Schema.As<AsyncApiAvroSchema>();
             payload.As<AvroRecord>().Name.Should().Be("thecodebuzz_schema");
 
             doc.SerializeAsYaml(AsyncApiVersion.AsyncApi2_0).Should()
-                .BePlatformAgnosticEquivalentTo(yaml);
+                .BePlatformAgnosticEquivalentTo(expected);
 
         }
     }

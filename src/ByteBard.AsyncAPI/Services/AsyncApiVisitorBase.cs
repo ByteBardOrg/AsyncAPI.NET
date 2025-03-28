@@ -53,7 +53,7 @@
         {
         }
 
-        public virtual void Visit(IAsyncApiMessagePayload payload)
+        public virtual void Visit(IAsyncApiSchema payload)
         {
         }
 
@@ -69,7 +69,15 @@
         {
         }
 
+        public virtual void Visit(IDictionary<string, AsyncApiOperation> anys)
+        {
+        }
+
         public virtual void Visit(IList<AsyncApiMessageTrait> traits)
+        {
+        }
+
+        public virtual void Visit(IList<AsyncApiSecurityScheme> traits)
         {
         }
 
@@ -154,7 +162,19 @@
         {
         }
 
+        public virtual void Visit(AsyncApiOperationReply reply)
+        {
+        }
+
+        public virtual void Visit(AsyncApiOperationReplyAddress replyAddress)
+        {
+        }
+
         public virtual void Visit(AsyncApiMessage message)
+        {
+        }
+
+        public virtual void Visit(AsyncApiMultiFormatSchema multiFormatSchema)
         {
         }
 
@@ -177,13 +197,6 @@
         }
 
         /// <summary>
-        /// Visits <see cref="AsyncApiSecurityRequirement"/>.
-        /// </summary>
-        public virtual void Visit(AsyncApiSecurityRequirement securityRequirement)
-        {
-        }
-
-        /// <summary>
         /// Visits <see cref="AsyncApiSecurityScheme"/>.
         /// </summary>
         public virtual void Visit(AsyncApiSecurityScheme securityScheme)
@@ -194,13 +207,6 @@
         /// Visits list of <see cref="AsyncApiTag"/>.
         /// </summary>
         public virtual void Visit(IList<AsyncApiTag> asyncApiTags)
-        {
-        }
-
-        /// <summary>
-        /// Visits list of <see cref="AsyncApiSecurityRequirement"/>.
-        /// </summary>
-        public virtual void Visit(IList<AsyncApiSecurityRequirement> asyncApiSecurityRequirements)
         {
         }
 
@@ -298,6 +304,10 @@
         }
 
         public virtual void Visit(IList<AsyncApiMessageExample> messageExamples)
+        {
+        }
+
+        public virtual void Visit(IDictionary<string, AsyncApiMessage> messages)
         {
         }
     }

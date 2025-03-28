@@ -2,9 +2,11 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics;
     using ByteBard.AsyncAPI.Models.Interfaces;
     using ByteBard.AsyncAPI.Writers;
 
+    [DebuggerDisplay("{Reference}")]
     public class AsyncApiBindingsReference<TBinding> : AsyncApiBindings<TBinding>, IAsyncApiReferenceable
         where TBinding : IBinding
     {
@@ -32,6 +34,8 @@
 
         public override ICollection<TBinding> Values => this.Target.Values;
 
+        public override IDictionary<string, IAsyncApiExtension> Extensions => this.target.Extensions;
+
         public override int Count => this.Target.Count;
 
         public override bool IsReadOnly => this.Target.IsReadOnly;
@@ -43,14 +47,17 @@
             {
                 type = ReferenceType.ServerBindings;
             }
+
             if (typeof(TBinding) == typeof(IMessageBinding))
             {
                 type = ReferenceType.MessageBindings;
             }
+
             if (typeof(TBinding) == typeof(IOperationBinding))
             {
                 type = ReferenceType.OperationBindings;
             }
+
             if (typeof(TBinding) == typeof(IChannelBinding))
             {
                 type = ReferenceType.ChannelBindings;
@@ -78,6 +85,22 @@
             }
 
             this.Target.SerializeV2(writer);
+        }
+
+        public override void SerializeV3(IAsyncApiWriter writer)
+        {
+            if (writer is null)
+            {
+                throw new ArgumentNullException(nameof(writer));
+            }
+
+            if (this.Reference != null && !writer.GetSettings().ShouldInlineReference(this.Reference))
+            {
+                this.Reference.SerializeV3(writer);
+                return;
+            }
+
+            this.Target.SerializeV3(writer);
         }
 
         public override void Add(string key, TBinding value)

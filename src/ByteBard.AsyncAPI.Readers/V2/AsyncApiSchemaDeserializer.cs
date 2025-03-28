@@ -5,7 +5,6 @@ namespace ByteBard.AsyncAPI.Readers
     using ByteBard.AsyncAPI.Extensions;
     using ByteBard.AsyncAPI.Models;
     using ByteBard.AsyncAPI.Readers.ParseNodes;
-    using ByteBard.AsyncAPI.Writers;
 
     public class AsyncApiSchemaDeserializer
     {

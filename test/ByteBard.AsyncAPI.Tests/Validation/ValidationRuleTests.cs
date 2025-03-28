@@ -1,123 +1,167 @@
-﻿namespace ByteBard.AsyncAPI.Tests.Validation
+﻿namespace ByteBard.AsyncAPI.Tests.Validation;
+
+using System.Linq;
+using FluentAssertions;
+using ByteBard.AsyncAPI.Readers;
+using NUnit.Framework;
+
+public class ValidationRuleTests
 {
-    using FluentAssertions;
-    using ByteBard.AsyncAPI.Readers;
-    using NUnit.Framework;
-    using System.Linq;
+  [Test]
+  public void V2_OperationId_WithNonUniqueKey_DiagnosticsError()
+  {
+    var input =
+      """
+      asyncapi: 2.6.0
+      info:
+        title: Chat Application
+        version: 1.0.0
+      servers:
+        testing:
+          url: test.mosquitto.org:1883
+          protocol: mqtt
+          description: Test broker
+      channels:
+        chat/{personId}:
+          publish:
+            operationId: onMessageReceieved
+            message:
+              name: text
+              payload:
+                type: string
+        chat/{personIdentity}:
+          publish:
+            operationId: onMessageReceieved
+            message:
+              name: text
+              payload:
+                type: string
+      """;
 
-    public class ValidationRuleTests
-    {
-        [Test]
-        [TestCase("chat-{person-id}")]
-        public void ChannelKey_WithInvalidParameter_DiagnosticsError(string channelKey)
-        {
-            var input =
-                $"""
-                asyncapi: 2.6.0
-                info:
-                  title: Chat Application
-                  version: 1.0.0
-                servers:
-                  testing:
-                    url: test.mosquitto.org:1883
-                    protocol: mqtt
-                    description: Test broker
-                channels:
-                  {channelKey}:
-                    publish:
-                      operationId: onMessageReceieved
-                      message:
-                        name: text
-                        payload:
-                          type: string
-                    subscribe:
-                      operationId: sendMessage
-                      message:
-                        name: text
-                        payload:
-                          type: string
-                """;
+    new AsyncApiStringReader().Read(input, out var diagnostic);
+    diagnostic.Errors.First().Message.Should().Be("OperationId: 'onMessageReceieved' is not unique.");
+    diagnostic.Errors.First().Pointer.Should().Be("#/channels/chat~1{personIdentity}");
+  }
 
-            var document = new AsyncApiStringReader().Read(input, out var diagnostic);
-            diagnostic.Errors.First().Message.Should().Be($"The key '{channelKey}' in 'channels' MUST match the regular expression '^[a-zA-Z0-9\\.\\-_]+$'.");
-            diagnostic.Errors.First().Pointer.Should().Be("#/channels");
-        }
+  [Test]
+  public void V3_OperationChannel_NotReferencingARootChannel_DiagnosticsError()
+  {
+    var input =
+      """
+      asyncapi: 3.0.0
+      info:
+        title: Chat Application
+        version: 1.0.0
+      servers:
+        testing:
+          host: test.mosquitto.org:1883
+          protocol: mqtt
+          description: Test broker
+      channels:
+        chatPersonId:
+          address: chat.{personId}
+          messages:
+            messageReceived:
+              name: text
+              payload:
+                type: string
+      operations:
+        onMessageReceived:
+          title: Message received
+          channel:
+            $ref: '#/components/channels/secondChannel'
+          messages:
+            - $ref: '#/channels/chatPersonId/messages/messageReceived'
+      components:
+        channels:
+          secondChannel:
+            address: chat.{secondChannel}
+      """;
 
-        [Test]
-        public void ChannelKey_WithNonUniqueKey_DiagnosticsError()
-        {
-            var input =
-                """
-                asyncapi: 2.6.0
-                info:
-                  title: Chat Application
-                  version: 1.0.0
-                servers:
-                  testing:
-                    url: test.mosquitto.org:1883
-                    protocol: mqtt
-                    description: Test broker
-                channels:
-                  chat/{personId}:
-                    publish:
-                      operationId: onMessageReceieved
-                      message:
-                        name: text
-                        payload:
-                          type: string
-                  chat/{personIdentity}:
-                    publish:
-                      operationId: onMessageReceieved
-                      message:
-                        name: text
-                        payload:
-                          type: string
-                """;
+    new AsyncApiStringReader().Read(input, out var diagnostic);
+    diagnostic.Errors.First().Message.Should().Be("The operation 'Message received' MUST point to a channel definition located in the root Channels Object.");
+    diagnostic.Errors.First().Pointer.Should().Be("#/operations/onMessageReceived");
+  }
 
-            var document = new AsyncApiStringReader().Read(input, out var diagnostic);
-            diagnostic.Errors.First().Message.Should().Be("Channel signature 'chat/{}' MUST be unique.");
-            diagnostic.Errors.First().Pointer.Should().Be("#/channels");
-        }
+  [Test]
+  public void V3_OperationMessage_NotReferencingARootChannel_DiagnosticsError()
+  {
+    var input =
+      """
+      asyncapi: 3.0.0
+      info:
+        title: Chat Application
+        version: 1.0.0
+      servers:
+        testing:
+          host: test.mosquitto.org:1883
+          protocol: mqtt
+          description: Test broker
+      channels:
+        chatPersonId:
+          address: chat.{personId}
+          messages:
+            messageReceived:
+              name: text
+              payload:
+                type: string
+      operations:
+        onMessageReceived:
+          title: Message received
+          channel:
+            $ref: '#/channels/chatPersonId'
+          messages:
+            - $ref: '#/components/messages/messageSent'
+      components:
+        messages:
+          messageSent:
+            name: text
+            payload:
+              type: string
+      """;
 
-        [Test]
-        [TestCase("chat")]
-        [TestCase("/some/chat/{personId}")]
-        [TestCase("chat-{personId}")]
-        [TestCase("chat-{person_id}")]
-        [TestCase("chat-{person%2Did}")]
-        [TestCase("chat-{personId2}")]
-        public void ChannelKey_WithValidKey_Success(string channelKey)
-        {
-            var input =
-                $"""
-                asyncapi: 2.6.0
-                info:
-                  title: Chat Application
-                  version: 1.0.0
-                servers:
-                  testing:
-                    url: test.mosquitto.org:1883
-                    protocol: mqtt
-                    description: Test broker
-                channels:
-                  {channelKey}:
-                    publish:
-                      operationId: onMessageReceieved
-                      message:
-                        name: text
-                        payload:
-                          type: string
-                    subscribe:
-                      operationId: sendMessage
-                      message:
-                        name: text
-                        payload:
-                          type: string
-                """;
+    new AsyncApiStringReader().Read(input, out var diagnostic);
+    diagnostic.Errors.First().Message.Should().Be("The messages of operation 'Message received' MUST be a subset of the referenced channels messages.");
+    diagnostic.Errors.First().Pointer.Should().Be("#/operations/onMessageReceived");
+  }
 
-            var document = new AsyncApiStringReader().Read(input, out var diagnostic);
-            diagnostic.Errors.Should().BeEmpty();
-        }
-    }
+  [Test]
+  [TestCase("chat")]
+  [TestCase("/some/chat/{personId}")]
+  [TestCase("chat-{personId}")]
+  [TestCase("chat-{person_id}")]
+  [TestCase("chat-{person%2Did}")]
+  [TestCase("chat-{personId2}")]
+  public void ChannelKey_WithValidKey_Success(string channelKey)
+  {
+    var input =
+      $"""
+       asyncapi: 2.6.0
+       info:
+         title: Chat Application
+         version: 1.0.0
+       servers:
+         testing:
+           url: test.mosquitto.org:1883
+           protocol: mqtt
+           description: Test broker
+       channels:
+         {channelKey}:
+           publish:
+             operationId: onMessageReceieved
+             message:
+               name: text
+               payload:
+                 type: string
+           subscribe:
+             operationId: sendMessage
+             message:
+               name: text
+               payload:
+                 type: string
+       """;
 
+    new AsyncApiStringReader().Read(input, out var diagnostic);
+    diagnostic.Errors.Should().BeEmpty();
+  }
 }

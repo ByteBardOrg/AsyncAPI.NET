@@ -2,7 +2,7 @@
   <!-- Common Properties used by all assemblies -->
   <PropertyGroup>
     <LangVersion>10</LangVersion>
-    <TargetFrameworks>netstandard2.0;net8</TargetFrameworks>
+    <TargetFrameworks>netstandard2.1;net8</TargetFrameworks>
     <ImplicitUsings>disable</ImplicitUsings>
     <Company>ByteBard</Company>
     <PackageProjectUrl>https://github.com/ByteBardOrg/AsyncAPI.NET</PackageProjectUrl>
