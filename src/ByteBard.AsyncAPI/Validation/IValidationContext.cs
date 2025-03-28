@@ -1,3 +1,5 @@
+using ByteBard.AsyncAPI.Models;
+
 namespace ByteBard.AsyncAPI.Validations
 {
     /// <summary>
@@ -32,5 +34,10 @@ namespace ByteBard.AsyncAPI.Validations
         /// Pointer to source of validation error in document.
         /// </summary>
         string PathString { get; }
+
+        /// <summary>
+        /// The root document.
+        /// </summary>
+        AsyncApiDocument RootDocument { get; }
     }
 }

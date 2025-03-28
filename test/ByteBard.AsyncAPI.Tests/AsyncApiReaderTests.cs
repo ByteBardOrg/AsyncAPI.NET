@@ -13,7 +13,7 @@ namespace ByteBard.AsyncAPI.Tests
     public class AsyncApiReaderTests
     {
         [Test]
-        public void Read_WithMissingEverything_DeserializesWithErrors()
+        public void V2_Read_WithMissingEverything_DeserializesWithErrors()
         {
             var yaml = @"asyncapi: 2.6.0";
             var reader = new AsyncApiStringReader();
@@ -21,7 +21,7 @@ namespace ByteBard.AsyncAPI.Tests
         }
 
         [Test]
-        public void Read_WithComponentBindings_Deserializes()
+        public void V2_Read_WithComponentBindings_Deserializes()
         {
             var yaml = @"
                 asyncapi: 2.6.0
@@ -40,14 +40,16 @@ namespace ByteBard.AsyncAPI.Tests
                   messages:
                     WorkspaceEventPayload:
                       schemaFormat: application/schema+yaml;version=draft-07
+                      payload:
+                        type: string
                 ";
             var reader = new AsyncApiStringReader();
             var doc = reader.Read(yaml, out var diagnostic);
-            Assert.AreEqual("application/schema+yaml;version=draft-07", doc.Components.Messages["WorkspaceEventPayload"].SchemaFormat);
+            Assert.AreEqual("application/schema+yaml;version=draft-07", doc.Components.Messages["WorkspaceEventPayload"].Payload.SchemaFormat);
         }
 
         [Test]
-        public void Read_WithExtensionParser_Parses()
+        public void V2_Read_WithExtensionParser_Parses()
         {
             var extensionName = "x-someValue";
             var yaml = $"""
@@ -92,7 +94,7 @@ namespace ByteBard.AsyncAPI.Tests
         }
 
         [Test]
-        public void Read_WithUnmappedMemberHandlingError_AddsError()
+        public void V2_Read_WithUnmappedMemberHandlingError_AddsError()
         {
             var extensionName = "x-someValue";
             var yaml = $"""
@@ -137,7 +139,7 @@ namespace ByteBard.AsyncAPI.Tests
         }
 
         [Test]
-        public void Read_WithUnmappedMemberHandlingIgnore_NoErrors()
+        public void V2_Read_WithUnmappedMemberHandlingIgnore_NoErrors()
         {
             var extensionName = "x-someValue";
             var yaml = $"""
@@ -182,7 +184,7 @@ namespace ByteBard.AsyncAPI.Tests
         }
 
         [Test]
-        public void Read_WithThrowingExtensionParser_AddsToDiagnostics()
+        public void V2_Read_WithThrowingExtensionParser_AddsToDiagnostics()
         {
             var extensionName = "x-fail";
             var yaml = $"""
@@ -222,7 +224,7 @@ namespace ByteBard.AsyncAPI.Tests
         }
 
         [Test]
-        public void Read_WithBasicPlusContact_Deserializes()
+        public void V2_Read_WithBasicPlusContact_Deserializes()
         {
             var yaml = """
                 asyncapi: 2.3.0
@@ -245,7 +247,7 @@ namespace ByteBard.AsyncAPI.Tests
         }
 
         [Test]
-        public void Read_WithBasicPlusExternalDocs_Deserializes()
+        public void V2_Read_WithBasicPlusExternalDocs_Deserializes()
         {
             var yaml = """
                 asyncapi: 2.3.0
@@ -270,13 +272,13 @@ namespace ByteBard.AsyncAPI.Tests
                 """;
             var reader = new AsyncApiStringReader();
             var doc = reader.Read(yaml, out var diagnostic);
-            var message = doc.Channels["workspace"].Publish.Message;
-            Assert.AreEqual(new Uri("https://example.com"), message.First().ExternalDocs.Url);
-            Assert.AreEqual("Find more info here", message.First().ExternalDocs.Description);
+            var messages = doc.Channels["workspace"].Messages.Values;
+            Assert.AreEqual(new Uri("https://example.com"), messages.First().ExternalDocs.Url);
+            Assert.AreEqual("Find more info here", messages.First().ExternalDocs.Description);
         }
 
         [Test]
-        public void Read_WithBasicPlusTag_Deserializes()
+        public void V2_Read_WithBasicPlusTag_Deserializes()
         {
             var yaml = """
                 asyncapi: 2.3.0
@@ -292,13 +294,13 @@ namespace ByteBard.AsyncAPI.Tests
                 """;
             var reader = new AsyncApiStringReader();
             var doc = reader.Read(yaml, out var diagnostic);
-            var tag = doc.Tags.First();
+            var tag = doc.Info.Tags.First();
             Assert.AreEqual("user", tag.Name);
             Assert.AreEqual("User-related messages", tag.Description);
         }
 
         [Test]
-        public void Read_WithBasicPlusServerDeserializes()
+        public void V2_Read_WithBasicPlusServerDeserializes()
         {
             var yaml = """
                 asyncapi: 2.3.0
@@ -310,7 +312,7 @@ namespace ByteBard.AsyncAPI.Tests
                     x-eventarchetype: objectchanged
                 servers:
                   production:
-                    url: 'pulsar+ssl://prod.events.managed.io:1234'
+                    url: 'prod.events.managed.io:1234'
                     protocol: pulsar+ssl
                     description: Pulsar broker
                 """;
@@ -318,13 +320,13 @@ namespace ByteBard.AsyncAPI.Tests
             var doc = reader.Read(yaml, out var diagnostic);
             var server = doc.Servers.First();
             Assert.AreEqual("production", server.Key);
-            Assert.AreEqual("pulsar+ssl://prod.events.managed.io:1234", server.Value.Url);
+            Assert.AreEqual("prod.events.managed.io:1234", server.Value.Host);
             Assert.AreEqual("pulsar+ssl", server.Value.Protocol);
             Assert.AreEqual("Pulsar broker", server.Value.Description);
         }
 
         [Test]
-        public void Read_WithBasicPlusServerVariablesDeserializes()
+        public void V2_Read_WithBasicPlusServerVariablesDeserializes()
         {
             var yaml = """
                 asyncapi: 2.3.0
@@ -336,28 +338,28 @@ namespace ByteBard.AsyncAPI.Tests
                     x-eventarchetype: objectchanged
                 servers:
                   production:
-                    url: 'pulsar+ssl://prod.events.managed.io:{port}'
+                    url: 'prod.events.managed.{security}.io:443    '
                     protocol: pulsar+ssl
                     description: Pulsar broker
                     variables:
-                      port:
-                        description: Secure connection (TLS) is available through port 8883.
-                        default: '1883'
+                      security:
+                        description: Secure connection
+                        default: 'secure'
                         enum:
-                          - '1883'
-                          - '8883'
+                          - 'secure'
+                          - 'insecure'
                 """;
             var reader = new AsyncApiStringReader();
             var doc = reader.Read(yaml, out var diagnostic);
             var server = doc.Servers.First();
             var variable = server.Value.Variables.First();
             Assert.AreEqual("production", server.Key);
-            Assert.AreEqual("port", variable.Key);
-            Assert.AreEqual("Secure connection (TLS) is available through port 8883.", variable.Value.Description);
+            Assert.AreEqual("security", variable.Key);
+            Assert.AreEqual("Secure connection", variable.Value.Description);
         }
 
         [Test]
-        public void Read_WithBasicPlusCorrelationIDDeserializes()
+        public void V2_Read_WithBasicPlusCorrelationIDDeserializes()
         {
             var yaml = """
                 asyncapi: 2.3.0
@@ -382,13 +384,13 @@ namespace ByteBard.AsyncAPI.Tests
                 """;
             var reader = new AsyncApiStringReader();
             var doc = reader.Read(yaml, out var diagnostic);
-            var message = doc.Channels["workspace"].Publish.Message;
-            Assert.AreEqual("Default Correlation ID", message.First().CorrelationId.Description);
-            Assert.AreEqual("$message.header#/correlationId", message.First().CorrelationId.Location);
+            var messages = doc.Channels["workspace"].Messages.Values;
+            Assert.AreEqual("Default Correlation ID", messages.First().CorrelationId.Description);
+            Assert.AreEqual("$message.header#/correlationId", messages.First().CorrelationId.Location);
         }
 
         [Test]
-        public void Read_WithOneOfMessage_Reads()
+        public void V2_Read_WithOneOfMessage_Reads()
         {
             var yaml = """
                 asyncapi: 2.3.0
@@ -414,13 +416,13 @@ namespace ByteBard.AsyncAPI.Tests
                 """;
             var reader = new AsyncApiStringReader();
             var doc = reader.Read(yaml, out var diagnostic);
-            var message = doc.Channels["workspace"].Publish.Message.First();
+            var message = doc.Channels["workspace"].Messages.Values.First();
             Assert.AreEqual("Default Correlation ID", message.CorrelationId.Description);
             Assert.AreEqual("$message.header#/correlationId", message.CorrelationId.Location);
         }
 
         [Test]
-        public void Read_WithBasicPlusSecuritySchemeDeserializes()
+        public void V2_Read_WithBasicPlusSecuritySchemeDeserializes()
         {
             var yaml = """
                 asyncapi: 2.3.0
@@ -453,7 +455,7 @@ namespace ByteBard.AsyncAPI.Tests
         }
 
         [Test]
-        public void Read_WithWrongReference_AddsError()
+        public void V2_Read_WithWrongReference_AddsError()
         {
             var yaml =
                 """
@@ -475,11 +477,11 @@ namespace ByteBard.AsyncAPI.Tests
             var reader = new AsyncApiStringReader();
             var doc = reader.Read(yaml, out var diagnostic);
             diagnostic.Errors.Should().NotBeEmpty();
-            doc.Channels.Values.First().Publish.Message.Should().BeEmpty();
+            doc.Channels.Values.First().Messages.Should().BeEmpty();
         }
 
         [Test]
-        public void Read_WithBasicPlusOAuthFlowDeserializes()
+        public void V2_Read_WithBasicPlusOAuthFlowDeserializes()
         {
             var yaml = """
                 asyncapi: 2.3.0
@@ -507,12 +509,12 @@ namespace ByteBard.AsyncAPI.Tests
             Assert.AreEqual("oauth2", scheme.Key);
             Assert.AreEqual(SecuritySchemeType.OAuth2, scheme.Value.Type);
             Assert.AreEqual(new Uri("https://example.com/api/oauth/dialog"), flow.Implicit.AuthorizationUrl);
-            Assert.IsTrue(flow.Implicit.Scopes.ContainsKey("write:pets"));
-            Assert.IsTrue(flow.Implicit.Scopes.ContainsKey("read:pets"));
+            Assert.IsTrue(flow.Implicit.AvailableScopes.ContainsKey("write:pets"));
+            Assert.IsTrue(flow.Implicit.AvailableScopes.ContainsKey("read:pets"));
         }
 
         [Test]
-        public void Read_WithServerReference_ResolvesReference()
+        public void V2_Read_WithServerReference_ResolvesReference()
         {
             var yaml = """
                 asyncapi: 2.3.0
@@ -547,11 +549,11 @@ namespace ByteBard.AsyncAPI.Tests
                 """;
             var reader = new AsyncApiStringReader();
             var doc = reader.Read(yaml, out var diagnostic);
-            Assert.AreEqual("pulsar+ssl://prod.events.managed.io:1234", doc.Servers.First().Value.Url);
+            Assert.AreEqual("prod.events.managed.io:1234", doc.Servers.First().Value.Host);
         }
 
         [Test]
-        public void Read_WithChannelReference_ResolvesReference()
+        public void V2_Read_WithChannelReference_ResolvesReference()
         {
             var yaml = """
                 asyncapi: 2.3.0
@@ -582,6 +584,8 @@ namespace ByteBard.AsyncAPI.Tests
                   messages:
                     WorkspaceEventPayload:
                       schemaFormat: 'application/schema+yaml;version=draft-07'
+                      payload:
+                        type: string
                   securitySchemes:
                     petstore_auth: 
                       type: oauth2
@@ -594,11 +598,11 @@ namespace ByteBard.AsyncAPI.Tests
                 """;
             var reader = new AsyncApiStringReader();
             var doc = reader.Read(yaml, out var diagnostic);
-            Assert.AreEqual("application/schema+yaml;version=draft-07", doc.Channels.First().Value.Publish.Message.First().SchemaFormat);
+            Assert.AreEqual("application/schema+yaml;version=draft-07", doc.Channels.First().Value.Messages.Values.First().Payload.SchemaFormat);
         }
 
         [Test]
-        public void Read_WithBasicPlusMessageTraitsDeserializes()
+        public void V2_Read_WithBasicPlusMessageTraitsDeserializes()
         {
             var yaml = """
                 asyncapi: 2.3.0
@@ -636,8 +640,8 @@ namespace ByteBard.AsyncAPI.Tests
             var reader = new AsyncApiStringReader();
             var doc = reader.Read(yaml, out var diagnostic);
 
-            Assert.AreEqual(1, doc.Channels.First().Value.Publish.Message.First().Traits.Count);
-            Assert.AreEqual("a common headers for common things", doc.Channels.First().Value.Publish.Message.First().Traits.First().Description);
+            Assert.AreEqual(1, doc.Channels.First().Value.Messages.Values.First().Traits.Count);
+            Assert.AreEqual("a common headers for common things", doc.Channels.First().Value.Messages.Values.First().Traits.First().Description);
         }
 
         /// <summary>
@@ -645,7 +649,7 @@ namespace ByteBard.AsyncAPI.Tests
         /// Bug: Serializing properties multiple times - specifically Schema.OneOf was serialized into OneOf and Then.
         /// </summary>
         [Test]
-        public void Serialize_withOneOfSchema_DoesNotWriteThen()
+        public void V2_Serialize_withOneOfSchema_DoesNotWriteThen()
         {
             var yaml = """
                 asyncapi: 2.3.0
@@ -696,7 +700,7 @@ namespace ByteBard.AsyncAPI.Tests
         }
 
         [Test]
-        public void Read_WithBasicPlusSecurityRequirementsDeserializes()
+        public void V2_Read_WithBasicPlusSecurityRequirementsDeserializes()
         {
             var yaml = """
                 asyncapi: 2.3.0
@@ -728,10 +732,10 @@ namespace ByteBard.AsyncAPI.Tests
                 """;
             var reader = new AsyncApiStringReader();
             var doc = reader.Read(yaml, out var diagnostic);
-            var requirement = doc.Servers.First().Value.Security.First().First();
-            Assert.AreEqual(SecuritySchemeType.OAuth2, requirement.Key.Type);
-            Assert.IsTrue(requirement.Value.Contains("write:pets"));
-            Assert.IsTrue(requirement.Value.Contains("read:pets"));
+            var scheme = doc.Servers.First().Value.Security.First();
+            Assert.AreEqual(SecuritySchemeType.OAuth2, scheme.Type);
+            Assert.IsTrue(scheme.Scopes.Contains("write:pets"));
+            Assert.IsTrue(scheme.Scopes.Contains("read:pets"));
         }
     }
 }

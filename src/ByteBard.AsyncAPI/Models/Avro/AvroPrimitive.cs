@@ -20,6 +20,16 @@
 
         public override void SerializeV2(IAsyncApiWriter writer)
         {
+            this.SerializeCore(writer);
+        }
+
+        public override void SerializeV3(IAsyncApiWriter writer)
+        {
+            this.SerializeCore(writer);
+        }
+
+        public void SerializeCore(IAsyncApiWriter writer)
+        {
             writer.WriteValue(this.Type);
             if (this.Metadata.Any())
             {

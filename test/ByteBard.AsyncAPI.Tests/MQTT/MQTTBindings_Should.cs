@@ -10,12 +10,12 @@
     public class MQTTBindings_Should
     {
         [Test]
-        public void MQTTServerBinding_FilledObject_SerializesAndDeserializes()
+        public void V2_MQTTServerBinding_FilledObject_SerializesAndDeserializes()
         {
             // Arrange
             var expected =
                 """
-                url: https://example.com
+                url: example.com
                 protocol: mqtt
                 bindings:
                   mqtt:
@@ -32,7 +32,7 @@
                 """;
 
             var server = new AsyncApiServer();
-            server.Url = "https://example.com";
+            server.Host = "example.com";
             server.Protocol = "mqtt";
             server.Bindings.Add(new MQTTServerBinding
             {
@@ -65,7 +65,7 @@
         }
 
         [Test]
-        public void MQTTOperationBinding_WithFilledObject_SerializesAndDeserializes()
+        public void V2_MQTTOperationBinding_WithFilledObject_SerializesAndDeserializes()
         {
             // Arrange
             var expected =
@@ -99,7 +99,7 @@
         }
 
         [Test]
-        public void MQTTMessageBinding_WithFilledObject_SerializesAndDeserializes()
+        public void V2_MQTTMessageBinding_WithFilledObject_SerializesAndDeserializes()
         {
             // Arrange
             var expected =

@@ -22,6 +22,32 @@ namespace ByteBard.AsyncAPI.Readers.ParseNodes
 
         public ParseNode Value { get; set; }
 
+        public void ParseField<T>(T parentInstance,  IDictionary<Func<string, bool>, Action<T, string, ParseNode>> patternFields)
+        {
+            var map = patternFields.Where(p => p.Key(this.Name)).Select(p => p.Value).FirstOrDefault();
+            if (map != null)
+            {
+                try
+                {
+                    this.Context.StartObject(this.Name);
+                    map(parentInstance, this.Name, this.Value);
+                }
+                catch (AsyncApiReaderException ex)
+                {
+                    this.Context.Diagnostic.Errors.Add(new AsyncApiError(ex));
+                }
+                catch (AsyncApiException ex)
+                {
+                    ex.Pointer = this.Context.GetLocation();
+                    this.Context.Diagnostic.Errors.Add(new AsyncApiError(ex));
+                }
+                finally
+                {
+                    this.Context.EndObject();
+                }
+            }
+        }
+
         public void ParseField<T>(
             T parentInstance,
             IDictionary<string, Action<T, ParseNode>> fixedFields,

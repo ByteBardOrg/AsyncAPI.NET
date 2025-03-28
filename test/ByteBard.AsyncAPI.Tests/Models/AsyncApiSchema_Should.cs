@@ -275,7 +275,7 @@ namespace ByteBard.AsyncAPI.Tests.Models
         };
 
         [Test]
-        public void SerializeAsJson_WithBasicSchema_V2Works()
+        public void V2_SerializeAsJson_WithBasicSchema_V2Works()
         {
             // Arrange
             var expected = @"{ }";
@@ -289,7 +289,7 @@ namespace ByteBard.AsyncAPI.Tests.Models
         }
 
         [Test]
-        public void SerializeAsJson_WithAdvancedSchemaNumber_V2Works()
+        public void V2_SerializeAsJson_WithAdvancedSchemaNumber_V2Works()
         {
             // Arrange
             var expected = """
@@ -317,7 +317,7 @@ namespace ByteBard.AsyncAPI.Tests.Models
         }
 
         [Test]
-        public void SerializeAsJson_WithAdvancedSchemaBigNumbers_V2Works()
+        public void V2_SerializeAsJson_WithAdvancedSchemaBigNumbers_V2Works()
         {
             // Arrange
             var expected = """
@@ -345,10 +345,10 @@ namespace ByteBard.AsyncAPI.Tests.Models
         }
 
         [Test]
-        public void SerializeAsJson_WithAdvancedSchemaObject_V2Works()
+        public void V2_SerializeAsJson_WithAdvancedSchemaObject_V2Works()
         {
             // Arrange
-            string expected = this.GetTestData<string>();
+            string expected = this.GetTestData<string>(AsyncApiVersion.AsyncApi2_0, "SerializeAsJson_WithAdvancedSchemaObject_V2Works");
 
             // Act
             var actual = AdvancedSchemaObject.SerializeAsJson(AsyncApiVersion.AsyncApi2_0);
@@ -359,10 +359,10 @@ namespace ByteBard.AsyncAPI.Tests.Models
         }
 
         [Test]
-        public void Deserialize_WithAdvancedSchema_Works()
+        public void V2_Deserialize_WithAdvancedSchema_Works()
         {
             // Arrange
-            var json = this.GetTestData<string>();
+            var json = this.GetTestData<string>(AsyncApiVersion.AsyncApi2_0, "Deserialize_WithAdvancedSchema_Works");
             var expected = AdvancedSchemaObject;
 
             // Act
@@ -373,10 +373,10 @@ namespace ByteBard.AsyncAPI.Tests.Models
         }
 
         [Test]
-        public void SerializeAsJson_WithAdvancedSchemaWithAllOf_V2Works()
+        public void V2_SerializeAsJson_WithAdvancedSchemaWithAllOf_V2Works()
         {
             // Arrange
-            var expected = this.GetTestData<string>();
+            var expected = this.GetTestData<string>(AsyncApiVersion.AsyncApi2_0, "SerializeAsJson_WithAdvancedSchemaWithAllOf_V2Works");
 
             // Act
             var actual = AdvancedSchemaWithAllOf.SerializeAsJson(AsyncApiVersion.AsyncApi2_0);
@@ -387,9 +387,9 @@ namespace ByteBard.AsyncAPI.Tests.Models
         }
 
         [Theory]
-        [TestCase(true)]
-        [TestCase(false)]
-        public void Serialize_WithInliningOptions_ShouldInlineAccordingly(bool shouldInline)
+        [TestCase(ReferenceInlineSetting.InlineReferences)]
+        [TestCase(ReferenceInlineSetting.DoNotInlineReferences)]
+        public void V2_Serialize_WithInliningOptions_ShouldInlineAccordingly(ReferenceInlineSetting shouldInline)
         {
             // arrange
             var asyncApiDocument = new AsyncApiDocumentBuilder()
@@ -406,11 +406,11 @@ namespace ByteBard.AsyncAPI.Tests.Models
             })
             .WithChannel("mychannel", new AsyncApiChannel()
             {
-                Publish = new AsyncApiOperation
+                Address = "mychannel-{parameter}",
+                Messages = new Dictionary<string, AsyncApiMessage>
                 {
-                    Message = new List<AsyncApiMessage>
                     {
-                        new AsyncApiMessage
+                        "whatever", new AsyncApiMessage
                         {
                             Payload = new AsyncApiJsonSchema
                             {
@@ -422,9 +422,15 @@ namespace ByteBard.AsyncAPI.Tests.Models
                                     { "testB", new AsyncApiJsonSchemaReference("#/components/schemas/testB") },
                                 },
                             },
-                        },
+                        }
                     },
                 },
+            })
+            .WithOperation("operationA", new AsyncApiOperation
+            {
+                Action = AsyncApiAction.Receive,
+                Channel = new AsyncApiChannelReference("#/channels/mychannel"),
+                Messages = new List<AsyncApiMessageReference> { new AsyncApiMessageReference("#/channels/mychannel/messages/whatever") }
             })
             .WithComponent("testD", new AsyncApiJsonSchema() { Type = SchemaType.String, Format = "uuid" })
             .WithComponent("testC", new AsyncApiJsonSchema()
@@ -439,7 +445,7 @@ namespace ByteBard.AsyncAPI.Tests.Models
             .Build();
 
             var outputString = new StringWriter();
-            var writer = new AsyncApiYamlWriter(outputString, new AsyncApiWriterSettings { InlineLocalReferences = shouldInline });
+            var writer = new AsyncApiYamlWriter(outputString, new AsyncApiWriterSettings { ReferenceInline = shouldInline });
 
             // Act
             asyncApiDocument.SerializeV2(writer);
@@ -447,7 +453,78 @@ namespace ByteBard.AsyncAPI.Tests.Models
             var actual = outputString.ToString();
 
             // Assert
-            string expected = this.GetTestData<string>(shouldInline
+            string expected = this.GetTestData<string>(
+                AsyncApiVersion.AsyncApi2_0,
+                shouldInline == ReferenceInlineSetting.InlineReferences
+                ? "AsyncApiSchema_InlinedReferences"
+                : "AsyncApiSchema_NoInlinedReferences.yml");
+
+            actual.Should()
+                  .BePlatformAgnosticEquivalentTo(expected);
+        }
+
+        [Theory]
+        [TestCase(ReferenceInlineSetting.InlineReferences)]
+        [TestCase(ReferenceInlineSetting.DoNotInlineReferences)]
+        public void V3_Serialize_WithInliningOptions_ShouldInlineAccordingly(ReferenceInlineSetting shouldInline)
+        {
+            // arrange
+            var asyncApiDocument = new AsyncApiDocumentBuilder()
+            .WithInfo(new AsyncApiInfo
+            {
+                Title = "Streetlights Kafka API",
+                Version = "1.0.0",
+                Description = "The Smartylighting Streetlights API allows you to remotely manage the city lights.",
+                License = new AsyncApiLicense
+                {
+                    Name = "Apache 2.0",
+                    Url = new Uri("https://www.apache.org/licenses/LICENSE-2.0"),
+                },
+            })
+            .WithChannel("mychannel", new AsyncApiChannel()
+            {
+                Messages = new Dictionary<string, AsyncApiMessage>
+                    {
+                {
+                    "whatever", new AsyncApiMessage
+                    {
+                        Payload = new AsyncApiJsonSchema
+                        {
+                            Type = SchemaType.Object,
+                            Required = new HashSet<string> { "testB" },
+                            Properties = new Dictionary<string, AsyncApiJsonSchema>
+                            {
+                                { "testC", new AsyncApiJsonSchemaReference("#/components/schemas/testC") },
+                                { "testB", new AsyncApiJsonSchemaReference("#/components/schemas/testB") },
+                            },
+                        },
+                    }
+                },
+                    },
+            })
+            .WithComponent("testD", new AsyncApiJsonSchema() { Type = SchemaType.String, Format = "uuid" })
+            .WithComponent("testC", new AsyncApiJsonSchema()
+            {
+                Type = SchemaType.Object,
+                Properties = new Dictionary<string, AsyncApiJsonSchema>
+                {
+            { "testD", new AsyncApiJsonSchemaReference("#/components/schemas/testD") },
+                },
+            })
+            .WithComponent("testB", new AsyncApiJsonSchema() { Description = "test", Type = SchemaType.Boolean })
+            .Build();
+
+            var outputString = new StringWriter();
+            var writer = new AsyncApiYamlWriter(outputString, new AsyncApiWriterSettings { ReferenceInline = shouldInline });
+
+            // Act
+            asyncApiDocument.SerializeV3(writer);
+
+            var actual = outputString.ToString();
+
+            // Assert
+            string expected = this.GetTestData<string>(AsyncApiVersion.AsyncApi3_0,
+                shouldInline == ReferenceInlineSetting.InlineReferences
                 ? "AsyncApiSchema_InlinedReferences"
                 : "AsyncApiSchema_NoInlinedReferences.yml");
 
@@ -456,7 +533,7 @@ namespace ByteBard.AsyncAPI.Tests.Models
         }
 
         [Test]
-        public void SerializeV2_WithNullWriter_Throws()
+        public void V2_SerializeV2_WithNullWriter_Throws()
         {
             // Arrange
             var asyncApiLicense = new AsyncApiLicense();
@@ -471,7 +548,7 @@ namespace ByteBard.AsyncAPI.Tests.Models
         /// Bug: Serializing properties multiple times - specifically Schema.OneOf was serialized into OneOf and Then.
         /// </summary>
         [Test]
-        public void Serialize_WithOneOf_DoesNotWriteThen()
+        public void V2_Serialize_WithOneOf_DoesNotWriteThen()
         {
             var mainSchema = new AsyncApiJsonSchema();
             var subSchema = new AsyncApiJsonSchema();
@@ -489,7 +566,7 @@ namespace ByteBard.AsyncAPI.Tests.Models
         /// Bug: Serializing properties multiple times - specifically Schema.AnyOf was serialized into AnyOf and If.
         /// </summary>
         [Test]
-        public void Serialize_WithAnyOf_DoesNotWriteIf()
+        public void V2_Serialize_WithAnyOf_DoesNotWriteIf()
         {
             var mainSchema = new AsyncApiJsonSchema();
             var subSchema = new AsyncApiJsonSchema();
@@ -502,7 +579,7 @@ namespace ByteBard.AsyncAPI.Tests.Models
         }
 
         [Test]
-        public void Deserialize_BasicExample()
+        public void V2_Deserialize_BasicExample()
         {
             var input =
                 """
@@ -528,7 +605,7 @@ namespace ByteBard.AsyncAPI.Tests.Models
         /// Bug: Serializing properties multiple times - specifically Schema.Not was serialized into Not and Else.
         /// </summary>
         [Test]
-        public void Serialize_WithNot_DoesNotWriteElse()
+        public void V2_Serialize_WithNot_DoesNotWriteElse()
         {
             var mainSchema = new AsyncApiJsonSchema();
             var subSchema = new AsyncApiJsonSchema();

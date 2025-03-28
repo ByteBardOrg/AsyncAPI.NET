@@ -2,9 +2,11 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics;
     using ByteBard.AsyncAPI.Models.Interfaces;
     using ByteBard.AsyncAPI.Writers;
 
+    [DebuggerDisplay("{Reference}")]
     public class AsyncApiAvroSchemaReference : AsyncApiAvroSchema, IAsyncApiReferenceable
     {
         private AsyncApiAvroSchema target;
@@ -37,6 +39,7 @@
             {
                 return null;
             }
+
             return this.Target.As<T>();
         }
 
@@ -46,6 +49,7 @@
             {
                 return false;
             }
+
             return this.Target.Is<T>();
         }
 
@@ -56,6 +60,7 @@
                 result = default;
                 return false;
             }
+
             return this.Target.TryGetAs(out result);
         }
 
@@ -73,6 +78,22 @@
             }
 
             this.Target.SerializeV2(writer);
+        }
+
+        public override void SerializeV3(IAsyncApiWriter writer)
+        {
+            if (writer is null)
+            {
+                throw new ArgumentNullException(nameof(writer));
+            }
+
+            if (this.Reference != null && !writer.GetSettings().ShouldInlineReference(this.Reference))
+            {
+                this.Reference.SerializeV2(writer);
+                return;
+            }
+
+            this.Target.SerializeV3(writer);
         }
     }
 }

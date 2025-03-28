@@ -3,15 +3,17 @@ namespace ByteBard.AsyncAPI.Readers
     using ByteBard.AsyncAPI.Extensions;
     using ByteBard.AsyncAPI.Models;
     using ByteBard.AsyncAPI.Readers.ParseNodes;
+    using System.Collections.Generic;
+    using System.Threading;
 
     internal static partial class AsyncApiV2Deserializer
     {
         private static readonly FixedFieldMap<AsyncApiChannel> ChannelFixedFields = new()
         {
             { "description", (a, n) => { a.Description = n.GetScalarValue(); } },
-            { "servers", (a, n) => { a.Servers = n.CreateSimpleList(s => s.GetScalarValue()); } },
-            { "subscribe", (a, n) => { a.Subscribe = LoadOperation(n); } },
-            { "publish", (a, n) => { a.Publish = LoadOperation(n); } },
+            { "servers", (a, n) => { a.Servers = n.CreateSimpleList(s => new AsyncApiServerReference("#/servers/" + s.GetScalarValue())); } },
+            { "subscribe", (a, n) => { /* happens after initial reading */ } },
+            { "publish", (a, n) => { /* happens after initial reading */ } },
             { "parameters", (a, n) => { a.Parameters = n.CreateMap(LoadParameter); } },
             { "bindings", (a, n) => { a.Bindings = LoadChannelBindings(n); } },
         };
@@ -22,7 +24,7 @@ namespace ByteBard.AsyncAPI.Readers
                 { s => s.StartsWith("x-"), (a, p, n) => a.AddExtension(p, LoadExtension(p, n)) },
             };
 
-        public static AsyncApiChannel LoadChannel(ParseNode node)
+        public static AsyncApiChannel LoadChannel(ParseNode node, string channelAddress = null)
         {
             var mapNode = node.CheckMapNode("channel");
             var pointer = mapNode.GetReferencePointer();
@@ -31,11 +33,61 @@ namespace ByteBard.AsyncAPI.Readers
                 return new AsyncApiChannelReference(pointer);
             }
 
-            var pathItem = new AsyncApiChannel();
+            var channel = new AsyncApiChannel();
 
-            ParseMap(mapNode, pathItem, ChannelFixedFields, ChannelPatternFields);
+            ParseMap(mapNode, channel, ChannelFixedFields, ChannelPatternFields);
+            if (channelAddress != null)
+            {
+                channel.Address = channelAddress;
+            }
 
-            return pathItem;
+            LoadV2Operation(mapNode["subscribe"]?.Value, channel, AsyncApiAction.Send);
+            LoadV2Operation(mapNode["publish"]?.Value, channel, AsyncApiAction.Receive);
+
+            return channel;
+        }
+
+        public static string NormalizeChannelKey(string channelKey, ParseNode node = null)
+        {
+            string newKey = string.Empty;
+            foreach (var character in channelKey)
+            {
+                if (char.IsLetterOrDigit(character))
+                {
+                    newKey += character;
+                }
+            }
+
+            if (node != null)
+            {
+                var addresses = node.Context.GetFromTempStorage<Dictionary<string, string>>(TempStorageKeys.ChannelAddresses) ?? new Dictionary<string, string>();
+                addresses.Add(newKey, channelKey);
+                node.Context.SetTempStorage(TempStorageKeys.ChannelAddresses, addresses);
+            }
+
+            return newKey;
+        }
+
+        private static void LoadV2Operation(ParseNode node, AsyncApiChannel instance, AsyncApiAction action)
+        {
+            if (node == null)
+            {
+                return;
+            }
+
+            var operation = LoadOperation(node);
+            var operationKey = node.CheckMapNode("operation")?["operationId"]?.Value.GetScalarValue() ?? "anonymous-operation-" + Interlocked.Increment(ref node.Context.OperationCounter).ToString();
+            operation.Action = action;
+            operation.Channel = new AsyncApiChannelReference("#/channels/" + NormalizeChannelKey(instance.Address));
+
+            var globalOperations = node.Context.GetFromTempStorage<Dictionary<string, AsyncApiOperation>>(TempStorageKeys.Operations) ?? new Dictionary<string, AsyncApiOperation>();
+
+            if (!globalOperations.TryAdd(operationKey, operation))
+            {
+                node.Context.Diagnostic.Errors.Add(new AsyncApiError(node.Context.GetLocation(), $"OperationId: '{operationKey}' is not unique."));
+            }
+
+            node.Context.SetTempStorage(TempStorageKeys.Operations, globalOperations);
         }
     }
 }

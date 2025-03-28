@@ -14,7 +14,7 @@
     internal class AsyncApiMessage_Should : TestBase
     {
         [Test]
-        public void AsyncApiMessage_WithNoType_DeserializesToDefault()
+        public void V2_AsyncApiMessage_WithNoType_DeserializesToDefault()
         {
             // Arrange
             var expected =
@@ -39,11 +39,11 @@
 
             // Assert
             diagnostic.Errors.Should().BeEmpty();
-            message.Payload.As<AsyncApiJsonSchema>().Properties.First().Value.Enum.Should().HaveCount(2);
+            message.Payload.Schema.As<AsyncApiJsonSchema>().Properties.First().Value.Enum.Should().HaveCount(2);
         }
 
         [Test]
-        public void AsyncApiMessage_WithNoSchemaFormat_DeserializesToDefault()
+        public void V2_AsyncApiMessage_WithNoSchemaFormat_DeserializesToDefault()
         {
             // Arrange
             var expected =
@@ -61,11 +61,11 @@
 
             // Assert
             diagnostic.Errors.Should().BeEmpty();
-            message.SchemaFormat.Should().BeNull();
+            message.Payload.SchemaFormat.Should().BeNull();
         }
 
         [Test]
-        public void AsyncApiMessage_WithUnsupportedSchemaFormat_DeserializesWithError()
+        public void V2_AsyncApiMessage_WithUnsupportedSchemaFormat_DeserializesWithError()
         {
             // Arrange
             var expected =
@@ -84,11 +84,11 @@
 
             // Assert
             diagnostic.Errors.Should().HaveCount(1);
-            diagnostic.Errors.First().Message.Should().StartWith("'whatever' is not a supported format");
+            diagnostic.Errors.First().Message.Should().StartWith("Could not deserialize Payload. Supported formats are");
         }
 
         [Test]
-        public void AsyncApiMessage_WithNoSchemaFormat_DoesNotSerializeSchemaFormat()
+        public void V2_AsyncApiMessage_WithNoSchemaFormat_DoesNotSerializeSchemaFormat()
         {
             // Arrange
             var expected =
@@ -127,7 +127,7 @@
         }
 
         [Test]
-        public void AsyncApiMessage_WithJsonSchemaFormat_Serializes()
+        public void V2_AsyncApiMessage_WithJsonSchemaFormat_Serializes()
         {
             // Arrange
             var expected =
@@ -142,7 +142,6 @@
                 """;
 
             var message = new AsyncApiMessage();
-            message.SchemaFormat = "application/vnd.aai.asyncapi+json;version=2.6.0";
             message.Payload = new AsyncApiJsonSchema()
             {
                 Properties = new Dictionary<string, AsyncApiJsonSchema>()
@@ -155,6 +154,7 @@
                     },
                 },
             };
+            message.Payload.SchemaFormat = "application/vnd.aai.asyncapi+json;version=2.6.0";
 
             // Act
             var actual = message.SerializeAsYaml(AsyncApiVersion.AsyncApi2_0);
@@ -167,7 +167,7 @@
         }
 
         [Test]
-        public void AsyncApiMessage_WithAvroSchemaFormat_Serializes()
+        public void V2_AsyncApiMessage_WithAvroSchemaFormat_Serializes()
         {
             // Arrange
             var expected =
@@ -186,7 +186,6 @@
             """;
 
             var message = new AsyncApiMessage();
-            message.SchemaFormat = "application/vnd.apache.avro";
             var schema = new AvroRecord()
             {
                 Name = "User",
@@ -203,7 +202,11 @@
                     },
                 },
             };
-            message.Payload = schema;
+            message.Payload = new AsyncApiMultiFormatSchema
+            {
+                Schema = schema,
+                SchemaFormat = "application/vnd.apache.avro",
+            };
 
             // Act
             var actual = message.SerializeAsYaml(AsyncApiVersion.AsyncApi2_0);
@@ -216,7 +219,7 @@
         }
 
         [Test]
-        public void AsyncApiMessage_WithAvroAsReference_Deserializes()
+        public void V2_AsyncApiMessage_WithAvroAsReference_Deserializes()
         {
             // Arrange
             var input =
@@ -227,19 +230,19 @@
             """;
 
             // Act
-            var deserializedMessage = new AsyncApiStringReader().ReadFragment<AsyncApiMessage>(input, AsyncApiVersion.AsyncApi2_0, out _);
+            var deserializedMessage = new AsyncApiStringReader().ReadFragment<AsyncApiMessage>(input, AsyncApiVersion.AsyncApi2_0, out var diag);
 
             // Assert
-            var payloadReference = deserializedMessage.Payload as AsyncApiAvroSchemaReference;
+            var payloadReference = deserializedMessage.Payload.Schema as AsyncApiAvroSchemaReference;
             payloadReference.UnresolvedReference.Should().BeTrue();
             payloadReference.Reference.Should().NotBeNull();
-            payloadReference.Reference.IsExternal.Should().BeTrue();
+            payloadReference.Reference.IsExternal.Should().BeTrue(); // We push the 'real' reference to components.
             payloadReference.Reference.IsFragment.Should().BeTrue();
 
         }
 
         [Test]
-        public void AsyncApiMessage_WithFilledObject_Serializes()
+        public void V2_AsyncApiMessage_WithFilledObject_Serializes()
         {
             var expected =
                 """
@@ -468,7 +471,7 @@
 
             var settings = new AsyncApiReaderSettings();
             settings.Bindings = BindingsCollection.All;
-            var deserializedMessage = new AsyncApiStringReader(settings).ReadFragment<AsyncApiMessage>(expected, AsyncApiVersion.AsyncApi2_0, out _);
+            var deserializedMessage = new AsyncApiStringReader(settings).ReadFragment<AsyncApiMessage>(expected, AsyncApiVersion.AsyncApi2_0, out var diag);
 
             // Assert
             actual.Should()

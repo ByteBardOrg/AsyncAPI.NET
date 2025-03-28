@@ -7,7 +7,7 @@ namespace ByteBard.AsyncAPI.Tests.Models
     public class AsyncApiLicense_Should
     {
         [Test]
-        public void SerializeV2_WithNullWriter_Throws()
+        public void V2_SerializeV2_WithNullWriter_Throws()
         {
             // Arrange
             var asyncApiLicense = new AsyncApiLicense();

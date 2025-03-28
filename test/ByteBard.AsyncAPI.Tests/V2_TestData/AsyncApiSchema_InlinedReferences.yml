@@ -7,7 +7,7 @@ info:
     name: Apache 2.0
     url: https://www.apache.org/licenses/LICENSE-2.0
 channels:
-  mychannel:
+  'mychannel-{parameter}':
     publish:
       message:
         payload:
@@ -16,19 +16,12 @@ channels:
             - testB
           properties:
             testC:
-              $ref: '#/components/schemas/testC'
+              type: object
+              properties:
+                testD:
+                  type: string
+                  format: uuid
             testB:
-              $ref: '#/components/schemas/testB'
-components:
-  schemas:
-    testD:
-      type: string
-      format: uuid
-    testC:
-      type: object
-      properties:
-        testD:
-          $ref: '#/components/schemas/testD'
-    testB:
-      type: boolean
-      description: test
+              type: boolean
+              description: test
+components: { }

@@ -11,7 +11,7 @@
     internal class KafkaBindings_Should : TestBase
     {
         [Test]
-        public void KafkaChannelBinding_WithFilledObject_SerializesAndDeserializes()
+        public void V2_KafkaChannelBinding_WithFilledObject_SerializesAndDeserializes()
         {
             // Arrange
             var expected =
@@ -70,12 +70,12 @@
         }
 
         [Test]
-        public void KafkaServerBinding_WithFilledObject_SerializesAndDeserializes()
+        public void V2_KafkaServerBinding_WithFilledObject_SerializesAndDeserializes()
         {
             // Arrange
             var expected =
                 """
-                url: https://example.com
+                url: example.com
                 protocol: kafka
                 bindings:
                   kafka:
@@ -85,7 +85,7 @@
 
             var server = new AsyncApiServer()
             {
-                Url = "https://example.com",
+                Host = "example.com",
                 Protocol = "kafka",
             };
 
@@ -108,7 +108,7 @@
         }
 
         [Test]
-        public void KafkaMessageBinding_WithFilledObject_SerializesAndDeserializes()
+        public void V2_KafkaMessageBinding_WithFilledObject_SerializesAndDeserializes()
         {
             // Arrange
             var expected =
@@ -148,7 +148,7 @@
         }
 
         [Test]
-        public void KafkaOperationBinding_WithFilledObject_SerializesAndDeserializes()
+        public void V2_KafkaOperationBinding_WithFilledObject_SerializesAndDeserializes()
         {
             // Arrange
             var expected =

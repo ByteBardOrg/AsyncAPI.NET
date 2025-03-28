@@ -8,9 +8,9 @@ namespace ByteBard.AsyncAPI.Readers
     {
         private static FixedFieldMap<AsyncApiComponents> componentsFixedFields = new()
         {
-            { "schemas", (a, n) => a.Schemas = n.CreateMap(AsyncApiSchemaDeserializer.LoadSchema) },
+            { "schemas", (a, n) => a.Schemas = n.CreateMap(LoadMultiSchemaFormat) },
             { "servers", (a, n) => a.Servers = n.CreateMap(LoadServer) },
-            { "channels", (a, n) => a.Channels = n.CreateMap(LoadChannel) },
+            { "channels", (a, n) => a.Channels = n.CreateMap((key) => NormalizeChannelKey(key), (n, key) => LoadChannel(n, channelAddress: NormalizeChannelKey(key))) },
             { "messages", (a, n) => a.Messages = n.CreateMap(LoadMessage) },
             { "securitySchemes", (a, n) => a.SecuritySchemes = n.CreateMap(LoadSecurityScheme) },
             { "parameters", (a, n) => a.Parameters = n.CreateMap(LoadParameter) },
@@ -37,6 +37,16 @@ namespace ByteBard.AsyncAPI.Readers
             ParseMap(mapNode, components, componentsFixedFields, componentsPatternFields);
 
             return components;
+        }
+
+        private static AsyncApiMultiFormatSchema LoadMultiSchemaFormat(ParseNode node)
+        {
+            var schemas = new AsyncApiMultiFormatSchema
+            {
+                Schema = AsyncApiSchemaDeserializer.LoadSchema(node),
+            };
+
+            return schemas;
         }
     }
 }

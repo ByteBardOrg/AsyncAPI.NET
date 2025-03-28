@@ -18,7 +18,6 @@
         /// </summary>
         public string Namespace { get; set; }
 
-
         /// <summary>
         /// Alternate names for this record.
         /// </summary>
@@ -35,6 +34,16 @@
         public override IDictionary<string, AsyncApiAny> Metadata { get; set; } = new Dictionary<string, AsyncApiAny>();
 
         public override void SerializeV2(IAsyncApiWriter writer)
+        {
+            this.SerializeCore(writer);
+        }
+
+        public override void SerializeV3(IAsyncApiWriter writer)
+        {
+            this.SerializeCore(writer);
+        }
+
+        public void SerializeCore(IAsyncApiWriter writer)
         {
             writer.WriteStartObject();
             writer.WriteOptionalProperty("type", this.Type);

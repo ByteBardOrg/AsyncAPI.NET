@@ -11,7 +11,7 @@
     public class BindingExtensions_Should
     {
         [Test]
-        public void TryGetValue_WithChannelBinding_ReturnsBinding()
+        public void V2_TryGetValue_WithChannelBinding_ReturnsBinding()
         {
             var channel = new AsyncApiChannel();
             channel.Bindings.Add(new WebSocketsChannelBinding
@@ -34,7 +34,7 @@
         }
 
         [Test]
-        public void TryGetValue_WithServerBinding_ReturnsBinding()
+        public void V2_TryGetValue_WithServerBinding_ReturnsBinding()
         {
             var server = new AsyncApiServer();
             server.Bindings.Add(new PulsarServerBinding
@@ -49,7 +49,7 @@
         }
 
         [Test]
-        public void TryGetValue_WithOperationBinding_ReturnsBinding()
+        public void V2_TryGetValue_WithOperationBinding_ReturnsBinding()
         {
             var operation = new AsyncApiOperation();
             operation.Bindings.Add(new MQTTOperationBinding
@@ -66,7 +66,7 @@
         }
 
         [Test]
-        public void TryGetValue_WithMessageBinding_ReturnsBinding()
+        public void V2_TryGetValue_WithMessageBinding_ReturnsBinding()
         {
             var message = new AsyncApiMessage();
             message.Bindings.Add(new MQTTMessageBinding

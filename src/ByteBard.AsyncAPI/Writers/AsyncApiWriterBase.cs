@@ -1,6 +1,5 @@
 ﻿namespace ByteBard.AsyncAPI.Writers
 {
-    using ByteBard.AsyncAPI.Models;
     using System;
     using System.Collections.Generic;
     using System.IO;

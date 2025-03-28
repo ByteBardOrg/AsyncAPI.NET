@@ -2,10 +2,12 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics;
     using ByteBard.AsyncAPI.Models.Interfaces;
     using ByteBard.AsyncAPI.Writers;
 
-    public class AsyncApiJsonSchemaReference : AsyncApiJsonSchema, IAsyncApiReferenceable
+    [DebuggerDisplay("{Reference}")]
+    public class AsyncApiJsonSchemaReference : AsyncApiJsonSchema, IAsyncApiReferenceable, IEquatable<AsyncApiJsonSchemaReference>, IEquatable<AsyncApiJsonSchema>
     {
         private AsyncApiJsonSchema target;
 
@@ -13,7 +15,7 @@
         {
             get
             {
-                this.target ??= this.Reference.Workspace?.ResolveReference<AsyncApiJsonSchema>(this.Reference);
+                this.target ??= this.Reference.Workspace?.ResolveReference<AsyncApiJsonSchema>(this.Reference) ?? this.Reference.Workspace?.ResolveReference<AsyncApiMultiFormatSchema>(this.Reference)?.Schema?.As<AsyncApiJsonSchema>();
                 return this.target;
             }
         }
@@ -288,6 +290,48 @@
             set => this.Target.Extensions = value;
         }
 
+        public static bool operator !=(AsyncApiJsonSchemaReference left, AsyncApiJsonSchemaReference right) => !(left == right);
+
+        public static bool operator ==(AsyncApiJsonSchemaReference left, AsyncApiJsonSchemaReference right)
+        {
+            return Equals(left, null) ? Equals(right, null) : left.Equals(right);
+        }
+
+        public bool Equals(AsyncApiJsonSchemaReference other)
+        {
+            if (other is null)
+            {
+                return false;
+            }
+
+            if (other.Target is AsyncApiJsonSchemaReference reference)
+            {
+                return this.Equals(reference);
+            }
+
+            return this.Target == other.Target;
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (obj is AsyncApiJsonSchemaReference reference)
+            {
+                return this.Equals(reference);
+            }
+
+            if (obj is AsyncApiJsonSchema message)
+            {
+                return this.Equals(message);
+            }
+
+            return false;
+        }
+
+        public bool Equals(AsyncApiJsonSchema other)
+        {
+            return this.Target == other;
+        }
+
         public override void SerializeV2(IAsyncApiWriter writer)
         {
             if (writer is null)
@@ -312,6 +356,32 @@
             }
 
             this.Target.SerializeV2(writer);
+        }
+
+        public override void SerializeV3(IAsyncApiWriter writer)
+        {
+            if (writer is null)
+            {
+                throw new ArgumentNullException(nameof(writer));
+            }
+
+            var settings = writer.GetSettings();
+            if (!settings.ShouldInlineReference(this.Reference))
+            {
+                this.Reference.SerializeV3(writer);
+                return;
+            }
+
+            this.Reference.Workspace = writer.Workspace;
+            // If Loop is detected then just Serialize as a reference.
+            if (!settings.LoopDetector.PushLoop(this))
+            {
+                settings.LoopDetector.SaveLoop(this);
+                this.Reference.SerializeV3(writer);
+                return;
+            }
+
+            this.Target.SerializeV3(writer);
         }
     }
 }

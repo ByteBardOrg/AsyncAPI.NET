@@ -1,13 +1,16 @@
 namespace ByteBard.AsyncAPI.Models
 {
+    using System;
     using System.Collections.Generic;
+    using System.Diagnostics;
     using ByteBard.AsyncAPI.Models.Interfaces;
     using ByteBard.AsyncAPI.Writers;
 
     /// <summary>
     /// The definition of a message this application MAY use.
     /// </summary>
-    public class AsyncApiMessageReference : AsyncApiMessage, IAsyncApiReferenceable
+    [DebuggerDisplay("{Reference}")]
+    public class AsyncApiMessageReference : AsyncApiMessage, IAsyncApiReferenceable, IEquatable<AsyncApiMessageReference>, IEquatable<AsyncApiMessage>
     {
         private AsyncApiMessage target;
 
@@ -25,15 +28,11 @@ namespace ByteBard.AsyncAPI.Models
             this.Reference = new AsyncApiReference(reference, ReferenceType.Message);
         }
 
-        public override string MessageId { get => this.Target?.MessageId; set => this.Target.MessageId = value; }
+        public override AsyncApiMultiFormatSchema Headers { get => this.Target?.Headers; set => this.Target.Headers = value; }
 
-        public override AsyncApiJsonSchema Headers { get => this.Target?.Headers; set => this.Target.Headers = value; }
-
-        public override IAsyncApiMessagePayload Payload { get => this.Target?.Payload; set => this.Target.Payload = value; }
+        public override AsyncApiMultiFormatSchema Payload { get => this.Target?.Payload; set => this.Target.Payload = value; }
 
         public override AsyncApiCorrelationId CorrelationId { get => this.Target?.CorrelationId; set => this.Target.CorrelationId = value; }
-
-        public override string SchemaFormat { get => this.Target?.SchemaFormat; set => this.Target.SchemaFormat = value; }
 
         public override string ContentType { get => this.Target?.ContentType; set => this.Target.ContentType = value; }
 
@@ -61,10 +60,67 @@ namespace ByteBard.AsyncAPI.Models
 
         public bool UnresolvedReference { get { return this.Target == null; } }
 
+        public static bool operator !=(AsyncApiMessageReference left, AsyncApiMessageReference right) => !(left == right);
+
+        public static bool operator ==(AsyncApiMessageReference left, AsyncApiMessageReference right)
+        {
+            return Equals(left, null) ? Equals(right, null) : left.Equals(right);
+        }
+
+        public bool Equals(AsyncApiMessageReference other)
+        {
+            if (other is null)
+            {
+                return false;
+            }
+
+            if (other.Target is AsyncApiMessageReference reference)
+            {
+                return this.Equals(reference);
+            }
+
+            return this.Target == other.Target;
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (obj is AsyncApiMessageReference reference)
+            {
+                return this.Equals(reference);
+            }
+
+            if (obj is AsyncApiMessage message)
+            {
+                return this.Equals(message);
+            }
+
+            return false;
+        }
+
+        public bool Equals(AsyncApiMessage other)
+        {
+            return this.Target == other;
+        }
+
         public override void SerializeV2(IAsyncApiWriter writer)
         {
             if (!writer.GetSettings().ShouldInlineReference(this.Reference))
             {
+                // If messages are from a V2 component, and is proxied through channels its a reference pointing to a reference.
+                if (this.Target is AsyncApiMessageReference reference)
+                {
+                    reference.SerializeV2(writer);
+                    return;
+                }
+
+                if (this.Reference.Reference.StartsWith("#/channels"))
+                {
+                    // Try force inline anyway.
+                    this.Reference.Workspace = writer.Workspace;
+                    this.Target?.SerializeV2(writer);
+                    return;
+                }
+
                 this.Reference.SerializeV2(writer);
                 return;
             }
@@ -72,6 +128,20 @@ namespace ByteBard.AsyncAPI.Models
             {
                 this.Reference.Workspace = writer.Workspace;
                 this.Target.SerializeV2(writer);
+            }
+        }
+
+        public override void SerializeV3(IAsyncApiWriter writer)
+        {
+            if (!writer.GetSettings().ShouldInlineReference(this.Reference))
+            {
+                this.Reference.SerializeV3(writer);
+                return;
+            }
+            else
+            {
+                this.Reference.Workspace = writer.Workspace;
+                this.Target.SerializeV3(writer);
             }
         }
     }

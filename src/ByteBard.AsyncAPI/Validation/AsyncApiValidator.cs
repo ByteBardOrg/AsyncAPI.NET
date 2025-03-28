@@ -19,10 +19,13 @@ namespace ByteBard.AsyncAPI.Validations
         /// Create a vistor that will validate an AsyncApiDocument.
         /// </summary>
         /// <param name="ruleSet"></param>
-        public AsyncApiValidator(ValidationRuleSet ruleSet)
+        public AsyncApiValidator(ValidationRuleSet ruleSet, AsyncApiDocument rootDocument = null)
         {
             this.ruleSet = ruleSet;
+            this.RootDocument = rootDocument;
         }
+
+        public AsyncApiDocument RootDocument { get; }
 
         /// <summary>
         /// Gets the validation errors.
@@ -130,13 +133,19 @@ namespace ByteBard.AsyncAPI.Validations
 
         public override void Visit(AsyncApiAvroSchema item) => this.Validate(item);
 
-        public override void Visit(IAsyncApiMessagePayload item) => this.Validate(item);
+        public override void Visit(IAsyncApiSchema item) => this.Validate(item);
 
         /// <summary>
         /// Execute validation rules against an <see cref="AsyncApiServer"/>.
         /// </summary>
         /// <param name="item">The object to be validated.</param>
         public override void Visit(AsyncApiServer item) => this.Validate(item);
+
+        /// <summary>
+        /// Execute validation rules against an <see cref="AsyncApiOperation"/>.
+        /// </summary>
+        /// <param name="item">The object to be validated.</param>
+        public override void Visit(AsyncApiOperation item) => this.Validate(item);
 
         public override void Visit(IServerBinding item) => this.Validate(item);
 

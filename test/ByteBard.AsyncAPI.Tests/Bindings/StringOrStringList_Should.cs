@@ -13,7 +13,7 @@ namespace ByteBard.AsyncAPI.Tests.Bindings
     public class StringOrStringList_Should : TestBase
     {
         [Test]
-        public void StringOrStringList_IsInitialised_WhenPassedStringOrStringList()
+        public void V2_StringOrStringList_IsInitialised_WhenPassedStringOrStringList()
         {
             // Arrange
             var stringValue = new StringOrStringList(new AsyncApiAny("AsyncApi"));
@@ -31,7 +31,7 @@ namespace ByteBard.AsyncAPI.Tests.Bindings
         }
 
         [Test]
-        public void StringOrStringList_ThrowsArgumentException_WhenIntialisedWithoutStringOrStringList()
+        public void V2_StringOrStringList_ThrowsArgumentException_WhenIntialisedWithoutStringOrStringList()
         {
             // Assert
             var ex = Assert.Throws<ArgumentException>(() => new StringOrStringList(new AsyncApiAny(true)));
@@ -41,7 +41,7 @@ namespace ByteBard.AsyncAPI.Tests.Bindings
         }
 
         [Test]
-        public void StringOrStringList_ThrowsArgumentException_WhenIntialisedWithListOfNonStrings()
+        public void V2_StringOrStringList_ThrowsArgumentException_WhenIntialisedWithListOfNonStrings()
         {
             // Assert
             var ex = Assert.Throws<ArgumentException>(() => new StringOrStringList(
@@ -57,7 +57,7 @@ namespace ByteBard.AsyncAPI.Tests.Bindings
         }
 
         [Test]
-        public void StringOrStringList_WhenValueIsString_SerializesDeserializes()
+        public void V2_StringOrStringList_WhenValueIsString_SerializesDeserializes()
         {
             // Arrange
             var expected = """
@@ -87,7 +87,7 @@ namespace ByteBard.AsyncAPI.Tests.Bindings
         }
 
         [Test]
-        public void StringOrStringList_WhenValueIsStringList_SerializesDeserializes()
+        public void V2_StringOrStringList_WhenValueIsStringList_SerializesDeserializes()
         {
             // Arrange
             var expected = """

@@ -1,6 +1,4 @@
-﻿using ByteBard.AsyncAPI.Models;
-
-namespace ByteBard.AsyncAPI.Writers
+﻿namespace ByteBard.AsyncAPI.Writers
 {
     public interface IAsyncApiWriter
     {

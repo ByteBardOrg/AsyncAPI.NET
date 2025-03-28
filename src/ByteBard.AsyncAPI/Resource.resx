@@ -126,6 +126,9 @@
   <data name="Validation_ExtensionNameMustBeginWithXDash" xml:space="preserve">
     <value>The extension name '{0}' in '{1}' object MUST being with 'x-'.</value>
   </data>
+  <data name="Validation_OperationMustReferenceValidChannel" xml:space="preserve">
+    <value>The operation '{0}' MUST point to a channel definition located in the root Channels Object.</value>
+  </data>
   <data name="Validation_FieldRequired" xml:space="preserve">
     <value>The field '{0}' in '{1}' object is REQUIRED.</value>
   </data>
@@ -140,5 +143,8 @@
   </data>
   <data name="Validation_SymbolsMustMatchRegularExpression" xml:space="preserve">
     <value>Symbols  MUST match the regular expression '{1}'.</value>
+  </data>
+  <data name="Validation_OperationMessagesMustReferenceOperationChannel" xml:space="preserve">
+    <value>The messages of operation '{0}' MUST be a subset of the referenced channels messages.</value>
   </data>
 </root>

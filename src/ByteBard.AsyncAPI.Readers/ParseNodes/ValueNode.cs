@@ -27,7 +27,6 @@ namespace ByteBard.AsyncAPI.Readers.ParseNodes
         {
             if (this.cachedScalarValue == null)
             {
-                // TODO: Update this property to use the .ToString() or JsonReader. 
                 var scalarNode = this.node is JsonValue value ? value : throw new AsyncApiException($"Expected scalar value");
                 this.cachedScalarValue = Convert.ToString(scalarNode.GetValue<object>(), this.Context.Settings.CultureInfo);
             }
