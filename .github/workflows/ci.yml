@@ -1,13 +1,13 @@
 name: Build & Test
 on:
   push:
-    branches: [ main, vnext ]
+    branches: [ vnext ]
     paths: 
       - 'src/**'
       - 'test/**' 
       - '!**/*.md'
   pull_request:
-    branches: [ main, vnext ]
+    branches: [ vnext ]
     paths: 
       - 'src/**'
       - 'test/**' 
