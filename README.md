@@ -1,6 +1,6 @@
 # AsyncAPI.NET
 This serves as the official future of AsyncAPI.NET.
-To be able to give the level of support I want, I have had to fork my original work from the ByteBard Group, and create my own.
+To be able to give the level of support I want, I have had to fork my original work from the The LEGO Group, and create my own.
 This is unfortunate, but after much back and not a lot of forth, I have decided that it was time.
 
 [![Build & Test](https://github.com/ByteBardOrg/AsyncAPI.NET/actions/workflows/ci.yml/badge.svg)](https://github.com/ByteBardOrg/AsyncAPI.NET/actions/workflows/ci.yml)
