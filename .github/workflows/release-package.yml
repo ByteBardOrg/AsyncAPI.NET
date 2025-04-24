@@ -19,12 +19,19 @@ jobs:
           conventional-changelog-conventionalcommits
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
+    
+    - name: Get token
+      if: steps.semantic.outputs.new_release_published == 'true'
+      id: get_token
+      uses: peter-murray/workflow-application-token-action@v2.1.0
+      with:
+        application_id: ${{ secrets.APP_ID }}
+        application_private_key: ${{ secrets.APP_SECRET }}
+        
     - name: Commit changes
       if: steps.semantic.outputs.new_release_published == 'true'
       env:
-        GITHUB_TOKEN: ${{ steps.GITHUB_TOKEN }}
-        GH_TOKEN: ${{ github.token }}
+        GITHUB_TOKEN: ${{ steps.get_token.outputs.token }}
         FILE_TO_COMMIT: CHANGELOG.md
         DESTINATION_BRANCH: ${{ github.ref }}
       run: |
