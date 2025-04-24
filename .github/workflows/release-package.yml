@@ -23,10 +23,10 @@ jobs:
     - name: Get token
       if: steps.semantic.outputs.new_release_published == 'true'
       id: get_token
-      uses: peter-murray/workflow-application-token-action@v2.1.0
+      uses: actions/create-github-app-token@v1
       with:
-        application_id: ${{ secrets.APP_ID }}
-        application_private_key: ${{ secrets.APP_SECRET }}
+        app-id: ${{ secrets.APP_ID }}
+        private-key: ${{ secrets.APP_SECRET }}
         
     - name: Commit changes
       if: steps.semantic.outputs.new_release_published == 'true'
