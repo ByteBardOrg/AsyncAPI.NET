@@ -243,6 +243,7 @@
         {
             var expected =
                 """
+                messageId: myMessage
                 headers:
                   title: HeaderTitle
                   description: HeaderDescription
@@ -313,6 +314,7 @@
 
             var message = new AsyncApiMessage
             {
+				MessageId = "myMessage",
                 Headers = new AsyncApiJsonSchema
                 {
                     Title = "HeaderTitle",

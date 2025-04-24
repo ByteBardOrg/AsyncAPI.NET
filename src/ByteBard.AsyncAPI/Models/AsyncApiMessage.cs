@@ -99,6 +99,7 @@ namespace ByteBard.AsyncAPI.Models
             }
 
             writer.WriteStartObject();
+            writer.WriteOptionalProperty(AsyncApiConstants.MessageId, this.MessageId);
             writer.WriteOptionalObject(AsyncApiConstants.Headers, this.Headers, (w, h) => h.SerializeV2(w));
             writer.WriteOptionalObject(AsyncApiConstants.Payload, this.Payload, (w, p) => p.SerializeV2(w));
             writer.WriteOptionalObject(AsyncApiConstants.CorrelationId, this.CorrelationId, (w, c) => c.SerializeV2(w));
