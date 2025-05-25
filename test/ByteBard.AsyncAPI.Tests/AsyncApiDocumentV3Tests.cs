@@ -233,7 +233,7 @@
             diagnostics.Warnings.Should().BeEmpty();
             reserialized.Should().BePlatformAgnosticEquivalentTo(expected);
         }
-
+        
         [Test]
         public void V3_SerializeV2_WithNoMessageReference_SerializesChannelMessagesOneOf()
         {
