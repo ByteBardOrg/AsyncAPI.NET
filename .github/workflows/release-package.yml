@@ -35,15 +35,16 @@ jobs:
         FILE_TO_COMMIT: CHANGELOG.md
         DESTINATION_BRANCH: ${{ github.ref }}
       run: |
-        export MESSAGE="chore: update $FILE_TO_COMMIT"
-        export SHA=$( git rev-parse $DESTINATION_BRANCH:$FILE_TO_COMMIT )
-        export CONTENT=$( base64 -i $FILE_TO_COMMIT )
-        gh api --method PUT /repos/:owner/:repo/contents/$FILE_TO_COMMIT \
-          --field message="$MESSAGE" \
-          --field content="$CONTENT" \
-          --field encoding="base64" \
-          --field branch="$DESTINATION_BRANCH" \
-          --field sha="$SHA"
+        cat CHANGELOG.md
+      #  export MESSAGE="chore: update $FILE_TO_COMMIT"
+      #  export SHA=$( git rev-parse $DESTINATION_BRANCH:$FILE_TO_COMMIT )
+      #  export CONTENT=$( base64 -i $FILE_TO_COMMIT )
+      #  gh api --method PUT /repos/:owner/:repo/contents/$FILE_TO_COMMIT \
+      #    --field message="$MESSAGE" \
+      #    --field content="$CONTENT" \
+      #    --field encoding="base64" \
+      #    --field branch="$DESTINATION_BRANCH" \
+      #    --field sha="$SHA"
 
     outputs:
       trigger_release: ${{ steps.semantic.outputs.new_release_published }}
