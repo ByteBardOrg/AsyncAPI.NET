@@ -1,5 +1,8 @@
 ﻿namespace ByteBard.AsyncAPI.Tests
 {
+    using System;
+    using System.Collections.Concurrent;
+    using System.Collections.Generic;
     using FluentAssertions;
     using ByteBard.AsyncAPI.Bindings;
     using ByteBard.AsyncAPI.Models;
@@ -229,6 +232,180 @@
             diagnostics.Errors.Should().BeEmpty();
             diagnostics.Warnings.Should().BeEmpty();
             reserialized.Should().BePlatformAgnosticEquivalentTo(expected);
+        }
+
+        [Test]
+        public void V3_SerializeV2_WithNoMessageReference_SerializesChannelMessagesOneOf()
+        {
+            var expected =
+                """
+                asyncapi: 2.6.0
+                info:
+                  title: my first asyncapi
+                  version: 1.0.0
+                channels:
+                  user/signedUp:
+                    publish:
+                      message:
+                        oneOf:
+                          - payload:
+                              type: object
+                              properties:
+                                displayName:
+                                  type: string
+                                  description: Name of the user
+                          - payload:
+                              type: object
+                              properties:
+                                displayName:
+                                  type: string
+                                  description: Name of the user
+                """;
+            var myFirstAsyncApi = new AsyncApiDocument
+            {
+                Info = new AsyncApiInfo
+                {
+                    Title = "my first asyncapi",
+                    Version = "1.0.0",
+                },
+                Channels = new Dictionary<string, AsyncApiChannel>
+                {
+                    {
+                        "UserSignup", new AsyncApiChannel
+                        {
+                            Address = "user/signedUp",
+                            Messages = new Dictionary<string, AsyncApiMessage>()
+                            {
+                                {
+                                    "UserMessage", new AsyncApiMessage
+                                    {
+                                        Payload = new AsyncApiJsonSchema()
+                                        {
+                                            Type = SchemaType.Object,
+                                            Properties = new Dictionary<string, AsyncApiJsonSchema>()
+                                            {
+                                                {
+                                                    "displayName", new AsyncApiJsonSchema()
+                                                    {
+                                                        Type = SchemaType.String,
+                                                        Description = "Name of the user",
+                                                    }
+                                                },
+                                            },
+                                        },
+                                    }
+                                },
+                                {
+                                    "OtherUserMessage", new AsyncApiMessage
+                                    {
+                                        Payload = new AsyncApiJsonSchema()
+                                        {
+                                            Type = SchemaType.Object,
+                                            Properties = new Dictionary<string, AsyncApiJsonSchema>()
+                                            {
+                                                {
+                                                    "displayName", new AsyncApiJsonSchema()
+                                                    {
+                                                        Type = SchemaType.String,
+                                                        Description = "Name of the user",
+                                                    }
+                                                },
+                                            },
+                                        },
+                                    }
+                                },
+                            },
+                        }
+                    },
+                },
+                Operations = new Dictionary<string, AsyncApiOperation>()
+                {
+                    {
+                        "ConsumerUserSignups", new AsyncApiOperation
+                        {
+                            Action = AsyncApiAction.Receive,
+                            Channel = new AsyncApiChannelReference("#/channels/UserSignup"),
+                        }
+                    },
+                },
+            };
+
+            var yamlV2 = myFirstAsyncApi.SerializeAsYaml(AsyncApiVersion.AsyncApi2_0);
+            yamlV2.Should().BeEquivalentTo(expected);
+        }
+        
+        [Test]
+        public void V3_SerializeV2_WithNoMessageReference_SerializesChannelMessage()
+        {
+            var expected =
+                """
+                asyncapi: 2.6.0
+                info:
+                  title: my first asyncapi
+                  version: 1.0.0
+                channels:
+                  user/signedUp:
+                    publish:
+                      message:
+                        payload:
+                          type: object
+                          properties:
+                            displayName:
+                              type: string
+                              description: Name of the user
+                """;
+            var myFirstAsyncApi = new AsyncApiDocument
+            {
+                Info = new AsyncApiInfo
+                {
+                    Title = "my first asyncapi",
+                    Version = "1.0.0",
+                },
+                Channels = new Dictionary<string, AsyncApiChannel>
+                {
+                    {
+                        "UserSignup", new AsyncApiChannel
+                        {
+                            Address = "user/signedUp",
+                            Messages = new Dictionary<string, AsyncApiMessage>()
+                            {
+                                {
+                                    "UserMessage", new AsyncApiMessage
+                                    {
+                                        Payload = new AsyncApiJsonSchema()
+                                        {
+                                            Type = SchemaType.Object,
+                                            Properties = new Dictionary<string, AsyncApiJsonSchema>()
+                                            {
+                                                {
+                                                    "displayName", new AsyncApiJsonSchema()
+                                                    {
+                                                        Type = SchemaType.String,
+                                                        Description = "Name of the user",
+                                                    }
+                                                },
+                                            },
+                                        },
+                                    }
+                                },
+                            },
+                        }
+                    },
+                },
+                Operations = new Dictionary<string, AsyncApiOperation>()
+                {
+                    {
+                        "ConsumerUserSignups", new AsyncApiOperation
+                        {
+                            Action = AsyncApiAction.Receive,
+                            Channel = new AsyncApiChannelReference("#/channels/UserSignup"),
+                        }
+                    },
+                },
+            };
+
+            var yamlV2 = myFirstAsyncApi.SerializeAsYaml(AsyncApiVersion.AsyncApi2_0);
+            yamlV2.Should().BeEquivalentTo(expected);
         }
     }
 }
