@@ -12,7 +12,7 @@ V3 is currently in pre-release - so grab that if you need V3
 [Wiki and getting started guide](https://github.com/ByteBardOrg/AsyncAPI.NET/wiki)
 
 ## Installation
-Generally you wan't to use Readers and Bindings.
+Generally you want to use Readers and Bindings.
 They have however been split to allow for different scenarios without polluting with unnecesary packages.
 
 Install the NuGet packages:
@@ -38,59 +38,43 @@ Main classes to know:
 ## Writing
 
 ```csharp
- var myFirstAsyncApi = new AsyncApiDocument
- {
-     Info = new AsyncApiInfo
-     {
-         Title = "my first asyncapi",
-     },
-     Channels = new Dictionary<string, AsyncApiChannel>
-     {
-         {
-             "users", new AsyncApiChannel
-             {
-                 Subscribe = new AsyncApiOperation
-                 {
-                     OperationId = "users",
-                     Description = "my users channel",
-                     Message = new List<AsyncApiMessage>
-                     {
-                       new AsyncApiMessageReference("#/components/messages/MyMessage"),
-                     },
-                 },
-             }
-         },
-     },
-     Components = new AsyncApiComponents
-     {
-         Messages = new Dictionary<string, AsyncApiMessage>
-         {
-             {
-                 "MyMessage", new AsyncApiMessage
-                 {
-                     Name = "Hello!",
-                 }
-             },
-         },
-     },
- };
-
-var yaml = myFirstAsyncApi.SerializeAsYaml(AsyncApi);
-
-//asyncapi: 2.6.0
-//  info:
-//    title: my first asyncapi
-//channels:
-//  users:
-//    subscribe:
-//      operationId: users
-//      description: my users channel
-//      message:
-//        $ref: '#/components/messages/MyMessage'
-//components:
-//  messages:
-//    MyMessage:
-//      name: Hello!
+var specification =
+"""
+asyncapi: 3.0.0
+info:
+  title: UsersAPI
+  version: 1.0.0
+  externalDocs:
+    description: Find more info here
+    url: https://www.asyncapi.com
+  tags:
+    - name: e-commerce
+servers:
+  production:
+    host: "rabbitmq.in.mycompany.com:5672"
+    pathname: "/production"
+    protocol: "amqp"
+channels:
+  UserSignup:
+    address: "user/signedup"
+    messages: 
+      UserMessage: 
+        payload:
+          type: object
+          properties:
+            displayName:
+              type: string
+              description: Name of the user
+operations:
+  ConsumeUserSignups:
+    action: receive
+    channel: 
+      $ref: "#/channels/UserSignup"
+""";
+var reader = new AsyncApiStringReader();
+var document = reader.Read(specification, out var diagnostics);
+var v2Document = document.SerializeAsYaml(AsyncApiVersion.AsyncApi2_0);
+var v3Document = document.SerializeAsJson(AsyncApiVersion.AsyncApi3_0);
 ```
 
 
