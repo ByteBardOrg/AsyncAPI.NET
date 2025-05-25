@@ -233,7 +233,7 @@
             diagnostics.Warnings.Should().BeEmpty();
             reserialized.Should().BePlatformAgnosticEquivalentTo(expected);
         }
-        
+
         [Test]
         public void V3_SerializeV2_WithNoMessageReference_SerializesChannelMessagesOneOf()
         {
@@ -331,9 +331,9 @@
             };
 
             var yamlV2 = myFirstAsyncApi.SerializeAsYaml(AsyncApiVersion.AsyncApi2_0);
-            yamlV2.Should().BeEquivalentTo(expected);
+            yamlV2.Should().BePlatformAgnosticEquivalentTo(expected);
         }
-        
+
         [Test]
         public void V3_SerializeV2_WithNoMessageReference_SerializesChannelMessage()
         {
@@ -405,7 +405,7 @@
             };
 
             var yamlV2 = myFirstAsyncApi.SerializeAsYaml(AsyncApiVersion.AsyncApi2_0);
-            yamlV2.Should().BeEquivalentTo(expected);
+            yamlV2.Should().BePlatformAgnosticEquivalentTo(expected);
         }
     }
 }
