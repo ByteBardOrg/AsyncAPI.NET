@@ -91,9 +91,9 @@
 
             writer.WriteOptionalObject(AsyncApiConstants.Bindings, this.Bindings, (w, t) => t.SerializeV2(w));
             writer.WriteOptionalCollection(AsyncApiConstants.Traits, this.Traits, (w, t) => t.SerializeV2(w));
-            IEnumerable<AsyncApiMessage> messages = this.Messages.Any() ? this.Messages : this.Channel.Messages.Values;
+            IEnumerable<AsyncApiMessage> messages = this.Messages.Any() ? this.Messages : this.Channel?.Messages.Values;
 
-            if (messages.Count() > 1)
+            if (messages?.Count() > 1)
             {
                 writer.WritePropertyName(AsyncApiConstants.Message);
                 writer.WriteStartObject();
@@ -102,7 +102,7 @@
             }
             else
             {
-                writer.WriteOptionalObject(AsyncApiConstants.Message, messages.FirstOrDefault(), (w, m) => m.SerializeV2(w));
+                writer.WriteOptionalObject(AsyncApiConstants.Message, messages?.FirstOrDefault(), (w, m) => m.SerializeV2(w));
             }
 
             writer.WriteExtensions(this.Extensions);
