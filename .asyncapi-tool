@@ -1,6 +1,6 @@
 {
-  "title": "AsyncAPI.Net",
-  "description": "The AsyncAPI.NET SDK contains a useful object model for AsyncAPI documents in .NET along with common serializers to extract raw OpenAPI JSON and YAML documents from the model.",
+  "title": "AsyncAPI.NET",
+  "description": "The officially maintained fork of the AsyncAPI.NET SDK contains a useful object model for AsyncAPI documents in .NET along with common (de)serializers to extract raw AsyncApi JSON and YAML documents from the model.",
   "links": {
     "websiteUrl": "https://github.com/ByteBardOrg/AsyncAPI.NET/",
     "repoUrl": "https://github.com/ByteBardOrg/AsyncAPI.NET"
