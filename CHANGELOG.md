@@ -1,3 +1,7 @@
+## [2.0.1](https://github.com/ByteBardOrg/AsyncAPI.NET/compare/v2.0.0...v2.0.1) (2025-05-31)
+### Bug Fixes
+* readd netstandard target to ensure source generator compat ([b28d6ff](https://github.com/ByteBardOrg/AsyncAPI.NET/commit/b28d6ff2a3c7b9df13d2ed9bab88e38593280ce6))
+
 # [2.0.0](https://github.com/ByteBardOrg/AsyncAPI.NET/compare/v1.0.0...v2.0.0) (2025-05-25)
 ### Features
 * feat!: full v3 support (#8) ([2b98f81](https://github.com/ByteBardOrg/AsyncAPI.NET/commit/2b98f81c4adbd61f8b981bc2247e7f008f598310)), closes [#8](https://github.com/ByteBardOrg/AsyncAPI.NET/issues/8)
