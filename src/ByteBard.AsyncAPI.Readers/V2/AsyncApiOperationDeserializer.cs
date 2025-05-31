@@ -1,6 +1,7 @@
 namespace ByteBard.AsyncAPI.Readers
 {
     using System.Collections.Generic;
+    using System.Linq;
     using System.Threading;
     using ByteBard.AsyncAPI.Extensions;
     using ByteBard.AsyncAPI.Models;
@@ -47,7 +48,7 @@ namespace ByteBard.AsyncAPI.Readers
             var message = LoadMessage(node);
             if (message is AsyncApiMessageReference reference)
             {
-                key = reference.Reference.Reference.Split("/")[^1];
+                key = reference.Reference.Reference.Split('/').Last();
             }
             else if (messageNode["messageId"] != null)
             {

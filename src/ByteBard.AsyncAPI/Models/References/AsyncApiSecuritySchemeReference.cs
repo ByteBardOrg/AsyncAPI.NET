@@ -88,9 +88,7 @@ namespace ByteBard.AsyncAPI.Models
             this.Reference.Workspace = writer.Workspace;
 
             writer.WriteStartObject();
-
-            writer.WritePropertyName(this.Reference.FragmentId.Split("/")[^1]);
-
+            writer.WritePropertyName(this.Reference.FragmentId.Split('/').Last());
             writer.WriteStartArray();
 
             if (this.Scopes.Any())

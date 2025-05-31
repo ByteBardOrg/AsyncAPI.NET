@@ -88,7 +88,7 @@ namespace ByteBard.AsyncAPI.Readers
                 if (operation.Value.Channel != null)
                 {
                     var messages = context.GetFromTempStorage<Dictionary<string, AsyncApiMessageReference>>(TempStorageKeys.OperationMessageReferences, operation.Value);
-                    var operationChannelFragmentKey = operation.Value.Channel.Reference.Reference.Split("/")[^1];
+                    var operationChannelFragmentKey = operation.Value.Channel.Reference.Reference.Split('/').Last();
                     var channel = document.Channels.FirstOrDefault(channel => channel.Key == operationChannelFragmentKey);
                     if (channel.Value == null)
                     {
