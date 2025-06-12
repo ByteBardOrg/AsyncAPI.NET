@@ -1,7 +1,9 @@
 name: Publish beta NuGet package
 on:
   workflow_dispatch:
-
+permissions:
+  contents: read
+  packages: write
 jobs:
   check:
     runs-on: ubuntu-latest

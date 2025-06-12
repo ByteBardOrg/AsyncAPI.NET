@@ -2,6 +2,10 @@ name: Publish NuGet package
 on:
   workflow_dispatch:
 
+permissions:
+  contents: read
+  packages: write
+
 jobs:
   prereleaseCheck:
     runs-on: ubuntu-latest
