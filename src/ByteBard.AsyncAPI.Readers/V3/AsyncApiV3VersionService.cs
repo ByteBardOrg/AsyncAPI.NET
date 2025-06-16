@@ -34,7 +34,7 @@
             [typeof(AsyncApiOperationReply)] = AsyncApiV3Deserializer.LoadOperationReply,
             [typeof(AsyncApiOperationReplyAddress)] = AsyncApiV3Deserializer.LoadOperationReplyAddress,
             [typeof(AsyncApiParameter)] = AsyncApiV3Deserializer.LoadParameter,
-            [typeof(AsyncApiJsonSchema)] = AsyncApiSchemaDeserializer.LoadSchema,
+            [typeof(AsyncApiJsonSchema)] = AsyncApiJsonSchemaDeserializer.LoadSchema,
             [typeof(AsyncApiAvroSchema)] = AsyncApiAvroSchemaDeserializer.LoadSchema,
             [typeof(AsyncApiSecurityScheme)] = AsyncApiV3Deserializer.LoadSecurityScheme,
             [typeof(AsyncApiMultiFormatSchema)] = AsyncApiV3Deserializer.LoadMultiFormatSchema,

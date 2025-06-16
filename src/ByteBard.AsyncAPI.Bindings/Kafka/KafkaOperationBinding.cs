@@ -26,8 +26,8 @@ namespace ByteBard.AsyncAPI.Bindings.Kafka
         protected override FixedFieldMap<KafkaOperationBinding> FixedFieldMap => new()
         {
             { "bindingVersion", (a, n) => { a.BindingVersion = n.GetScalarValue(); } },
-            { "groupId", (a, n) => { a.GroupId = AsyncApiSchemaDeserializer.LoadSchema(n); } },
-            { "clientId", (a, n) => { a.ClientId = AsyncApiSchemaDeserializer.LoadSchema(n); } },
+            { "groupId", (a, n) => { a.GroupId = AsyncApiJsonSchemaDeserializer.LoadSchema(n); } },
+            { "clientId", (a, n) => { a.ClientId = AsyncApiJsonSchemaDeserializer.LoadSchema(n); } },
         };
 
         /// <summary>

@@ -6,7 +6,7 @@ namespace ByteBard.AsyncAPI.Readers
     using ByteBard.AsyncAPI.Models;
     using ByteBard.AsyncAPI.Readers.ParseNodes;
 
-    public class AsyncApiSchemaDeserializer
+    public class AsyncApiJsonSchemaDeserializer
     {
         private static readonly FixedFieldMap<AsyncApiJsonSchema> schemaFixedFields = new()
         {

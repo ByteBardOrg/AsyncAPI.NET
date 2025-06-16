@@ -24,7 +24,7 @@ namespace ByteBard.AsyncAPI.Readers
 
         private static void LoadParameterFromSchema(AsyncApiParameter instance, ParseNode node)
         {
-            var schema = AsyncApiSchemaDeserializer.LoadSchema(node);
+            var schema = AsyncApiJsonSchemaDeserializer.LoadSchema(node);
             if (schema.Enum.Any())
             {
                 instance.Enum = schema.Enum.Select(e => e.GetValue<string>()).ToList();

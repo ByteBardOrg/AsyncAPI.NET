@@ -40,7 +40,7 @@ namespace ByteBard.AsyncAPI.Bindings.Http
         protected override FixedFieldMap<HttpMessageBinding> FixedFieldMap => new()
         {
             { "bindingVersion", (a, n) => { a.BindingVersion = n.GetScalarValue(); } },
-            { "headers", (a, n) => { a.Headers = AsyncApiSchemaDeserializer.LoadSchema(n); } },
+            { "headers", (a, n) => { a.Headers = AsyncApiJsonSchemaDeserializer.LoadSchema(n); } },
         };
     }
 }

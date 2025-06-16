@@ -43,7 +43,7 @@ namespace ByteBard.AsyncAPI.Readers
         {
             var schemas = new AsyncApiMultiFormatSchema
             {
-                Schema = AsyncApiSchemaDeserializer.LoadSchema(node),
+                Schema = AsyncApiJsonSchemaDeserializer.LoadSchema(node),
             };
 
             return schemas;
