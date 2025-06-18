@@ -57,8 +57,8 @@ namespace ByteBard.AsyncAPI.Readers
         { get; set; } =
            new List<IBindingParser<IBinding>>();
 
-        public SchemaParserRegistry SchemaParserRegistry { get; set; } = new SchemaParserRegistry();
-    
+        public SchemaParserRegistry SchemaParserRegistry { get; } = new SchemaParserRegistry();
+
         /// <summary>
         /// Rules to use for validating AsyncApi specification.  If none are provided a default set of rules are applied.
         /// </summary>
