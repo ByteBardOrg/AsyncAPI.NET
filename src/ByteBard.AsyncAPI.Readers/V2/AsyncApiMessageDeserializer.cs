@@ -85,7 +85,7 @@ namespace ByteBard.AsyncAPI.Readers
                 case null:
                 case "":
                 case var _ when SupportedJsonSchemaFormats.Where(s => format.StartsWith(s)).Any():
-                    return AsyncApiSchemaDeserializer.LoadSchema(n);
+                    return AsyncApiJsonSchemaDeserializer.LoadSchema(n);
                 case var _ when SupportedAvroSchemaFormats.Where(s => format.StartsWith(s)).Any():
                     return AsyncApiAvroSchemaDeserializer.LoadSchema(n);
                 default:
@@ -143,7 +143,7 @@ namespace ByteBard.AsyncAPI.Readers
 
             if (mapNode["headers"] != null)
             {
-                message.Headers = new AsyncApiMultiFormatSchema { Schema = AsyncApiSchemaDeserializer.LoadSchema(mapNode["headers"].Value) };
+                message.Headers = new AsyncApiMultiFormatSchema { Schema = AsyncApiJsonSchemaDeserializer.LoadSchema(mapNode["headers"].Value) };
             }
 
             if (mapNode["payload"] != null)

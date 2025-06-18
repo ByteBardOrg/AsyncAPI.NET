@@ -61,7 +61,7 @@ namespace ByteBard.AsyncAPI.Bindings.Http
             { "bindingVersion", (a, n) => { a.BindingVersion = n.GetScalarValue(); } },
             { "type", (a, n) => { a.Type = n.GetScalarValue().GetEnumFromDisplayName<HttpOperationType>(); } },
             { "method", (a, n) => { a.Method = n.GetScalarValue(); } },
-            { "query", (a, n) => { a.Query = AsyncApiSchemaDeserializer.LoadSchema(n); } },
+            { "query", (a, n) => { a.Query = AsyncApiJsonSchemaDeserializer.LoadSchema(n); } },
         };
 
         public override string BindingKey => "http";

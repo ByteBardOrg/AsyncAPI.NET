@@ -31,12 +31,11 @@
 
             var format = mapNode["schemaFormat"].Value.GetScalarValue();
             var schema = mapNode["schema"].Value;
-            schemaFormat.Schema = LoadSchema(schema, LoadSchemaFormat(format));
+            schemaFormat.Schema = LoadSchema(schema, format);
             schemaFormat.SchemaFormat = format;
             return schemaFormat;
-
         }
-
+        
         private static IAsyncApiSchema LoadSchema(ParseNode n, string format)
         {
             if (n == null)
@@ -44,47 +43,15 @@
                 return null;
             }
 
-            switch (format)
+            var registry = n.Context.SchemaParserRegistry;
+            var parser = registry.GetParser(format);
+            if (parser != null)
             {
-                case null:
-                case "":
-                case var _ when SupportedJsonSchemaFormats.Where(s => format.StartsWith(s)).Any():
-                    return AsyncApiSchemaDeserializer.LoadSchema(n);
-                case var _ when SupportedAvroSchemaFormats.Where(s => format.StartsWith(s)).Any():
-                    return AsyncApiAvroSchemaDeserializer.LoadSchema(n);
-                default:
-                    var supportedFormats = SupportedJsonSchemaFormats.Concat(SupportedAvroSchemaFormats);
-                    throw new AsyncApiException($"Could not deserialize Schema. Supported formats are {string.Join(", ", supportedFormats)}");
-            }
-        }
-
-        static readonly IEnumerable<string> SupportedJsonSchemaFormats = new List<string>
-        {
-            "application/vnd.aai.asyncapi+json",
-            "application/vnd.aai.asyncapi+yaml",
-            "application/vnd.aai.asyncapi",
-            "application/schema+json;version=draft-07",
-            "application/schema+yaml;version=draft-07",
-        };
-
-        static readonly IEnumerable<string> SupportedAvroSchemaFormats = new List<string>
-        {
-            "application/vnd.apache.avro",
-            "application/vnd.apache.avro+json",
-            "application/vnd.apache.avro+yaml",
-            "application/vnd.apache.avro+json;version=1.9.0",
-            "application/vnd.apache.avro+yaml;version=1.9.0",
-        };
-
-        private static string LoadSchemaFormat(string schemaFormat)
-        {
-            var supportedFormats = SupportedJsonSchemaFormats.Concat(SupportedAvroSchemaFormats);
-            if (!supportedFormats.Where(s => schemaFormat.StartsWith(s)).Any())
-            {
-                throw new AsyncApiException($"'{schemaFormat}' is not a supported format. Supported formats are {string.Join(", ", supportedFormats)}");
+                return parser.LoadSchema(n);
             }
 
-            return schemaFormat;
+            var supportedFormats = registry.GetSupportedFormats();
+            throw new AsyncApiException($"Could not deserialize Schema. Supported formats are {string.Join(", ", supportedFormats)}");
         }
     }
 }

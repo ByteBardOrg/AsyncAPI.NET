@@ -29,8 +29,8 @@ namespace ByteBard.AsyncAPI.Bindings.WebSockets
         {
             { "bindingVersion", (a, n) => { a.BindingVersion = n.GetScalarValue(); } },
             { "method", (a, n) => { a.Method = n.GetScalarValue(); } },
-            { "query", (a, n) => { a.Query = AsyncApiSchemaDeserializer.LoadSchema(n); } },
-            { "headers", (a, n) => { a.Headers = AsyncApiSchemaDeserializer.LoadSchema(n); } },
+            { "query", (a, n) => { a.Query = AsyncApiJsonSchemaDeserializer.LoadSchema(n); } },
+            { "headers", (a, n) => { a.Headers = AsyncApiJsonSchemaDeserializer.LoadSchema(n); } },
         };
 
         public override void SerializeProperties(IAsyncApiWriter writer)

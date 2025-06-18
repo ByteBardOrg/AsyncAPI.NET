@@ -55,7 +55,7 @@
         protected override FixedFieldMap<MQTTMessageBinding> FixedFieldMap => new()
         {
             { "payloadFormatIndicator", (a, n) => { a.PayloadFormatIndicator = n.GetIntegerValueOrDefault(); } },
-            { "correlationData", (a, n) => { a.CorrelationData = AsyncApiSchemaDeserializer.LoadSchema(n); } },
+            { "correlationData", (a, n) => { a.CorrelationData = AsyncApiJsonSchemaDeserializer.LoadSchema(n); } },
             { "contentType", (a, n) => { a.ContentType = n.GetScalarValue(); } },
             { "responseTopic", (a, n) => { a.ResponseTopic = n.GetScalarValue(); } },
         };

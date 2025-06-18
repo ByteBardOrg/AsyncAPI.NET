@@ -3,6 +3,7 @@ namespace ByteBard.AsyncAPI.Readers
     using System;
     using System.Collections.Generic;
     using System.IO;
+    using System.Runtime.CompilerServices;
     using ByteBard.AsyncAPI.Models;
     using ByteBard.AsyncAPI.Models.Interfaces;
     using ByteBard.AsyncAPI.Readers.Interface;
@@ -55,6 +56,8 @@ namespace ByteBard.AsyncAPI.Readers
            Bindings
         { get; set; } =
            new List<IBindingParser<IBinding>>();
+
+        public SchemaParserRegistry SchemaParserRegistry { get; } = new SchemaParserRegistry();
 
         /// <summary>
         /// Rules to use for validating AsyncApi specification.  If none are provided a default set of rules are applied.

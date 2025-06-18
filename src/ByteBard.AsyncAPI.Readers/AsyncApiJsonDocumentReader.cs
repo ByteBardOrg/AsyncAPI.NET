@@ -50,6 +50,7 @@ namespace ByteBard.AsyncAPI.Readers
                 ChannelBindingParsers = this.settings.Bindings.OfType<IBindingParser<IChannelBinding>>().ToDictionary(b => b.BindingKey, b => b),
                 OperationBindingParsers = this.settings.Bindings.OfType<IBindingParser<IOperationBinding>>().ToDictionary(b => b.BindingKey, b => b),
                 MessageBindingParsers = this.settings.Bindings.OfType<IBindingParser<IMessageBinding>>().ToDictionary(b => b.BindingKey, b => b),
+                SchemaParserRegistry = this.settings.SchemaParserRegistry,
             };
 
             AsyncApiDocument document = null;
@@ -90,6 +91,7 @@ namespace ByteBard.AsyncAPI.Readers
                 ChannelBindingParsers = this.settings.Bindings.OfType<IBindingParser<IChannelBinding>>().ToDictionary(b => b.BindingKey, b => b),
                 OperationBindingParsers = this.settings.Bindings.OfType<IBindingParser<IOperationBinding>>().ToDictionary(b => b.BindingKey, b => b),
                 MessageBindingParsers = this.settings.Bindings.OfType<IBindingParser<IMessageBinding>>().ToDictionary(b => b.BindingKey, b => b),
+                SchemaParserRegistry = this.settings.SchemaParserRegistry,
             };
 
             AsyncApiDocument document = null;
@@ -144,6 +146,7 @@ namespace ByteBard.AsyncAPI.Readers
                 ChannelBindingParsers = this.settings.Bindings.OfType<IBindingParser<IChannelBinding>>().ToDictionary(b => b.BindingKey, b => b),
                 OperationBindingParsers = this.settings.Bindings.OfType<IBindingParser<IOperationBinding>>().ToDictionary(b => b.BindingKey, b => b),
                 MessageBindingParsers = this.settings.Bindings.OfType<IBindingParser<IMessageBinding>>().ToDictionary(b => b.BindingKey, b => b),
+                SchemaParserRegistry = this.settings.SchemaParserRegistry,
             };
 
             IAsyncApiElement element = null;

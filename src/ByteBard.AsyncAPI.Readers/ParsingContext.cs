@@ -36,6 +36,8 @@ namespace ByteBard.AsyncAPI.Readers
         internal Dictionary<string, IBindingParser<IOperationBinding>> OperationBindingParsers { get; set; } = new();
 
         internal Dictionary<string, IBindingParser<IMessageBinding>> MessageBindingParsers { get; set; } = new();
+        
+        internal SchemaParserRegistry SchemaParserRegistry { get; set; } = new();
 
         internal RootNode RootNode { get; set; }
 
