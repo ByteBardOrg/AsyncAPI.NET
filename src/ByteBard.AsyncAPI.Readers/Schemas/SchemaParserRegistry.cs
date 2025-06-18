@@ -11,10 +11,10 @@ public class SchemaParserRegistry
         this.RegisterParser(new AvroSchemaParser());
     }
     
-    private readonly Dictionary<string, ISchemaParser> parsers = new();
+    private readonly Dictionary<string, IAsyncApiSchemaParser> parsers = new();
     private readonly Dictionary<string, string> formatToPrefix = new();
 
-    public void RegisterParser(ISchemaParser deserializer)
+    public void RegisterParser(IAsyncApiSchemaParser deserializer)
     {
         foreach (var format in deserializer.SupportedFormats)
         {
@@ -23,7 +23,7 @@ public class SchemaParserRegistry
         }
     }
 
-    public ISchemaParser GetParser(string format)
+    public IAsyncApiSchemaParser GetParser(string format)
     {
         if (string.IsNullOrEmpty(format))
         {

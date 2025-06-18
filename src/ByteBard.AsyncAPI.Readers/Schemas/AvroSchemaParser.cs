@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using Models.Interfaces;
 using ParseNodes;
 
-public class AvroSchemaParser : ISchemaParser
+public class AvroSchemaParser : IAsyncApiSchemaParser
 {
     public IAsyncApiSchema LoadSchema(ParseNode parseNode)
     {

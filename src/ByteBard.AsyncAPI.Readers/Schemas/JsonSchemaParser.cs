@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using Models.Interfaces;
 using ParseNodes;
 
-public class JsonSchemaParser: ISchemaParser
+public class JsonSchemaParser: IAsyncApiSchemaParser
 {
     public IAsyncApiSchema LoadSchema(ParseNode node)
     {
