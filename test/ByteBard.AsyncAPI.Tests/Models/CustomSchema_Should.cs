@@ -5,6 +5,7 @@ using System.Linq;
 using AsyncAPI.Models;
 using AsyncAPI.Models.Interfaces;
 using AsyncAPI.Writers;
+using Attributes;
 using FluentAssertions;
 using NUnit.Framework;
 using Readers;
@@ -14,7 +15,9 @@ public class CustomSchema_Should
 {
     public enum MySchemaType
     {
+        [Display("one")]
         One,
+        [Display("two")]
         Two,
     }
 
