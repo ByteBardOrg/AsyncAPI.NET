@@ -1304,5 +1304,89 @@ namespace ByteBard.AsyncAPI.Tests
 
             Assert.AreEqual("this mah binding", httpBinding.Headers.Description);
         }
+        
+        [Test]
+        public void V2_DocumentWithParameterReference_ResolvesToParameter()
+        {
+            var input = """
+                        {
+                            "asyncapi": "2.6.0",
+                            "info": {
+                                "title": "NikolajApi",
+                                "description": "Trying to work with enum in parameter",
+                                "contact": {
+                                    "url": "https://github.com/Nikolajls",
+                                    "name": "Nikolaj",
+                                    "email": "test@test.com"
+                                },
+                                "version": "0.0.1"
+                            },
+                            "servers": {
+                                "integration-pulsar": {
+                                    "url": "pulsar+ssl://localhost:6651",
+                                    "protocol": "pulsar+ssl"
+                                }
+                            },
+                            "channels": {
+                                "v1.Room.{roomId}.Opened": {
+                                    "publish": {
+                                        "description": "Publish a message about a room being opened",
+                                        "operationId": "pub-room",
+                                        "message": {
+                                            "$ref": "#/components/messages/RoomOpened"
+                                        }
+                                    },
+                                    "parameters": {
+                                        "roomId": {
+                                            "schema": {
+                                                "$ref": "#/components/schemas/Rooms"
+                                            },
+                                            "description": "The ID of the room"
+                                        }
+                                    }
+                                }
+                            },
+                            "components": {
+                                "schemas": {
+                                    "RoomOpened": {
+                                        "type": "object",
+                                        "properties": {
+                                            "roomName": {
+                                                "type": "string",
+                                                "examples": [
+                                                    "ABC"
+                                                ]
+                                            }
+                                        },
+                                        "additionalProperties": false
+                                    },
+                                    "Rooms": {
+                                        "enum": [
+                                            "123",
+                                            "245",
+                                            "678"
+                                        ],
+                                        "type": "string"
+                                    }
+                                },
+                                "messages": {
+                                    "RoomOpened": {
+                                        "name": "RoomOpened",
+                                        "summary": "Message indicating a room has been opened",
+                                        "contentType": "application/json",
+                                        "payload": {
+                                            "$ref": "#/components/schemas/RoomOpened"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        """;
+
+            var document = new AsyncApiStringReader().Read(input, out var diagnostic);
+            diagnostic.Errors.Should().BeEmpty();
+            diagnostic.Warnings.Should().BeEmpty();
+            document.Channels.First().Value.Parameters.First().Value.Enum.Should().HaveCount(3);
+        }
     }
 }
