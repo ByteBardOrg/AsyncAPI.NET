@@ -67,6 +67,11 @@ namespace ByteBard.AsyncAPI.Readers
                 context.GetFromTempStorage<Dictionary<AsyncApiParameter, AsyncApiJsonSchemaReference>>(TempStorageKeys
                     .ParameterSchemaReferences);
 
+            if (parameterReferences == null)
+            {
+                return;
+            }
+
             foreach (var parameterReference in parameterReferences)
             {
                 var parameter = parameterReference.Key;
@@ -76,7 +81,7 @@ namespace ByteBard.AsyncAPI.Readers
                 {
                     continue;
                 }
-                
+
                 if (schema.Enum.Any())
                 {
                     parameter.Enum = schema.Enum.Select(e => e.GetValue<string>()).ToList();
@@ -93,7 +98,7 @@ namespace ByteBard.AsyncAPI.Readers
                 }
             }
         }
-        
+
         private static void SetMessages(ParsingContext context, AsyncApiDocument document)
         {
             var messages = context.GetFromTempStorage<Dictionary<string, AsyncApiMessage>>(TempStorageKeys.ComponentMessages);
