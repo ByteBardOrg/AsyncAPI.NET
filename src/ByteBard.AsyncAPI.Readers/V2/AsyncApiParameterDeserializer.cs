@@ -1,5 +1,6 @@
 namespace ByteBard.AsyncAPI.Readers
 {
+    using System.Collections.Generic;
     using ByteBard.AsyncAPI.Extensions;
     using ByteBard.AsyncAPI.Models;
     using ByteBard.AsyncAPI.Readers.ParseNodes;
@@ -23,6 +24,14 @@ namespace ByteBard.AsyncAPI.Readers
         private static void LoadParameterFromSchema(AsyncApiParameter instance, ParseNode node)
         {
             var schema = AsyncApiJsonSchemaDeserializer.LoadSchema(node);
+            if (schema is AsyncApiJsonSchemaReference schemaReference)
+            {
+                var existingReferences = node.Context.GetFromTempStorage<Dictionary<AsyncApiParameter, AsyncApiJsonSchemaReference>>(TempStorageKeys.ParameterSchemaReferences) ?? new Dictionary<AsyncApiParameter, AsyncApiJsonSchemaReference>();
+                existingReferences.Add(instance, schemaReference);
+                node.Context.SetTempStorage(TempStorageKeys.ParameterSchemaReferences, existingReferences);
+                return;
+            }
+
             if (schema.Enum.Any())
             {
                 instance.Enum = schema.Enum.Select(e => e.GetValue<string>()).ToList();

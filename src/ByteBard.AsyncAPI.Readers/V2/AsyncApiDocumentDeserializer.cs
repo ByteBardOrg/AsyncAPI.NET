@@ -57,7 +57,46 @@ namespace ByteBard.AsyncAPI.Readers
             SetSecuritySchemeScopes(asyncApiNode.Context, document);
             SetMessages(asyncApiNode.Context, document);
             SetOperations(asyncApiNode.Context, document);
+            SetParameters(asyncApiNode.Context, document);
             return document;
+        }
+
+        private static void SetParameters(ParsingContext context, AsyncApiDocument document)
+        {
+            var parameterReferences =
+                context.GetFromTempStorage<Dictionary<AsyncApiParameter, AsyncApiJsonSchemaReference>>(TempStorageKeys
+                    .ParameterSchemaReferences);
+
+            if (parameterReferences == null)
+            {
+                return;
+            }
+
+            foreach (var parameterReference in parameterReferences)
+            {
+                var parameter = parameterReference.Key;
+                var multiFormatSchema = context.Workspace.ResolveReference<AsyncApiMultiFormatSchema>(parameterReference.Value.Reference);
+                var schema = multiFormatSchema.Schema.As<AsyncApiJsonSchema>();
+                if (schema == null)
+                {
+                    continue;
+                }
+
+                if (schema.Enum.Any())
+                {
+                    parameter.Enum = schema.Enum.Select(e => e.GetValue<string>()).ToList();
+                }
+
+                if (schema.Default != null)
+                {
+                    parameter.Default = schema.Default.GetValue<string>();
+                }
+
+                if (schema.Examples.Any())
+                {
+                    parameter.Examples = schema.Examples.Select(e => e.GetValue<string>()).ToList();
+                }
+            }
         }
 
         private static void SetMessages(ParsingContext context, AsyncApiDocument document)
