@@ -14,7 +14,7 @@
         /// <summary>
         /// TTL (Time-To-Live) for the message. It MUST be greater than or equal to zero.
         /// </summary>
-        public uint? Expiration { get; set; }
+        public uint Expiration { get; set; }
 
         /// <summary>
         /// Identifies the user who has sent the message.
@@ -29,17 +29,17 @@
         /// <summary>
         /// A priority for the message.
         /// </summary>
-        public int? Priority { get; set; }
+        public int Priority { get; set; }
 
         /// <summary>
         /// Delivery mode of the message. Its value MUST be either 1 (transient) or 2 (persistent).
         /// </summary>
-        public DeliveryMode? DeliveryMode { get; set; }
+        public DeliveryMode DeliveryMode { get; set; }
 
         /// <summary>
         /// Whether the message is mandatory or not.
         /// </summary>
-        public bool? Mandatory { get; set; }
+        public bool Mandatory { get; set; }
 
         /// <summary>
         /// Like cc but consumers will not receive this information.
@@ -49,27 +49,27 @@
         /// <summary>
         /// Whether the message should include a timestamp or not.
         /// </summary>
-        public bool? Timestamp { get; set; }
+        public bool Timestamp { get; set; }
 
         /// <summary>
         /// Whether the consumer should ack the message or not.
         /// </summary>
-        public bool? Ack { get; set; }
+        public bool Ack { get; set; }
 
         public override string BindingKey => "amqp";
 
         protected override FixedFieldMap<AMQPOperationBinding> FixedFieldMap => new()
         {
             { "bindingVersion", (a, n) => { a.BindingVersion = n.GetScalarValue(); } },
-            { "expiration", (a, n) => { a.Expiration = (uint?)n.GetIntegerValueOrDefault(); } },
+            { "expiration", (a, n) => { a.Expiration = (uint)n.GetIntegerValue(); } },
             { "userId", (a, n) => { a.UserId = n.GetScalarValueOrDefault(); } },
             { "cc", (a, n) => { a.Cc = n.CreateSimpleList(s => s.GetScalarValue()); } },
-            { "priority", (a, n) => { a.Priority = n.GetIntegerValueOrDefault(); } },
-            { "deliveryMode", (a, n) => { a.DeliveryMode = (DeliveryMode?)n.GetIntegerValueOrDefault(); } },
-            { "mandatory", (a, n) => { a.Mandatory = n.GetBooleanValueOrDefault(); } },
+            { "priority", (a, n) => { a.Priority = n.GetIntegerValue(); } },
+            { "deliveryMode", (a, n) => { a.DeliveryMode = (DeliveryMode)n.GetIntegerValue(); } },
+            { "mandatory", (a, n) => { a.Mandatory = n.GetBooleanValue(); } },
             { "bcc", (a, n) => { a.Bcc = n.CreateSimpleList(s => s.GetScalarValue()); } },
-            { "timestamp", (a, n) => { a.Timestamp = n.GetBooleanValueOrDefault(); } },
-            { "ack", (a, n) => { a.Ack = n.GetBooleanValueOrDefault(); } },
+            { "timestamp", (a, n) => { a.Timestamp = n.GetBooleanValue(); } },
+            { "ack", (a, n) => { a.Ack = n.GetBooleanValue(); } },
         };
 
         /// <summary>
@@ -83,15 +83,15 @@
             }
 
             writer.WriteStartObject();
-            writer.WriteOptionalProperty<int>("expiration", (int)this.Expiration);
-            writer.WriteOptionalProperty("userId", this.UserId);
+            writer.WriteRequiredProperty<int>("expiration", (int)this.Expiration);
+            writer.WriteRequiredProperty("userId", this.UserId);
             writer.WriteOptionalCollection("cc", this.Cc, (w, s) => w.WriteValue(s));
-            writer.WriteOptionalProperty("priority", this.Priority);
-            writer.WriteOptionalProperty("deliveryMode", (int?)this.DeliveryMode);
-            writer.WriteOptionalProperty("mandatory", this.Mandatory);
+            writer.WriteRequiredProperty("priority", this.Priority);
+            writer.WriteRequiredProperty("deliveryMode", (int)this.DeliveryMode);
+            writer.WriteRequiredProperty("mandatory", this.Mandatory);
             writer.WriteOptionalCollection("bcc", this.Bcc, (w, s) => w.WriteValue(s));
-            writer.WriteOptionalProperty("timestamp", this.Timestamp);
-            writer.WriteOptionalProperty("ack", this.Ack);
+            writer.WriteRequiredProperty("timestamp", this.Timestamp);
+            writer.WriteRequiredProperty("ack", this.Ack);
             writer.WriteOptionalProperty(AsyncApiConstants.BindingVersion, this.BindingVersion);
             writer.WriteExtensions(this.Extensions);
             writer.WriteEndObject();
