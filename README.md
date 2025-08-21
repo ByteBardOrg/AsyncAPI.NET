@@ -21,8 +21,8 @@ Install the NuGet packages:
 [![Nuget](https://img.shields.io/nuget/vpre/ByteBard.AsyncAPI.NET?label=ByteBard.AsyncAPI.NET-Preview&style=for-the-badge)](https://www.nuget.org/packages/ByteBard.AsyncAPI.NET/)  
 
 ### ByteBard.AsyncAPI.Readers
-[![Nuget](https://img.shields.io/nuget/v/ByteBard.AsyncAPI.NET.Readers?label=ByteBard.AsyncAPI.Readers&style=for-the-badge)](https://www.nuget.org/packages/AsyncAPI.NET.Readers/)  
-[![Nuget](https://img.shields.io/nuget/vpre/ByteBard.AsyncAPI.NET.Readers?label=ByteBard.AsyncAPI.Readers-Preview&style=for-the-badge)](https://www.nuget.org/packages/AsyncAPI.NET.Readers/)  
+[![Nuget](https://img.shields.io/nuget/v/ByteBard.AsyncAPI.NET.Readers?label=ByteBard.AsyncAPI.Readers&style=for-the-badge)](https://www.nuget.org/packages/ByteBard.AsyncAPI.NET.Readers/)  
+[![Nuget](https://img.shields.io/nuget/vpre/ByteBard.AsyncAPI.NET.Readers?label=ByteBard.AsyncAPI.Readers-Preview&style=for-the-badge)](https://www.nuget.org/packages/ByteBard.AsyncAPI.NET.Readers/)  
 
 ### ByteBard.AsyncAPI.Bindings
 [![Nuget](https://img.shields.io/nuget/v/ByteBard.AsyncAPI.NET.Bindings?label=ByteBard.AsyncAPI.Bindings&style=for-the-badge)](https://www.nuget.org/packages/ByteBard.AsyncAPI.NET.Bindings/)  
