@@ -87,7 +87,7 @@
         public const string AdditionalProperties = "additionalProperties";
         public const string Format = "format";
         public const string Nullable = "nullable";
-        public const string Discriminator = "descriminator";
+        public const string Discriminator = "discriminator";
         public const string ReadOnly = "readOnly";
         public const string WriteOnly = "writeOnly";
         public const string Deprecated = "deprecated";
