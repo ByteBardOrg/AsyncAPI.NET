@@ -600,6 +600,102 @@ namespace ByteBard.AsyncAPI.Tests.Models
             diag.Errors.Should().BeEmpty();
             schema.Should().BeEquivalentTo(AdvancedSchemaNumber);
         }
+
+        [Test]
+        public void V2_Deserialize_WithOutOfRangeIntegers_HasError()
+        {
+            var input =
+                """
+                title: title1
+                type: string
+                maxLength: 10000000000000
+                minLength: 10000000000000
+                maxProperties: 10000000000000
+                minProperties: 10000000000000
+                maxItems: 10000000000000
+                minItems: 10000000000000
+                default: this is a test
+                nullable: true
+                externalDocs:
+                  url: http://example.com/externalDocs
+                """;
+
+            var schema = new AsyncApiStringReader().ReadFragment<AsyncApiJsonSchema>(input, AsyncApiVersion.AsyncApi2_0, out var diag);
+
+            diag.Errors.Should().HaveCount(6);
+        }
+
+        [Test]
+        public void V2_Deserialize_WithNegativeValues_HasError()
+        {
+            var input =
+                """
+                title: title1
+                type: string
+                maxLength: -22
+                minLength: -22
+                maxProperties: -22
+                minProperties: -22
+                maxItems: -22
+                minItems: -22
+                default: this is a test
+                nullable: true
+                externalDocs:
+                  url: http://example.com/externalDocs
+                """;
+
+            var schema = new AsyncApiStringReader().ReadFragment<AsyncApiJsonSchema>(input, AsyncApiVersion.AsyncApi2_0, out var diag);
+
+            diag.Errors.Should().HaveCount(6);
+        }
+
+        [Test]
+        public void V3_Deserialize_WithOutOfRangeIntegers_HasError()
+        {
+            var input =
+                """
+                title: title1
+                type: string
+                maxLength: 10000000000000
+                minLength: 10000000000000
+                maxProperties: 10000000000000
+                minProperties: 10000000000000
+                maxItems: 10000000000000
+                minItems: 10000000000000
+                default: this is a test
+                nullable: true
+                externalDocs:
+                  url: http://example.com/externalDocs
+                """;
+
+            var schema = new AsyncApiStringReader().ReadFragment<AsyncApiJsonSchema>(input, AsyncApiVersion.AsyncApi3_0, out var diag);
+
+            diag.Errors.Should().HaveCount(6);
+        }
+
+        [Test]
+        public void V3_Deserialize_WithNegativeValues_HasError()
+        {
+            var input =
+                """
+                title: title1
+                type: string
+                maxLength: -22
+                minLength: -22
+                maxProperties: -22
+                minProperties: -22
+                maxItems: -22
+                minItems: -22
+                default: this is a test
+                nullable: true
+                externalDocs:
+                  url: http://example.com/externalDocs
+                """;
+
+            var schema = new AsyncApiStringReader().ReadFragment<AsyncApiJsonSchema>(input, AsyncApiVersion.AsyncApi3_0, out var diag);
+
+            diag.Errors.Should().HaveCount(6);
+        }
         /// <summary>
         /// Regression test.
         /// Bug: Serializing properties multiple times - specifically Schema.Not was serialized into Not and Else.

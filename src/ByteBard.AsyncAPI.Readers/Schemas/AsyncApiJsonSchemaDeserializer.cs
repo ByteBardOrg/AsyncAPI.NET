@@ -1,10 +1,13 @@
 namespace ByteBard.AsyncAPI.Readers
 {
+    using System;
     using System.Collections.Generic;
     using System.Globalization;
+    using System.Runtime.CompilerServices;
     using ByteBard.AsyncAPI.Extensions;
     using ByteBard.AsyncAPI.Models;
     using ByteBard.AsyncAPI.Readers.ParseNodes;
+    using Exceptions;
 
     public class AsyncApiJsonSchemaDeserializer
     {
@@ -77,30 +80,30 @@ namespace ByteBard.AsyncAPI.Readers
                 }
             },
             {
-                "maxLength", (a, n) => { a.MaxLength = int.Parse(n.GetScalarValue(), n.Context.Settings.CultureInfo); }
+                "maxLength", (a, n) => { a.MaxLength = ParseInteger(n); }
             },
             {
-                "minLength", (a, n) => { a.MinLength = int.Parse(n.GetScalarValue(), n.Context.Settings.CultureInfo); }
+                "minLength", (a, n) => { a.MinLength = ParseInteger(n); }
             },
             {
                 "pattern", (a, n) => { a.Pattern = n.GetScalarValue(); }
             },
             {
-                "maxItems", (a, n) => { a.MaxItems = int.Parse(n.GetScalarValue(), n.Context.Settings.CultureInfo); }
+                "maxItems", (a, n) => { a.MaxItems = ParseInteger(n); }
             },
             {
-                "minItems", (a, n) => { a.MinItems = int.Parse(n.GetScalarValue(), n.Context.Settings.CultureInfo); }
+                "minItems", (a, n) => { a.MinItems = ParseInteger(n); }
             },
             {
                 "uniqueItems", (a, n) => { a.UniqueItems = bool.Parse(n.GetScalarValue()); }
             },
             {
                 "maxProperties",
-                (a, n) => { a.MaxProperties = int.Parse(n.GetScalarValue(), n.Context.Settings.CultureInfo); }
+                (a, n) => { a.MaxProperties = ParseInteger(n); }
             },
             {
                 "minProperties",
-                (a, n) => { a.MinProperties = int.Parse(n.GetScalarValue(), n.Context.Settings.CultureInfo); }
+                (a, n) => { a.MinProperties = ParseInteger(n); }
             },
             {
                 "enum", (a, n) => { a.Enum = n.CreateListOfAny(); }
@@ -211,6 +214,18 @@ namespace ByteBard.AsyncAPI.Readers
                 "nullable", (a, n) => { a.Nullable = n.GetBooleanValue(); }
             },
         };
+
+        private static int ParseInteger(ParseNode node)
+        {
+            try
+            {
+                return int.Parse(node.GetScalarValue(), node.Context.Settings.CultureInfo);
+            }
+            catch (Exception e)
+            {
+                throw new AsyncApiReaderException("The value is out of range.", node.Context);
+            }
+        }
 
         private static readonly PatternFieldMap<AsyncApiJsonSchema> schemaPatternFields =
             new()

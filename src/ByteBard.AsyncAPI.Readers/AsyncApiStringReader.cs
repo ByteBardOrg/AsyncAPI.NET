@@ -4,6 +4,7 @@ namespace ByteBard.AsyncAPI.Readers
     using ByteBard.AsyncAPI.Models;
     using ByteBard.AsyncAPI.Models.Interfaces;
     using ByteBard.AsyncAPI.Readers.Interface;
+    using Extensions;
 
     /// <summary>
     /// Service class for converting strings into AsyncApiDocument instances.

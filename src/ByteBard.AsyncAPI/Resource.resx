@@ -132,6 +132,9 @@
   <data name="Validation_FieldRequired" xml:space="preserve">
     <value>The field '{0}' in '{1}' object is REQUIRED.</value>
   </data>
+  <data name="Validation_MustBeNonNegative" xml:space="preserve">
+    <value>The field '{0}' must be non-negative.</value>
+  </data>
   <data name="Validation_KeyMustMatchRegularExpr" xml:space="preserve">
     <value>The key '{0}' in '{1}' MUST match the regular expression '{2}'.</value>
   </data>
