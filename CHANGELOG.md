@@ -1,3 +1,7 @@
+## [2.1.1](https://github.com/ByteBardOrg/AsyncAPI.NET/compare/v2.1.0...v2.1.1) (2025-08-28)
+### Bug Fixes
+* discriminator constant for writing specs. ([b9657e0](https://github.com/ByteBardOrg/AsyncAPI.NET/commit/b9657e0e8c0ad1e82d54c40cec1f34d50402e5e1))
+* large number parsing and add non-negative validation. ([cf9f212](https://github.com/ByteBardOrg/AsyncAPI.NET/commit/cf9f212e9e34c21eabfb2e5ada3949255950c205))
 # [2.1.0](https://github.com/ByteBardOrg/AsyncAPI.NET/compare/v2.0.1...v2.1.0) (2025-08-08)
 ### Bug Fixes
 * parameter reference resolution during V3 upgrade ([#15](https://github.com/ByteBardOrg/AsyncAPI.NET/issues/15)) ([ccd6ff3](https://github.com/ByteBardOrg/AsyncAPI.NET/commit/ccd6ff3a1e5359512ab12b9a8d1375049839571b))
