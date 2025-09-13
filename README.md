@@ -7,7 +7,9 @@ This is unfortunate, but after much back and not a lot of forth, I have decided 
 
 
 The AsyncAPI.NET SDK contains a useful object model for the AsyncAPI specification in .NET along with common serializers to extract raw AsyncAPI JSON and YAML documents from the model as well.
-V3 is currently in pre-release - so grab that if you need V3
+Full support for both 2.6 and 3.0.
+2.6 are 'upgraded' to 3.0 during deserialization and can be written back as 2.6 (see writing examples).
+  
 [CHANGELOG](https://github.com/ByteBardOrg/AsyncAPI.NET/blob/vnext/CHANGELOG.md)  
 [Wiki and getting started guide](https://github.com/ByteBardOrg/AsyncAPI.NET/wiki)
 
