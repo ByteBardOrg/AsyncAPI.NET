@@ -51,7 +51,7 @@
                             return File.OpenRead(uri.AbsolutePath);
                         case "http":
                         case "https":
-                            return HttpClient.GetStreamAsync(uri).GetAwaiter().GetResult();
+                            return await HttpClient.GetStreamAsync(uri);
                         default:
                             throw new ArgumentException("Unsupported scheme");
                     }
