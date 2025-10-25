@@ -15,20 +15,27 @@
         {
             try
             {
-                switch (uri.Scheme)
+                if (uri.IsAbsoluteUri && !string.IsNullOrEmpty(uri.Scheme))
                 {
-                    case "file":
-                        return File.OpenRead(uri.AbsolutePath);
-                    case "http":
-                    case "https":
-                        return HttpClient.GetStreamAsync(uri).GetAwaiter().GetResult();
-                    default:
-                        throw new ArgumentException("Unsupported scheme");
+                    switch (uri.Scheme.ToLowerInvariant())
+                    {
+                        case "file":
+                            return File.OpenRead(uri.AbsolutePath);
+                        case "http":
+                        case "https":
+                            return HttpClient.GetStreamAsync(uri).GetAwaiter().GetResult();
+                        default:
+                            throw new ArgumentException("Unsupported scheme");
+                    }
+                }
+                else
+                {
+                    return File.OpenRead(uri.OriginalString);
                 }
             }
             catch (Exception ex)
             {
-                throw new AsyncApiReaderException($"Something went wrong trying to fetch '{uri.OriginalString}. {ex.Message}'", ex);
+                throw new AsyncApiReaderException($"Something went wrong trying to fetch '{uri.OriginalString}'. {ex.Message}", ex);
             }
         }
 
@@ -36,15 +43,22 @@
         {
             try
             {
-                switch (uri.Scheme)
+                if (uri.IsAbsoluteUri && !string.IsNullOrEmpty(uri.Scheme))
                 {
-                    case "file":
-                        return File.OpenRead(uri.AbsolutePath);
-                    case "http":
-                    case "https":
-                        return await HttpClient.GetStreamAsync(uri);
-                    default:
-                        throw new ArgumentException("Unsupported scheme");
+                    switch (uri.Scheme.ToLowerInvariant())
+                    {
+                        case "file":
+                            return File.OpenRead(uri.AbsolutePath);
+                        case "http":
+                        case "https":
+                            return HttpClient.GetStreamAsync(uri).GetAwaiter().GetResult();
+                        default:
+                            throw new ArgumentException("Unsupported scheme");
+                    }
+                }
+                else
+                {
+                    return File.OpenRead(uri.OriginalString);
                 }
             }
             catch (Exception ex)
