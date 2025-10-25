@@ -15,7 +15,7 @@
         {
             try
             {
-                if (uri.IsAbsoluteUri && !string.IsNullOrEmpty(uri.Scheme))
+                if (uri.IsAbsoluteUri)
                 {
                     switch (uri.Scheme.ToLowerInvariant())
                     {
