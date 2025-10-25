@@ -48,7 +48,7 @@
                     switch (uri.Scheme.ToLowerInvariant())
                     {
                         case "file":
-                            return File.OpenRead(uri.AbsolutePath);
+                            return File.OpenRead(uri.LocalPath);
                         case "http":
                         case "https":
                             return await HttpClient.GetStreamAsync(uri);
