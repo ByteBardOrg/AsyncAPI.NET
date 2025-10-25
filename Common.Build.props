@@ -11,6 +11,10 @@
     <PackageTags>asyncapi .net openapi documentation</PackageTags>
     <PackageIcon>logo.png</PackageIcon>
     <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
+    <!-- Optional: Publish the repository URL in the built .nupkg (in the NuSpec <Repository> element) -->
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <!-- Recommended: Embed symbols containing Source Link in the main file (exe/dll) -->
+    <DebugType>embedded</DebugType>
   </PropertyGroup>
   <ItemGroup>
     <None Include="..\..\media\logo.png" Pack="true" PackagePath="\" />
