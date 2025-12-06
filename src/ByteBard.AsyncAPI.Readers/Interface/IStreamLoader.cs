@@ -6,8 +6,8 @@ namespace ByteBard.AsyncAPI.Readers.Interface
 
     public interface IStreamLoader
     {
-        Task<Stream> LoadAsync(Uri uri);
+        Task<Stream> LoadAsync(Uri baseUri, Uri uri);
 
-        Stream Load(Uri uri);
+        Stream Load(Uri baseUri, Uri uri);
     }
 }

@@ -525,7 +525,7 @@ namespace ByteBard.AsyncAPI.Tests
 
         private readonly string input;
 
-        public Stream Load(Uri uri)
+        public Stream Load(Uri baseUri, Uri uri)
         {
             var stream = new MemoryStream();
             var writer = new StreamWriter(stream);
@@ -535,9 +535,9 @@ namespace ByteBard.AsyncAPI.Tests
             return stream;
         }
 
-        public Task<Stream> LoadAsync(Uri uri)
+        public Task<Stream> LoadAsync(Uri baseUri, Uri uri)
         {
-            return Task.FromResult(this.Load(uri));
+            return Task.FromResult(this.Load(baseUri, uri));
         }
     }
 
@@ -564,7 +564,7 @@ namespace ByteBard.AsyncAPI.Tests
                 description: Light intensity measured in lumens.
             """;
 
-        public Stream Load(Uri uri)
+        public Stream Load(Uri baseUri, Uri uri)
         {
             var stream = new MemoryStream();
             var writer = new StreamWriter(stream);
@@ -581,9 +581,9 @@ namespace ByteBard.AsyncAPI.Tests
             return stream;
         }
 
-        public Task<Stream> LoadAsync(Uri uri)
+        public Task<Stream> LoadAsync(Uri baseUri, Uri uri)
         {
-            return Task.FromResult(this.Load(uri));
+            return Task.FromResult(this.Load(baseUri, uri));
         }
     }
 }

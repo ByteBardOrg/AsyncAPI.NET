@@ -11,7 +11,7 @@
     {
         private static readonly HttpClient HttpClient = new HttpClient();
 
-        public Stream Load(Uri uri)
+        public Stream Load(Uri baseUri, Uri uri)
         {
             try
             {
@@ -30,7 +30,7 @@
                 }
                 else
                 {
-                    return File.OpenRead(uri.OriginalString);
+                    return File.OpenRead(new Uri(baseUri, uri).LocalPath);
                 }
             }
             catch (Exception ex)
@@ -39,7 +39,7 @@
             }
         }
 
-        public async Task<Stream> LoadAsync(Uri uri)
+        public async Task<Stream> LoadAsync(Uri baseUri, Uri uri)
         {
             try
             {
@@ -58,7 +58,7 @@
                 }
                 else
                 {
-                    return File.OpenRead(uri.OriginalString);
+                    return File.OpenRead(new Uri(baseUri, uri).LocalPath);
                 }
             }
             catch (Exception ex)

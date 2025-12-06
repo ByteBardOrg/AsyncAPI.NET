@@ -280,7 +280,7 @@ namespace ByteBard.AsyncAPI.Readers
                 }
                 else
                 {
-                    stream = loader.Load(new Uri(reference.Reference.ExternalResource, UriKind.RelativeOrAbsolute));
+                    stream = loader.Load(this.settings.BaseUri, new Uri(reference.Reference.ExternalResource, UriKind.RelativeOrAbsolute));
                     this.context.Workspace.RegisterComponent(reference.Reference.ExternalResource, stream);
                 }
 
@@ -310,7 +310,7 @@ namespace ByteBard.AsyncAPI.Readers
                 }
                 else
                 {
-                    stream = await loader.LoadAsync(new Uri(reference.Reference.ExternalResource, UriKind.RelativeOrAbsolute));
+                    stream = await loader.LoadAsync(this.settings.BaseUri, new Uri(reference.Reference.ExternalResource, UriKind.RelativeOrAbsolute));
                     this.context.Workspace.RegisterComponent(reference.Reference.ExternalResource, stream);
                 }
 
