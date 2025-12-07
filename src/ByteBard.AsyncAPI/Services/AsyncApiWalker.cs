@@ -587,8 +587,15 @@ namespace ByteBard.AsyncAPI.Services
 
             this.visitor.Visit(reply);
 
-            this.Walk(reply.Address);
-            this.Walk(reply.Channel as IAsyncApiReferenceable);
+            if (reply.Address != null)
+            {
+                this.Walk(reply.Address);
+            }
+
+            if (reply.Channel != null)
+            {
+                this.Walk(reply.Channel as IAsyncApiReferenceable);
+            }
 
             foreach (var message in reply.Messages)
             {
