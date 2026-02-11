@@ -14,6 +14,7 @@ namespace ByteBard.AsyncAPI.Validations
         private readonly ValidationRuleSet ruleSet;
         private readonly IList<AsyncApiValidatorError> errors = new List<AsyncApiValidatorError>();
         private readonly IList<AsyncApiValidatorWarning> warnings = new List<AsyncApiValidatorWarning>();
+        private AsyncApiVersion? documentVersion;
 
         /// <summary>
         /// Create a vistor that will validate an AsyncApiDocument.
@@ -23,6 +24,7 @@ namespace ByteBard.AsyncAPI.Validations
         {
             this.ruleSet = ruleSet;
             this.RootDocument = rootDocument;
+            this.documentVersion = this.GetDocumentVersion();
         }
 
         public AsyncApiDocument RootDocument { get; }
@@ -198,11 +200,26 @@ namespace ByteBard.AsyncAPI.Validations
                 type = typeof(IAsyncApiReferenceable);
             }
 
-            var rules = this.ruleSet.FindRules(type);
+            var rules = this.ruleSet.FindRules(type, this.documentVersion);
             foreach (var rule in rules)
             {
                 rule.Evaluate(this as IValidationContext, item);
             }
+        }
+
+        private AsyncApiVersion? GetDocumentVersion()
+        {
+            if (this.RootDocument?.Asyncapi?.StartsWith("2") == true)
+            {
+                return AsyncApiVersion.AsyncApi2_0;
+            }
+
+            if (this.RootDocument?.Asyncapi?.StartsWith("3") == true)
+            {
+                return AsyncApiVersion.AsyncApi3_0;
+            }
+
+            return null;
         }
     }
 }

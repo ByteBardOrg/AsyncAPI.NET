@@ -31,6 +31,25 @@ namespace ByteBard.AsyncAPI.Validations
         }
 
         /// <summary>
+        /// Retrieve the rules that are related to a specific type and version.
+        /// </summary>
+        /// <param name="type">The type that is to be validated.</param>
+        /// <param name="version">The AsyncAPI version to filter rules by. If null, all rules are returned.</param>
+        /// <returns>Either the rules related to the type and version, or an empty list.</returns>
+        public IList<ValidationRule> FindRules(Type type, AsyncApiVersion? version)
+        {
+            var allRules = this.FindRules(type);
+            if (version == null)
+            {
+                return allRules;
+            }
+
+            return allRules.Where(r =>
+                r.ApplicableVersions == null ||
+                r.ApplicableVersions.Contains(version.Value)).ToList();
+        }
+
+        /// <summary>
         /// Gets the default validation rule sets.
         /// </summary>
         /// <remarks>
@@ -161,19 +180,25 @@ namespace ByteBard.AsyncAPI.Validations
             ValidationRuleSet ruleSet = new ValidationRuleSet();
             Type validationRuleType = typeof(ValidationRule);
 
-            IEnumerable<PropertyInfo> rules = typeof(ValidationRuleSet).Assembly.GetTypes()
+            IEnumerable<PropertyInfo> ruleProperties = typeof(ValidationRuleSet).Assembly.GetTypes()
                 .Where(t => t.IsClass
                             && t != typeof(object)
                             && t.GetCustomAttributes(typeof(AsyncApiRuleAttribute), false).Any())
                 .SelectMany(t2 => t2.GetProperties(BindingFlags.Static | BindingFlags.Public)
                                 .Where(p => validationRuleType.IsAssignableFrom(p.PropertyType)));
 
-            foreach (var property in rules)
+            foreach (var property in ruleProperties)
             {
                 var propertyValue = property.GetValue(null); // static property
                 ValidationRule rule = propertyValue as ValidationRule;
                 if (rule != null)
                 {
+                    var versionAttribute = property.GetCustomAttribute<AsyncApiVersionRuleAttribute>();
+                    if (versionAttribute != null)
+                    {
+                        rule.ApplicableVersions = versionAttribute.Versions;
+                    }
+
                     ruleSet.Add(rule);
                 }
             }
@@ -185,5 +210,16 @@ namespace ByteBard.AsyncAPI.Validations
     [AttributeUsage(AttributeTargets.Class, AllowMultiple = false, Inherited = false)]
     public class AsyncApiRuleAttribute : Attribute
     {
+    }
+
+    [AttributeUsage(AttributeTargets.Property, AllowMultiple = false)]
+    public class AsyncApiVersionRuleAttribute : Attribute
+    {
+        public AsyncApiVersion[] Versions { get; }
+
+        public AsyncApiVersionRuleAttribute(params AsyncApiVersion[] versions)
+        {
+            Versions = versions;
+        }
     }
 }
