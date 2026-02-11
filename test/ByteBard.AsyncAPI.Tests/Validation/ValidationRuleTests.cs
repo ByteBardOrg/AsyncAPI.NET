@@ -77,8 +77,10 @@ public class ValidationRuleTests
   [Test]
   public void VersionAwareRuleSet_V2Rule_DoesNotRunOnV3Document()
   {
-    // arrange
-    var document = new AsyncApiDocument { Asyncapi = "3.0.0", Info = new AsyncApiInfo { Title = "Test", Version = "1.0.0" } };
+   public void VersionAwareRuleSet_V2Rule_DoesNotRunOnV3Document()
+   {
+     // arrange
+     var ruleSet = ValidationRuleSet.GetDefaultRuleSet();
     var ruleSet = ValidationRuleSet.GetDefaultRuleSet();
 
     // act
