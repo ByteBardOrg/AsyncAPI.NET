@@ -35,7 +35,14 @@ namespace ByteBard.AsyncAPI.Bindings.Http
         {
             { "bindingVersion", (a, n) => { a.BindingVersion = n.GetScalarValue(); } },
             { "headers", (a, n) => { a.Headers = AsyncApiJsonSchemaDeserializer.LoadSchema(n); } },
-            { "statusCode", (a, n) => { a.StatusCode = (HttpStatusCode)int.Parse(n.GetScalarValue()); } },
+            { "statusCode", (a, n) =>
+                {
+                    if (int.TryParse(n.GetScalarValue(), out var code))
+                    {
+                        a.StatusCode = (HttpStatusCode)code;
+                    }
+                }
+            },
         };
 
         public override void SerializeV2(IAsyncApiWriter writer)
