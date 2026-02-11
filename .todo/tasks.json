@@ -1,0 +1,68 @@
+[
+  {
+    "id": "TASK_1",
+    "priority": "LOW",
+    "tags": [],
+    "title": "V3.1.0",
+    "description": "Ensure 3.1.0 compatibility ",
+    "status": "TODO",
+    "date": {
+      "date": {
+        "year": 2026,
+        "month": 2,
+        "day": 2
+      },
+      "time": {
+        "hour": 21,
+        "minute": 9,
+        "second": 46,
+        "nano": 727937352
+      }
+    },
+    "isImported": false
+  },
+  {
+    "id": "TASK_3",
+    "priority": "LOW",
+    "tags": [],
+    "title": "V2 channels must not be empty",
+    "description": "",
+    "status": "TODO",
+    "date": {
+      "date": {
+        "year": 2026,
+        "month": 2,
+        "day": 2
+      },
+      "time": {
+        "hour": 21,
+        "minute": 10,
+        "second": 2,
+        "nano": 977810510
+      }
+    },
+    "isImported": false
+  },
+  {
+    "id": "TASK_6",
+    "priority": "LOW",
+    "tags": [],
+    "title": "Bindings must work for v3 and v2",
+    "description": "",
+    "status": "TODO",
+    "date": {
+      "date": {
+        "year": 2026,
+        "month": 2,
+        "day": 2
+      },
+      "time": {
+        "hour": 21,
+        "minute": 10,
+        "second": 16,
+        "nano": 294662272
+      }
+    },
+    "isImported": false
+  }
+]

@@ -17,7 +17,7 @@
             // Arrange
             var expected =
                 """
-                asyncapi: 3.0.0
+                asyncapi: 3.1.0
                 info:
                   title: Streetlights Kafka API
                   version: 1.0.0
