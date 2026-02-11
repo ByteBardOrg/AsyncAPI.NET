@@ -147,7 +147,7 @@
             writer.WriteStartObject();
 
             // asyncApi
-            writer.WriteRequiredProperty(AsyncApiConstants.AsyncApi, "3.0.0");
+            writer.WriteRequiredProperty(AsyncApiConstants.AsyncApi, "3.1.0");
 
             // info
             writer.WriteRequiredObject(AsyncApiConstants.Info, this.Info, (w, i) => i.SerializeV3(w));
