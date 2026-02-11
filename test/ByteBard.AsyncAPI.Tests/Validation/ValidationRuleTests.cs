@@ -2,11 +2,105 @@
 
 using System.Linq;
 using FluentAssertions;
+using ByteBard.AsyncAPI.Models;
 using ByteBard.AsyncAPI.Readers;
+using ByteBard.AsyncAPI.Validations;
 using NUnit.Framework;
 
 public class ValidationRuleTests
 {
+  [Test]
+  public void V2_DocumentWithNoChannels_ShouldError()
+  {
+    // arrange
+    var input =
+      """
+      asyncapi: 2.6.0
+      info:
+        title: Chat Application
+        version: 1.0.0
+      """;
+
+    // act
+    new AsyncApiStringReader().Read(input, out var diagnostic);
+
+    // assert
+    diagnostic.Errors.Should().Contain(e => e.Message == "The field 'channels' in 'document' object is REQUIRED.");
+  }
+
+  [Test]
+  public void V2_DocumentWithChannels_ShouldPass()
+  {
+    // arrange
+    var input =
+      """
+      asyncapi: 2.6.0
+      info:
+        title: Chat Application
+        version: 1.0.0
+      channels:
+        chat:
+          publish:
+            operationId: onMessageReceived
+            message:
+              name: text
+              payload:
+                type: string
+      """;
+
+    // act
+    new AsyncApiStringReader().Read(input, out var diagnostic);
+
+    // assert
+    diagnostic.Errors.Should().NotContain(e => e.Message.Contains("channels"));
+  }
+
+  [Test]
+  public void V3_DocumentWithNoChannels_ShouldPass()
+  {
+    // arrange
+    var input =
+      """
+      asyncapi: 3.0.0
+      info:
+        title: Chat Application
+        version: 1.0.0
+      """;
+
+    // act
+    new AsyncApiStringReader().Read(input, out var diagnostic);
+
+    // assert
+    diagnostic.Errors.Should().NotContain(e => e.Message.Contains("channels") && e.Message.Contains("REQUIRED"));
+  }
+
+  [Test]
+  public void VersionAwareRuleSet_V2Rule_DoesNotRunOnV3Document()
+  {
+    // arrange
+    var document = new AsyncApiDocument { Asyncapi = "3.0.0", Info = new AsyncApiInfo { Title = "Test", Version = "1.0.0" } };
+    var ruleSet = ValidationRuleSet.GetDefaultRuleSet();
+
+    // act
+    var rules = ruleSet.FindRules(typeof(AsyncApiDocument), AsyncApiVersion.AsyncApi3_0);
+
+    // assert
+    rules.Should().NotContain(r => r.ApplicableVersions != null && r.ApplicableVersions.Contains(AsyncApiVersion.AsyncApi2_0) && !r.ApplicableVersions.Contains(AsyncApiVersion.AsyncApi3_0));
+  }
+
+  [Test]
+  public void VersionAwareRuleSet_V3Rule_DoesNotRunOnV2Document()
+  {
+    // arrange
+    var ruleSet = ValidationRuleSet.GetDefaultRuleSet();
+
+    // act
+    var rules = ruleSet.FindRules(typeof(AsyncApiOperation), AsyncApiVersion.AsyncApi2_0);
+
+    // assert
+    rules.Should().NotContain(r => r.ApplicableVersions != null && r.ApplicableVersions.Contains(AsyncApiVersion.AsyncApi3_0) && !r.ApplicableVersions.Contains(AsyncApiVersion.AsyncApi2_0));
+  }
+
   [Test]
   public void V2_OperationId_WithNonUniqueKey_DiagnosticsError()
   {

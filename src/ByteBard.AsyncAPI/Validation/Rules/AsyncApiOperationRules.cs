@@ -10,6 +10,7 @@ namespace ByteBard.AsyncAPI.Validation.Rules
     [AsyncApiRule]
     public static class AsyncApiOperationRules
     {
+        [AsyncApiVersionRule(AsyncApiVersion.AsyncApi3_0)]
         public static ValidationRule<AsyncApiOperation> OperationRequiredFields =>
             new ValidationRule<AsyncApiOperation>(
                 (context, operation) =>
@@ -35,6 +36,7 @@ namespace ByteBard.AsyncAPI.Validation.Rules
                     context.Exit();
                 });
 
+        [AsyncApiVersionRule(AsyncApiVersion.AsyncApi3_0)]
         public static ValidationRule<AsyncApiOperation> OperationChannelReference =>
             new ValidationRule<AsyncApiOperation>(
                 (context, operation) =>
@@ -56,6 +58,7 @@ namespace ByteBard.AsyncAPI.Validation.Rules
                     }
                 });
 
+        [AsyncApiVersionRule(AsyncApiVersion.AsyncApi3_0)]
         public static ValidationRule<AsyncApiOperation> OperationMessages =>
             new ValidationRule<AsyncApiOperation>(
                 (context, operation) =>

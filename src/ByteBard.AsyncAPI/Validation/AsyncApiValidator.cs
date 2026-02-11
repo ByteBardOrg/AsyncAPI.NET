@@ -198,11 +198,27 @@ namespace ByteBard.AsyncAPI.Validations
                 type = typeof(IAsyncApiReferenceable);
             }
 
-            var rules = this.ruleSet.FindRules(type);
+            var version = this.GetDocumentVersion();
+            var rules = this.ruleSet.FindRules(type, version);
             foreach (var rule in rules)
             {
                 rule.Evaluate(this as IValidationContext, item);
             }
+        }
+
+        private AsyncApiVersion? GetDocumentVersion()
+        {
+            if (this.RootDocument?.Asyncapi?.StartsWith("2") == true)
+            {
+                return AsyncApiVersion.AsyncApi2_0;
+            }
+
+            if (this.RootDocument?.Asyncapi?.StartsWith("3") == true)
+            {
+                return AsyncApiVersion.AsyncApi3_0;
+            }
+
+            return null;
         }
     }
 }

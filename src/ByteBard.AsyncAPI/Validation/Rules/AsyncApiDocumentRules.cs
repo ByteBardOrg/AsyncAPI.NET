@@ -1,4 +1,4 @@
-﻿namespace ByteBard.AsyncAPI.Validation.Rules
+namespace ByteBard.AsyncAPI.Validation.Rules
 {
     using System;
     using System.Collections.Generic;
@@ -73,6 +73,22 @@
                                 "ServerKeys",
                                 string.Format(Resource.Validation_KeyMustMatchRegularExpr, key, "servers", keyRegex.ToString()));
                         }
+                    }
+
+                    context.Exit();
+                });
+
+        [AsyncApiVersionRule(AsyncApiVersion.AsyncApi2_0)]
+        public static ValidationRule<AsyncApiDocument> V2ChannelsRequired =>
+            new ValidationRule<AsyncApiDocument>(
+                (context, document) =>
+                {
+                    context.Enter("channels");
+                    if (document.Channels == null || document.Channels.Count == 0)
+                    {
+                        context.CreateError(
+                                nameof(DocumentRequiredFields),
+                                string.Format(Resource.Validation_FieldRequired, "channels", "document"));
                     }
 
                     context.Exit();
