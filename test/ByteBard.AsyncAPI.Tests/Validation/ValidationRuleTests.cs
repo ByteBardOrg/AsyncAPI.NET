@@ -77,10 +77,7 @@ public class ValidationRuleTests
   [Test]
   public void VersionAwareRuleSet_V2Rule_DoesNotRunOnV3Document()
   {
-   public void VersionAwareRuleSet_V2Rule_DoesNotRunOnV3Document()
-   {
-     // arrange
-     var ruleSet = ValidationRuleSet.GetDefaultRuleSet();
+    // arrange
     var ruleSet = ValidationRuleSet.GetDefaultRuleSet();
 
     // act
