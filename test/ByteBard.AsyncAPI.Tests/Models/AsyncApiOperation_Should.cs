@@ -238,6 +238,7 @@ namespace ByteBard.AsyncAPI.Tests.Models
         [Test]
         public void V2_AsyncApiOperation_WithBindings_Serializes()
         {
+            // Arrange
             var expected =
                 """
                 bindings:
@@ -246,6 +247,7 @@ namespace ByteBard.AsyncAPI.Tests.Models
                     method: PUT
                     query:
                       description: some query
+                    bindingVersion: 0.2.0
                   kafka:
                     groupId:
                       description: some Id
@@ -255,12 +257,12 @@ namespace ByteBard.AsyncAPI.Tests.Models
 
             var operation = new AsyncApiOperation
             {
+                Action = AsyncApiAction.Send,
                 Bindings = new AsyncApiBindings<IOperationBinding>
                 {
                     {
                         new HttpOperationBinding
                         {
-                            Type = HttpOperationBinding.HttpOperationType.Request,
                             Method = "PUT",
                             Query = new AsyncApiJsonSchema
                             {
@@ -284,6 +286,7 @@ namespace ByteBard.AsyncAPI.Tests.Models
                 },
             };
 
+            // Act
             var actual = operation.SerializeAsYaml(AsyncApiVersion.AsyncApi2_0);
 
             // Assert

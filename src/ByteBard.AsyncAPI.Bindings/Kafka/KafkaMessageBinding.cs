@@ -35,6 +35,16 @@
         /// The version of this binding. If omitted, "latest" MUST be assumed.
         /// </summary>
 
+        public override void SerializeV2(IAsyncApiWriter writer)
+        {
+            this.SerializeV3(writer);
+        }
+
+        public override void SerializeV3(IAsyncApiWriter writer)
+        {
+            this.SerializeProperties(writer);
+        }
+
         public override void SerializeProperties(IAsyncApiWriter writer)
         {
             if (writer is null)
@@ -53,12 +63,6 @@
 
             writer.WriteEndObject();
         }
-
-        /// <summary>
-        /// Serializes the v2.
-        /// </summary>
-        /// <param name="writer">The writer.</param>
-        /// <exception cref="ArgumentNullException">writer.</exception>
 
         public override string BindingKey => "kafka";
 

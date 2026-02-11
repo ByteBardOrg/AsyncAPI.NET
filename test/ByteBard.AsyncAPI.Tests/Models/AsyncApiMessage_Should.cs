@@ -282,6 +282,7 @@
                       examples:
                         - cKey: c
                           dKey: 1
+                    bindingVersion: 0.2.0
                 examples:
                   - payload:
                       PropA: a
@@ -379,6 +380,7 @@
                     {
                         "http", new HttpMessageBinding
                         {
+                            BindingVersion = "0.2.0",
                             Headers = new AsyncApiJsonSchema
                             {
                                 Title = "SchemaTitle",

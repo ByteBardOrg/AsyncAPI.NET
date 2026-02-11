@@ -10,8 +10,17 @@ namespace ByteBard.AsyncAPI.Bindings.Http
     /// <summary>
     /// Binding class for http operations.
     /// </summary>
+    /// <remarks>
+    /// The 'type' field exists in AsyncAPI V2 but is removed in V3 (inferred from operation action).
+    /// </remarks>
     public class HttpOperationBinding : OperationBinding<HttpOperationBinding>
     {
+        private const string V2BindingVersion = "0.2.0";
+        private const string V3BindingVersion = "0.3.0";
+
+        /// <summary>
+        /// Represents the HTTP operation type (used in V2 serialization).
+        /// </summary>
         public enum HttpOperationType
         {
             [Display("request")]
@@ -22,12 +31,7 @@ namespace ByteBard.AsyncAPI.Bindings.Http
         }
 
         /// <summary>
-        /// REQUIRED. Type of operation. Its value MUST be either request or response.
-        /// </summary>
-        public HttpOperationType? Type { get; set; }
-
-        /// <summary>
-        /// When type is request, this is the HTTP method, otherwise it MUST be ignored. Its value MUST be one of GET, POST, PUT, PATCH, DELETE, HEAD, OPTIONS, CONNECT, and TRACE.
+        /// The HTTP method, e.g. GET, POST, PUT, PATCH, DELETE, HEAD, OPTIONS, CONNECT, and TRACE.
         /// </summary>
         public string Method { get; set; }
 
@@ -36,10 +40,16 @@ namespace ByteBard.AsyncAPI.Bindings.Http
         /// </summary>
         public AsyncApiJsonSchema Query { get; set; }
 
-        /// <summary>
-        /// Serialize to AsyncAPI V2 document without using reference.
-        /// </summary>
-        public override void SerializeProperties(IAsyncApiWriter writer)
+        public override string BindingKey => "http";
+
+        protected override FixedFieldMap<HttpOperationBinding> FixedFieldMap => new()
+        {
+            { "bindingVersion", (a, n) => { a.BindingVersion = n.GetScalarValue(); } },
+            { "method", (a, n) => { a.Method = n.GetScalarValue(); } },
+            { "query", (a, n) => { a.Query = AsyncApiJsonSchemaDeserializer.LoadSchema(n); } },
+        };
+
+        public override void SerializeV2(IAsyncApiWriter writer)
         {
             if (writer is null)
             {
@@ -48,22 +58,50 @@ namespace ByteBard.AsyncAPI.Bindings.Http
 
             writer.WriteStartObject();
 
-            writer.WriteRequiredProperty(AsyncApiConstants.Type, this.Type.GetDisplayName());
+            var typeValue = this.InferTypeFromContext(writer);
+            if (typeValue.HasValue)
+            {
+                writer.WriteRequiredProperty(AsyncApiConstants.Type, typeValue.GetDisplayName());
+            }
+
             writer.WriteOptionalProperty(AsyncApiConstants.Method, this.Method);
             writer.WriteOptionalObject(AsyncApiConstants.Query, this.Query, (w, h) => h.SerializeV2(w));
-            writer.WriteOptionalProperty(AsyncApiConstants.BindingVersion, this.BindingVersion);
+            writer.WriteOptionalProperty(AsyncApiConstants.BindingVersion, this.BindingVersion ?? V2BindingVersion);
             writer.WriteExtensions(this.Extensions);
             writer.WriteEndObject();
         }
 
-        protected override FixedFieldMap<HttpOperationBinding> FixedFieldMap => new()
+        public override void SerializeV3(IAsyncApiWriter writer)
         {
-            { "bindingVersion", (a, n) => { a.BindingVersion = n.GetScalarValue(); } },
-            { "type", (a, n) => { a.Type = n.GetScalarValue().GetEnumFromDisplayName<HttpOperationType>(); } },
-            { "method", (a, n) => { a.Method = n.GetScalarValue(); } },
-            { "query", (a, n) => { a.Query = AsyncApiJsonSchemaDeserializer.LoadSchema(n); } },
-        };
+            if (writer is null)
+            {
+                throw new ArgumentNullException(nameof(writer));
+            }
 
-        public override string BindingKey => "http";
+            writer.WriteStartObject();
+            writer.WriteOptionalProperty(AsyncApiConstants.Method, this.Method);
+            writer.WriteOptionalObject(AsyncApiConstants.Query, this.Query, (w, h) => h.SerializeV3(w));
+            writer.WriteOptionalProperty(AsyncApiConstants.BindingVersion, this.BindingVersion ?? V3BindingVersion);
+            writer.WriteExtensions(this.Extensions);
+            writer.WriteEndObject();
+        }
+
+        public override void SerializeProperties(IAsyncApiWriter writer)
+        {
+            this.SerializeV3(writer);
+        }
+
+        private HttpOperationType? InferTypeFromContext(IAsyncApiWriter writer)
+        {
+            var parentOperation = writer.Workspace?.GetSerializationContext<AsyncApiOperation>();
+            if (parentOperation == null)
+            {
+                return null;
+            }
+
+            return parentOperation.Action == AsyncApiAction.Send
+                ? HttpOperationType.Request
+                : HttpOperationType.Response;
+        }
     }
 }

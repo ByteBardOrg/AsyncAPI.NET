@@ -1208,6 +1208,7 @@ namespace ByteBard.AsyncAPI.Tests
                           http:
                             headers:
                               description: this mah binding
+                            bindingVersion: 0.2.0
                           kafka:
                             key:
                               description: this mah other binding
