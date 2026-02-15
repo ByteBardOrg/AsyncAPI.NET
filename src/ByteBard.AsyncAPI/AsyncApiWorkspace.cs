@@ -3,6 +3,7 @@
     using System;
     using System.Collections.Generic;
     using System.IO;
+    using System.Linq;
     using ByteBard.AsyncAPI.Models;
     using ByteBard.AsyncAPI.Models.Interfaces;
 
@@ -12,6 +13,23 @@
         private readonly Dictionary<Uri, IAsyncApiSerializable> resolvedReferenceRegistry = new();
 
         public AsyncApiDocument RootDocument { get; private set; }
+
+        /// <summary>
+        /// Stack for tracking parent context during serialization.
+        /// Allows bindings to access their parent operation, channel, or message.
+        /// </summary>
+        public Stack<object> SerializationContext { get; } = new();
+
+        /// <summary>
+        /// Gets the first item of the specified type from the serialization context.
+        /// </summary>
+        /// <typeparam name="T">The type to find in the context.</typeparam>
+        /// <returns>The first matching item, or default if not found.</returns>
+        public T GetSerializationContext<T>()
+            where T : class
+        {
+            return this.SerializationContext.OfType<T>().FirstOrDefault();
+        }
 
         public void RegisterComponents(AsyncApiDocument document)
         {

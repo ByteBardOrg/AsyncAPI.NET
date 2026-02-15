@@ -30,9 +30,16 @@ namespace ByteBard.AsyncAPI.Bindings.Kafka
             { "clientId", (a, n) => { a.ClientId = AsyncApiJsonSchemaDeserializer.LoadSchema(n); } },
         };
 
-        /// <summary>
-        /// Serialize to AsyncAPI V2 document without using reference.
-        /// </summary>
+        public override void SerializeV2(IAsyncApiWriter writer)
+        {
+            this.SerializeV3(writer);
+        }
+
+        public override void SerializeV3(IAsyncApiWriter writer)
+        {
+            this.SerializeProperties(writer);
+        }
+
         public override void SerializeProperties(IAsyncApiWriter writer)
         {
             if (writer is null)

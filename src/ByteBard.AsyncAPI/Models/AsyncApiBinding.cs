@@ -13,25 +13,9 @@
 
         public string BindingVersion { get; set; }
 
-        public void SerializeV2(IAsyncApiWriter writer)
-        {
-            this.SerializeCore(writer);
-        }
+        public abstract void SerializeV2(IAsyncApiWriter writer);
 
-        public void SerializeV3(IAsyncApiWriter writer)
-        {
-            this.SerializeCore(writer);
-        }
-
-        private void SerializeCore(IAsyncApiWriter writer)
-        {
-            if (writer is null)
-            {
-                throw new ArgumentNullException(nameof(writer));
-            }
-
-            this.SerializeProperties(writer);
-        }
+        public abstract void SerializeV3(IAsyncApiWriter writer);
 
         public abstract void SerializeProperties(IAsyncApiWriter writer);
     }

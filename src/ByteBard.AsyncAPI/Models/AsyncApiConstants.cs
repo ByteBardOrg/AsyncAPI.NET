@@ -114,6 +114,7 @@
         public const string SchemaFormat = "schemaFormat";
         public const string ContentType = "contentType";
         public const string BindingVersion = "bindingVersion";
+        public const string StatusCode = "statusCode";
         public const string Key = "key";
         public const string Method = "method";
         public const string SchemaIdPayloadEncoding = "schemaIdPayloadEncoding";

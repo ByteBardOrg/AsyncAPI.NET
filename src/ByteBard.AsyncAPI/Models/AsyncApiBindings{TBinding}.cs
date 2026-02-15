@@ -13,16 +13,6 @@
 
         public virtual void SerializeV2(IAsyncApiWriter writer)
         {
-            this.SerializeCore(writer);
-        }
-
-        public virtual void SerializeV3(IAsyncApiWriter writer)
-        {
-            this.SerializeCore(writer);
-        }
-
-        private void SerializeCore(IAsyncApiWriter writer)
-        {
             if (writer is null)
             {
                 throw new ArgumentNullException(nameof(writer));
@@ -38,6 +28,29 @@
                 writer.WritePropertyName(bindingType);
 
                 bindingValue.SerializeV2(writer);
+            }
+
+            writer.WriteExtensions(this.Extensions);
+            writer.WriteEndObject();
+        }
+
+        public virtual void SerializeV3(IAsyncApiWriter writer)
+        {
+            if (writer is null)
+            {
+                throw new ArgumentNullException(nameof(writer));
+            }
+
+            writer.WriteStartObject();
+
+            foreach (var binding in this)
+            {
+                var bindingType = binding.Key;
+                var bindingValue = binding.Value;
+
+                writer.WritePropertyName(bindingType);
+
+                bindingValue.SerializeV3(writer);
             }
 
             writer.WriteExtensions(this.Extensions);

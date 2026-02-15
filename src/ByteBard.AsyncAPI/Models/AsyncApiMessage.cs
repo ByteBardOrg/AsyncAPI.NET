@@ -88,25 +88,33 @@
                 throw new ArgumentNullException(nameof(writer));
             }
 
-            writer.WriteStartObject();
-            writer.WriteOptionalObject(AsyncApiConstants.Headers, this.Headers, (w, h) => h.Schema.SerializeV2(w));
-            writer.WriteOptionalObject(AsyncApiConstants.Payload, this.Payload, (w, p) => p.SerializeV2(w));
-            writer.WriteOptionalObject(AsyncApiConstants.CorrelationId, this.CorrelationId, (w, c) => c.SerializeV2(w));
-            writer.WriteOptionalProperty(AsyncApiConstants.SchemaFormat, this.Payload?.SchemaFormat);
-            writer.WriteOptionalProperty(AsyncApiConstants.ContentType, this.ContentType);
-            writer.WriteOptionalProperty(AsyncApiConstants.Name, this.Name);
-            writer.WriteOptionalProperty(AsyncApiConstants.Title, this.Title);
-            writer.WriteOptionalProperty(AsyncApiConstants.Summary, this.Summary);
-            writer.WriteOptionalProperty(AsyncApiConstants.Description, this.Description);
-            writer.WriteOptionalCollection(AsyncApiConstants.Tags, this.Tags, (w, t) => t.SerializeV2(w));
-            writer.WriteOptionalObject(AsyncApiConstants.ExternalDocs, this.ExternalDocs, (w, e) => e.SerializeV2(w));
+            writer.Workspace?.SerializationContext.Push(this);
+            try
+            {
+                writer.WriteStartObject();
+                writer.WriteOptionalObject(AsyncApiConstants.Headers, this.Headers, (w, h) => h.Schema.SerializeV2(w));
+                writer.WriteOptionalObject(AsyncApiConstants.Payload, this.Payload, (w, p) => p.SerializeV2(w));
+                writer.WriteOptionalObject(AsyncApiConstants.CorrelationId, this.CorrelationId, (w, c) => c.SerializeV2(w));
+                writer.WriteOptionalProperty(AsyncApiConstants.SchemaFormat, this.Payload?.SchemaFormat);
+                writer.WriteOptionalProperty(AsyncApiConstants.ContentType, this.ContentType);
+                writer.WriteOptionalProperty(AsyncApiConstants.Name, this.Name);
+                writer.WriteOptionalProperty(AsyncApiConstants.Title, this.Title);
+                writer.WriteOptionalProperty(AsyncApiConstants.Summary, this.Summary);
+                writer.WriteOptionalProperty(AsyncApiConstants.Description, this.Description);
+                writer.WriteOptionalCollection(AsyncApiConstants.Tags, this.Tags, (w, t) => t.SerializeV2(w));
+                writer.WriteOptionalObject(AsyncApiConstants.ExternalDocs, this.ExternalDocs, (w, e) => e.SerializeV2(w));
 
-            writer.WriteOptionalObject(AsyncApiConstants.Bindings, this.Bindings, (w, t) => t.SerializeV2(w));
-            writer.WriteOptionalCollection(AsyncApiConstants.Examples, this.Examples, (w, e) => e.SerializeV2(w));
+                writer.WriteOptionalObject(AsyncApiConstants.Bindings, this.Bindings, (w, t) => t.SerializeV2(w));
+                writer.WriteOptionalCollection(AsyncApiConstants.Examples, this.Examples, (w, e) => e.SerializeV2(w));
 
-            writer.WriteOptionalCollection(AsyncApiConstants.Traits, this.Traits, (w, t) => t.SerializeV2(w));
-            writer.WriteExtensions(this.Extensions);
-            writer.WriteEndObject();
+                writer.WriteOptionalCollection(AsyncApiConstants.Traits, this.Traits, (w, t) => t.SerializeV2(w));
+                writer.WriteExtensions(this.Extensions);
+                writer.WriteEndObject();
+            }
+            finally
+            {
+                writer.Workspace?.SerializationContext.Pop();
+            }
         }
 
         public virtual void SerializeV3(IAsyncApiWriter writer)
@@ -116,24 +124,32 @@
                 throw new ArgumentNullException(nameof(writer));
             }
 
-            writer.WriteStartObject();
-            writer.WriteOptionalObject(AsyncApiConstants.Headers, this.Headers, (w, h) => h.SerializeV3(w));
-            writer.WriteOptionalObject(AsyncApiConstants.Payload, this.Payload, (w, p) => p.SerializeV3(w));
-            writer.WriteOptionalObject(AsyncApiConstants.CorrelationId, this.CorrelationId, (w, c) => c.SerializeV3(w));
-            writer.WriteOptionalProperty(AsyncApiConstants.ContentType, this.ContentType);
-            writer.WriteOptionalProperty(AsyncApiConstants.Name, this.Name);
-            writer.WriteOptionalProperty(AsyncApiConstants.Title, this.Title);
-            writer.WriteOptionalProperty(AsyncApiConstants.Summary, this.Summary);
-            writer.WriteOptionalProperty(AsyncApiConstants.Description, this.Description);
-            writer.WriteOptionalCollection(AsyncApiConstants.Tags, this.Tags, (w, t) => t.SerializeV3(w));
-            writer.WriteOptionalObject(AsyncApiConstants.ExternalDocs, this.ExternalDocs, (w, e) => e.SerializeV3(w));
+            writer.Workspace?.SerializationContext.Push(this);
+            try
+            {
+                writer.WriteStartObject();
+                writer.WriteOptionalObject(AsyncApiConstants.Headers, this.Headers, (w, h) => h.SerializeV3(w));
+                writer.WriteOptionalObject(AsyncApiConstants.Payload, this.Payload, (w, p) => p.SerializeV3(w));
+                writer.WriteOptionalObject(AsyncApiConstants.CorrelationId, this.CorrelationId, (w, c) => c.SerializeV3(w));
+                writer.WriteOptionalProperty(AsyncApiConstants.ContentType, this.ContentType);
+                writer.WriteOptionalProperty(AsyncApiConstants.Name, this.Name);
+                writer.WriteOptionalProperty(AsyncApiConstants.Title, this.Title);
+                writer.WriteOptionalProperty(AsyncApiConstants.Summary, this.Summary);
+                writer.WriteOptionalProperty(AsyncApiConstants.Description, this.Description);
+                writer.WriteOptionalCollection(AsyncApiConstants.Tags, this.Tags, (w, t) => t.SerializeV3(w));
+                writer.WriteOptionalObject(AsyncApiConstants.ExternalDocs, this.ExternalDocs, (w, e) => e.SerializeV3(w));
 
-            writer.WriteOptionalObject(AsyncApiConstants.Bindings, this.Bindings, (w, t) => t.SerializeV3(w));
-            writer.WriteOptionalCollection(AsyncApiConstants.Examples, this.Examples, (w, e) => e.SerializeV3(w));
+                writer.WriteOptionalObject(AsyncApiConstants.Bindings, this.Bindings, (w, t) => t.SerializeV3(w));
+                writer.WriteOptionalCollection(AsyncApiConstants.Examples, this.Examples, (w, e) => e.SerializeV3(w));
 
-            writer.WriteOptionalCollection(AsyncApiConstants.Traits, this.Traits, (w, t) => t.SerializeV3(w));
-            writer.WriteExtensions(this.Extensions);
-            writer.WriteEndObject();
+                writer.WriteOptionalCollection(AsyncApiConstants.Traits, this.Traits, (w, t) => t.SerializeV3(w));
+                writer.WriteExtensions(this.Extensions);
+                writer.WriteEndObject();
+            }
+            finally
+            {
+                writer.Workspace?.SerializationContext.Pop();
+            }
         }
     }
 }

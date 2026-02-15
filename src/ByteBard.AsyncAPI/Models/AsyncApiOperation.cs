@@ -80,33 +80,41 @@
                 throw new ArgumentNullException(nameof(writer));
             }
 
-            writer.WriteStartObject();
-
-            // writer.WriteOptionalProperty(AsyncApiConstants.OperationId, this.OperationId);
-            writer.WriteOptionalProperty(AsyncApiConstants.Summary, this.Summary);
-            writer.WriteOptionalProperty(AsyncApiConstants.Description, this.Description);
-            writer.WriteOptionalCollection(AsyncApiConstants.Security, this.Security, (w, t) => this.SerializeAsSecurityRequirement(t, w));
-            writer.WriteOptionalCollection(AsyncApiConstants.Tags, this.Tags, (w, t) => t.SerializeV2(w));
-            writer.WriteOptionalObject(AsyncApiConstants.ExternalDocs, this.ExternalDocs, (w, e) => e.SerializeV2(w));
-
-            writer.WriteOptionalObject(AsyncApiConstants.Bindings, this.Bindings, (w, t) => t.SerializeV2(w));
-            writer.WriteOptionalCollection(AsyncApiConstants.Traits, this.Traits, (w, t) => t.SerializeV2(w));
-            IEnumerable<AsyncApiMessage> messages = this.Messages.Any() ? this.Messages : this.Channel?.Messages.Values;
-
-            if (messages?.Count() > 1)
+            writer.Workspace?.SerializationContext.Push(this);
+            try
             {
-                writer.WritePropertyName(AsyncApiConstants.Message);
                 writer.WriteStartObject();
-                writer.WriteOptionalCollection(AsyncApiConstants.OneOf, messages, (w, t) => t.SerializeV2(w));
+
+                // writer.WriteOptionalProperty(AsyncApiConstants.OperationId, this.OperationId);
+                writer.WriteOptionalProperty(AsyncApiConstants.Summary, this.Summary);
+                writer.WriteOptionalProperty(AsyncApiConstants.Description, this.Description);
+                writer.WriteOptionalCollection(AsyncApiConstants.Security, this.Security, (w, t) => this.SerializeAsSecurityRequirement(t, w));
+                writer.WriteOptionalCollection(AsyncApiConstants.Tags, this.Tags, (w, t) => t.SerializeV2(w));
+                writer.WriteOptionalObject(AsyncApiConstants.ExternalDocs, this.ExternalDocs, (w, e) => e.SerializeV2(w));
+
+                writer.WriteOptionalObject(AsyncApiConstants.Bindings, this.Bindings, (w, t) => t.SerializeV2(w));
+                writer.WriteOptionalCollection(AsyncApiConstants.Traits, this.Traits, (w, t) => t.SerializeV2(w));
+                IEnumerable<AsyncApiMessage> messages = this.Messages.Any() ? this.Messages : this.Channel?.Messages.Values;
+
+                if (messages?.Count() > 1)
+                {
+                    writer.WritePropertyName(AsyncApiConstants.Message);
+                    writer.WriteStartObject();
+                    writer.WriteOptionalCollection(AsyncApiConstants.OneOf, messages, (w, t) => t.SerializeV2(w));
+                    writer.WriteEndObject();
+                }
+                else
+                {
+                    writer.WriteOptionalObject(AsyncApiConstants.Message, messages?.FirstOrDefault(), (w, m) => m.SerializeV2(w));
+                }
+
+                writer.WriteExtensions(this.Extensions);
                 writer.WriteEndObject();
             }
-            else
+            finally
             {
-                writer.WriteOptionalObject(AsyncApiConstants.Message, messages?.FirstOrDefault(), (w, m) => m.SerializeV2(w));
+                writer.Workspace?.SerializationContext.Pop();
             }
-
-            writer.WriteExtensions(this.Extensions);
-            writer.WriteEndObject();
         }
 
         public virtual void SerializeV3(IAsyncApiWriter writer)
@@ -116,21 +124,29 @@
                 throw new ArgumentNullException(nameof(writer));
             }
 
-            writer.WriteStartObject();
-            writer.WriteRequiredProperty(AsyncApiConstants.Action, this.Action.GetDisplayName());
-            writer.WriteRequiredObject(AsyncApiConstants.Channel, this.Channel, (w, c) => c.Reference.SerializeV3(w));
-            writer.WriteOptionalProperty(AsyncApiConstants.Title, this.Title);
-            writer.WriteOptionalProperty(AsyncApiConstants.Summary, this.Summary);
-            writer.WriteOptionalProperty(AsyncApiConstants.Description, this.Description);
-            writer.WriteOptionalCollection(AsyncApiConstants.Security, this.Security, (w, t) => t.SerializeV3(w));
-            writer.WriteOptionalCollection(AsyncApiConstants.Tags, this.Tags, (w, t) => t.SerializeV3(w));
-            writer.WriteOptionalObject(AsyncApiConstants.ExternalDocs, this.ExternalDocs, (w, e) => e.SerializeV3(w));
-            writer.WriteOptionalObject(AsyncApiConstants.Bindings, this.Bindings, (w, t) => t.SerializeV3(w));
-            writer.WriteOptionalCollection(AsyncApiConstants.Traits, this.Traits, (w, t) => t.SerializeV3(w));
-            writer.WriteOptionalCollection(AsyncApiConstants.Messages, this.Messages, (w, m) => m.Reference.SerializeV3(w));
-            writer.WriteOptionalObject(AsyncApiConstants.Reply, this.Reply, (w, t) => t.SerializeV3(w));
-            writer.WriteExtensions(this.Extensions);
-            writer.WriteEndObject();
+            writer.Workspace?.SerializationContext.Push(this);
+            try
+            {
+                writer.WriteStartObject();
+                writer.WriteRequiredProperty(AsyncApiConstants.Action, this.Action.GetDisplayName());
+                writer.WriteRequiredObject(AsyncApiConstants.Channel, this.Channel, (w, c) => c.Reference.SerializeV3(w));
+                writer.WriteOptionalProperty(AsyncApiConstants.Title, this.Title);
+                writer.WriteOptionalProperty(AsyncApiConstants.Summary, this.Summary);
+                writer.WriteOptionalProperty(AsyncApiConstants.Description, this.Description);
+                writer.WriteOptionalCollection(AsyncApiConstants.Security, this.Security, (w, t) => t.SerializeV3(w));
+                writer.WriteOptionalCollection(AsyncApiConstants.Tags, this.Tags, (w, t) => t.SerializeV3(w));
+                writer.WriteOptionalObject(AsyncApiConstants.ExternalDocs, this.ExternalDocs, (w, e) => e.SerializeV3(w));
+                writer.WriteOptionalObject(AsyncApiConstants.Bindings, this.Bindings, (w, t) => t.SerializeV3(w));
+                writer.WriteOptionalCollection(AsyncApiConstants.Traits, this.Traits, (w, t) => t.SerializeV3(w));
+                writer.WriteOptionalCollection(AsyncApiConstants.Messages, this.Messages, (w, m) => m.Reference.SerializeV3(w));
+                writer.WriteOptionalObject(AsyncApiConstants.Reply, this.Reply, (w, t) => t.SerializeV3(w));
+                writer.WriteExtensions(this.Extensions);
+                writer.WriteEndObject();
+            }
+            finally
+            {
+                writer.Workspace?.SerializationContext.Pop();
+            }
         }
 
         private void SerializeAsSecurityRequirement(AsyncApiSecurityScheme scheme, IAsyncApiWriter w)
