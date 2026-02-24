@@ -139,6 +139,7 @@ namespace ByteBard.AsyncAPI.Readers
             where T : IAsyncApiElement
         {
             diagnostic = new AsyncApiDiagnostic();
+            diagnostic.SpecificationVersion = version;
             this.context ??= new ParsingContext(diagnostic, this.settings)
             {
                 ExtensionParsers = this.settings.ExtensionParsers,
@@ -370,51 +371,51 @@ namespace ByteBard.AsyncAPI.Readers
                 case ReferenceType.Schema:
                     if (reference is AsyncApiJsonSchemaReference)
                     {
-                        result = this.ReadFragment<AsyncApiJsonSchema>(json, AsyncApiVersion.AsyncApi2_0, out fragmentDiagnostic);
+                        result = this.ReadFragment<AsyncApiJsonSchema>(json, diagnostic.SpecificationVersion, out fragmentDiagnostic);
                     }
 
                     if (reference is AsyncApiAvroSchemaReference)
                     {
-                        result = this.ReadFragment<AsyncApiAvroSchema>(json, AsyncApiVersion.AsyncApi2_0, out fragmentDiagnostic);
+                        result = this.ReadFragment<AsyncApiAvroSchema>(json, diagnostic.SpecificationVersion, out fragmentDiagnostic);
                     }
 
                     break;
 
                 case ReferenceType.Server:
-                    result = this.ReadFragment<AsyncApiServer>(json, AsyncApiVersion.AsyncApi2_0, out fragmentDiagnostic);
+                    result = this.ReadFragment<AsyncApiServer>(json, diagnostic.SpecificationVersion, out fragmentDiagnostic);
                     break;
                 case ReferenceType.Channel:
-                    result = this.ReadFragment<AsyncApiChannel>(json, AsyncApiVersion.AsyncApi2_0, out fragmentDiagnostic);
+                    result = this.ReadFragment<AsyncApiChannel>(json, diagnostic.SpecificationVersion, out fragmentDiagnostic);
                     break;
                 case ReferenceType.Message:
-                    result = this.ReadFragment<AsyncApiMessage>(json, AsyncApiVersion.AsyncApi2_0, out fragmentDiagnostic);
+                    result = this.ReadFragment<AsyncApiMessage>(json, diagnostic.SpecificationVersion, out fragmentDiagnostic);
                     break;
                 case ReferenceType.SecurityScheme:
-                    result = this.ReadFragment<AsyncApiSecurityScheme>(json, AsyncApiVersion.AsyncApi2_0, out fragmentDiagnostic);
+                    result = this.ReadFragment<AsyncApiSecurityScheme>(json, diagnostic.SpecificationVersion, out fragmentDiagnostic);
                     break;
                 case ReferenceType.Parameter:
-                    result = this.ReadFragment<AsyncApiParameter>(json, AsyncApiVersion.AsyncApi2_0, out fragmentDiagnostic);
+                    result = this.ReadFragment<AsyncApiParameter>(json, diagnostic.SpecificationVersion, out fragmentDiagnostic);
                     break;
                 case ReferenceType.CorrelationId:
-                    result = this.ReadFragment<AsyncApiCorrelationId>(json, AsyncApiVersion.AsyncApi2_0, out fragmentDiagnostic);
+                    result = this.ReadFragment<AsyncApiCorrelationId>(json, diagnostic.SpecificationVersion, out fragmentDiagnostic);
                     break;
                 case ReferenceType.OperationTrait:
-                    result = this.ReadFragment<AsyncApiOperationTrait>(json, AsyncApiVersion.AsyncApi2_0, out fragmentDiagnostic);
+                    result = this.ReadFragment<AsyncApiOperationTrait>(json, diagnostic.SpecificationVersion, out fragmentDiagnostic);
                     break;
                 case ReferenceType.MessageTrait:
-                    result = this.ReadFragment<AsyncApiMessageTrait>(json, AsyncApiVersion.AsyncApi2_0, out fragmentDiagnostic);
+                    result = this.ReadFragment<AsyncApiMessageTrait>(json, diagnostic.SpecificationVersion, out fragmentDiagnostic);
                     break;
                 case ReferenceType.ServerBindings:
-                    result = this.ReadFragment<AsyncApiBindings<IServerBinding>>(json, AsyncApiVersion.AsyncApi2_0, out fragmentDiagnostic);
+                    result = this.ReadFragment<AsyncApiBindings<IServerBinding>>(json, diagnostic.SpecificationVersion, out fragmentDiagnostic);
                     break;
                 case ReferenceType.ChannelBindings:
-                    result = this.ReadFragment<AsyncApiBindings<IChannelBinding>>(json, AsyncApiVersion.AsyncApi2_0, out fragmentDiagnostic);
+                    result = this.ReadFragment<AsyncApiBindings<IChannelBinding>>(json, diagnostic.SpecificationVersion, out fragmentDiagnostic);
                     break;
                 case ReferenceType.OperationBindings:
-                    result = this.ReadFragment<AsyncApiBindings<IOperationBinding>>(json, AsyncApiVersion.AsyncApi2_0, out fragmentDiagnostic);
+                    result = this.ReadFragment<AsyncApiBindings<IOperationBinding>>(json, diagnostic.SpecificationVersion, out fragmentDiagnostic);
                     break;
                 case ReferenceType.MessageBindings:
-                    result = this.ReadFragment<AsyncApiBindings<IMessageBinding>>(json, AsyncApiVersion.AsyncApi2_0, out fragmentDiagnostic);
+                    result = this.ReadFragment<AsyncApiBindings<IMessageBinding>>(json, diagnostic.SpecificationVersion, out fragmentDiagnostic);
                     break;
                 default:
                     diagnostic.Errors.Add(new AsyncApiError(reference.Reference.Reference, "Could not resolve reference."));
