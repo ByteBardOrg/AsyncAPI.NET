@@ -139,6 +139,7 @@ namespace ByteBard.AsyncAPI.Readers
             where T : IAsyncApiElement
         {
             diagnostic = new AsyncApiDiagnostic();
+            diagnostic.SpecificationVersion = version;
             this.context ??= new ParsingContext(diagnostic, this.settings)
             {
                 ExtensionParsers = this.settings.ExtensionParsers,
@@ -363,7 +364,10 @@ namespace ByteBard.AsyncAPI.Readers
                 }
             }
 
-            AsyncApiDiagnostic fragmentDiagnostic = new AsyncApiDiagnostic();
+            AsyncApiDiagnostic fragmentDiagnostic = new AsyncApiDiagnostic
+            {
+                SpecificationVersion = diagnostic.SpecificationVersion,
+            };
             IAsyncApiSerializable result = null;
             switch (reference.Reference.Type)
             {
