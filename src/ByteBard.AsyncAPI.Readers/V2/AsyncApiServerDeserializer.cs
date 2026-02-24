@@ -16,6 +16,13 @@ namespace ByteBard.AsyncAPI.Readers
             {
                 "url", (a, n) => { SetHostAndPathname(a, n); }
             },
+            //this is workaround for some reason we parse twice this...
+            {
+                "host", (a, n) => { a.Host = n.GetScalarValue(); }
+            },
+            {
+                "pathname", (a, n) => { a.PathName = n.GetScalarValue(); }
+            },
             {
                 "description", (a, n) => { a.Description = n.GetScalarValue(); }
             },
