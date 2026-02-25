@@ -204,6 +204,24 @@
                     this.RegisterComponent(location + "/messages/" + message.Key, message.Value);
                 }
             }
+
+            string serverBaseUri = "#/servers/";
+            foreach (var server in document.Servers)
+            {
+                var registerableServerValue = server.Value;
+                if (server.Value is IAsyncApiReferenceable serverReference)
+                {
+                    if (serverReference.Reference.IsExternal)
+                    {
+                        continue;
+                    }
+
+                    registerableServerValue = this.ResolveReference<AsyncApiServer>(serverReference.Reference);
+                }
+
+                location = serverBaseUri + server.Key;
+                this.RegisterComponent(location, registerableServerValue);
+            }
         }
 
         public bool RegisterComponent<T>(string location, T component)

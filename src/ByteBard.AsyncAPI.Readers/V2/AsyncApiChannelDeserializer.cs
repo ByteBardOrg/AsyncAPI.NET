@@ -11,12 +11,18 @@ namespace ByteBard.AsyncAPI.Readers
         private static readonly FixedFieldMap<AsyncApiChannel> ChannelFixedFields = new()
         {
             { "description", (a, n) => { a.Description = n.GetScalarValue(); } },
-            { "servers", (a, n) => { a.Servers = n.CreateSimpleList(s => new AsyncApiServerReference("#/servers/" + s.GetScalarValue())); } },
+            { "servers", (a, n) => { a.Servers = n.CreateSimpleList(s => new AsyncApiServerReference(GetServerReferenceKey(s))); } },
             { "subscribe", (a, n) => { /* happens after initial reading */ } },
             { "publish", (a, n) => { /* happens after initial reading */ } },
             { "parameters", (a, n) => { a.Parameters = n.CreateMap(LoadParameter); } },
             { "bindings", (a, n) => { a.Bindings = LoadChannelBindings(n); } },
         };
+
+        private static string GetServerReferenceKey(ValueNode valueNode)
+        {
+            var stringValue = valueNode.GetScalarValue();
+            return stringValue.StartsWith("#/servers/") ? stringValue : "#/servers/" + stringValue;
+        }
 
         private static readonly PatternFieldMap<AsyncApiChannel> ChannelPatternFields =
             new()
