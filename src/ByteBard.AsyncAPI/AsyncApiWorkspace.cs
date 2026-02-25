@@ -216,7 +216,7 @@
                         continue;
                     }
 
-                    registerableServerValue = this.ResolveReference<AsyncApiServer>(reference.Reference);
+                    registerableServerValue = this.ResolveReference<AsyncApiServer>(serverReference.Reference);
                 }
 
                 location = serverBaseUri + server.Key;
