@@ -208,14 +208,14 @@
                 foreach (var server in document.Servers)
                 {
                     var registerableServerValue = server.Value;
-                    if (server.Value is IAsyncApiReferenceable reference)
+                    if (server.Value is IAsyncApiReferenceable serverReference)
                     {
-                        if (reference.Reference.IsExternal)
+                        if (serverReference.Reference.IsExternal)
                         {
                             continue;
                         }
 
-                        registerableServerValue = this.ResolveReference<AsyncApiServer>(reference.Reference);
+                        registerableServerValue = this.ResolveReference<AsyncApiServer>(serverReference.Reference);
                     }
 
                     location = serverBaseUri + server.Key;
