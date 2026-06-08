@@ -58,5 +58,17 @@
 
                     context.Exit();
                 });
+
+        public static ValidationRule<AsyncApiAvroSchema> NamedTypeMustResolve =>
+            new ValidationRule<AsyncApiAvroSchema>(
+                (context, schema) =>
+                {
+                    if (schema is AvroNamedType namedType && namedType.Target == null)
+                    {
+                        context.CreateWarning(
+                            nameof(NamedTypeMustResolve),
+                            $"Avro named type '{namedType.Name}' is referenced but was not defined before use.");
+                    }
+                });
     }
 }

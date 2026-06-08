@@ -1,5 +1,6 @@
 ﻿namespace ByteBard.AsyncAPI.Models
 {
+    using System;
     using System.Collections.Generic;
     using System.Linq;
     using ByteBard.AsyncAPI.Writers;
@@ -8,7 +9,7 @@
     {
         public override string Type { get; } = "map";
 
-        public AvroPrimitiveType Values { get; set; }
+        public AsyncApiAvroSchema Values { get; set; }
 
         /// <summary>
         /// A map of properties not in the schema, but added as additional metadata.
@@ -17,19 +18,24 @@
 
         public override void SerializeV2(IAsyncApiWriter writer)
         {
-            this.SerializeCore(writer);
+            this.SerializeCore(writer, (w, s) => s.SerializeV2(w));
         }
 
         public override void SerializeV3(IAsyncApiWriter writer)
         {
-            this.SerializeCore(writer);
+            this.SerializeCore(writer, (w, s) => s.SerializeV3(w));
         }
 
         public void SerializeCore(IAsyncApiWriter writer)
         {
+            this.SerializeCore(writer, (w, s) => s.SerializeV2(w));
+        }
+
+        private void SerializeCore(IAsyncApiWriter writer, Action<IAsyncApiWriter, AsyncApiAvroSchema> action)
+        {
             writer.WriteStartObject();
             writer.WriteOptionalProperty("type", this.Type);
-            writer.WriteRequiredProperty("values", this.Values.GetDisplayName());
+            writer.WriteRequiredObject("values", this.Values, action);
             if (this.Metadata.Any())
             {
                 foreach (var item in this.Metadata)
