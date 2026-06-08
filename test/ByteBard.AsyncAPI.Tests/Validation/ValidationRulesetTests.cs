@@ -33,7 +33,7 @@
             Assert.IsNotEmpty(rules);
 
             // Update the number if you add new default rule(s).
-            Assert.AreEqual(28, rules.Count);
+            Assert.AreEqual(29, rules.Count);
         }
     }
 }

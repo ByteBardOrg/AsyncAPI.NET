@@ -9,6 +9,7 @@ namespace ByteBard.AsyncAPI.Services
     {
         private readonly AsyncApiVisitorBase visitor;
         private readonly Stack<AsyncApiJsonSchema> schemaLoop = new();
+        private readonly Stack<AsyncApiAvroSchema> avroSchemaLoop = new();
 
         public AsyncApiWalker(AsyncApiVisitorBase visitor)
         {
@@ -23,6 +24,7 @@ namespace ByteBard.AsyncAPI.Services
             }
 
             this.schemaLoop.Clear();
+            this.avroSchemaLoop.Clear();
 
             this.visitor.Visit(doc);
 
@@ -391,13 +393,53 @@ namespace ByteBard.AsyncAPI.Services
 
         internal void Walk(AsyncApiAvroSchema schema)
         {
+            if (schema == null)
+            {
+                return;
+            }
+
             if (schema is AsyncApiAvroSchemaReference reference)
             {
                 this.Walk(reference as IAsyncApiReferenceable);
                 return;
             }
 
+            if (this.avroSchemaLoop.Contains(schema))
+            {
+                return;
+            }
+
+            this.avroSchemaLoop.Push(schema);
+
             this.visitor.Visit(schema);
+
+            switch (schema)
+            {
+                case AvroRecord record:
+                    this.Walk("fields", () =>
+                    {
+                        foreach (var field in record.Fields)
+                        {
+                            this.Walk(field.Name, () => this.Walk("type", () => this.Walk(field.Type)));
+                        }
+                    });
+                    break;
+                case AvroArray array:
+                    this.Walk("items", () => this.Walk(array.Items));
+                    break;
+                case AvroMap map:
+                    this.Walk("values", () => this.Walk(map.Values));
+                    break;
+                case AvroUnion union:
+                    foreach (var type in union.Types)
+                    {
+                        this.Walk("types", () => this.Walk(type));
+                    }
+
+                    break;
+            }
+
+            this.avroSchemaLoop.Pop();
         }
 
         internal void Walk(AsyncApiJsonSchema schema)

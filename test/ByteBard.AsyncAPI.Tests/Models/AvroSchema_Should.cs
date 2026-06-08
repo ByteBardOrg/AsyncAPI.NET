@@ -1,9 +1,12 @@
 ﻿namespace ByteBard.AsyncAPI.Tests.Models
 {
     using System.Collections.Generic;
+    using System.Linq;
     using FluentAssertions;
+    using ByteBard.AsyncAPI.Extensions;
     using ByteBard.AsyncAPI.Models;
     using ByteBard.AsyncAPI.Readers;
+    using ByteBard.AsyncAPI.Validations;
     using NUnit.Framework;
 
     public class AvroSchema_Should
@@ -461,6 +464,277 @@
             // Assert
             actual.Should()
                   .BeEquivalentTo(expected);
+        }
+
+        [Test]
+        public void V2_ReadFragment_WithRecursiveNamedType_DeserializesCorrectly()
+        {
+            var input = """
+            {
+              "type": "record",
+              "name": "LongList",
+              "aliases": ["LinkedLongs"],
+              "fields" : [
+                {"name": "value", "type": "long"},
+                {"name": "next", "type": ["null", "LongList"]}
+              ]
+            }
+            """;
+
+            var actual = new AsyncApiStringReader().ReadFragment<AsyncApiAvroSchema>(input, AsyncApiVersion.AsyncApi2_0, out var diagnostic);
+
+            diagnostic.Errors.Should().BeEmpty();
+
+            var record = actual.As<AvroRecord>();
+            var union = record.Fields[1].Type.As<AvroUnion>();
+            var namedType = union.Types[1].As<AvroNamedType>();
+
+            namedType.Name.Should().Be("LongList");
+            namedType.Target.Should().BeSameAs(record);
+
+            var serialized = actual.SerializeAsJson(AsyncApiVersion.AsyncApi2_0);
+            serialized.Should().Contain("\"LongList\"");
+            serialized.Should().NotContain("$ref");
+
+            actual.Validate(ValidationRuleSet.GetDefaultRuleSet())
+                  .OfType<AsyncApiValidatorWarning>()
+                  .Should()
+                  .BeEmpty();
+        }
+
+        [Test]
+        public void V2_Serialize_WithRecursiveNamedType_WritesNamedTypeAsString()
+        {
+            var expected = """
+            type: record
+            name: LongList
+            fields:
+              - name: value
+                type: long
+              - name: next
+                type:
+                  - 'null'
+                  - LongList
+            """;
+
+            var record = new AvroRecord
+            {
+                Name = "LongList",
+            };
+
+            record.Fields = new List<AvroField>
+            {
+                new AvroField
+                {
+                    Name = "value",
+                    Type = AvroPrimitiveType.Long,
+                },
+                new AvroField
+                {
+                    Name = "next",
+                    Type = new AvroUnion
+                    {
+                        Types = new List<AsyncApiAvroSchema>
+                        {
+                            AvroPrimitiveType.Null,
+                            new AvroNamedType("LongList", record),
+                        },
+                    },
+                },
+            };
+
+            var actual = record.SerializeAsYaml(AsyncApiVersion.AsyncApi2_0);
+
+            actual.Should().BePlatformAgnosticEquivalentTo(expected);
+        }
+
+        [Test]
+        public void V2_ReadFragment_WithMapValuesNamedType_DeserializesCorrectly()
+        {
+            var input = """
+            {
+              "type": "record",
+              "name": "Container",
+              "namespace": "example",
+              "fields" : [
+                {
+                  "name": "item",
+                  "type": {
+                    "type": "record",
+                    "name": "Item",
+                    "fields": [
+                      {"name": "id", "type": "string"}
+                    ]
+                  }
+                },
+                {
+                  "name": "itemsByKey",
+                  "type": {
+                    "type": "map",
+                    "values": "Item"
+                  }
+                }
+              ]
+            }
+            """;
+
+            var actual = new AsyncApiStringReader().ReadFragment<AsyncApiAvroSchema>(input, AsyncApiVersion.AsyncApi2_0, out var diagnostic);
+
+            diagnostic.Errors.Should().BeEmpty();
+
+            var record = actual.As<AvroRecord>();
+            var item = record.Fields[0].Type.As<AvroRecord>();
+            var map = record.Fields[1].Type.As<AvroMap>();
+            var namedType = map.Values.As<AvroNamedType>();
+
+            namedType.Name.Should().Be("Item");
+            namedType.Target.Should().BeSameAs(item);
+
+            var serialized = actual.SerializeAsJson(AsyncApiVersion.AsyncApi2_0);
+            serialized.Should().Contain("\"values\": \"Item\"");
+            serialized.Should().NotContain("$ref");
+
+            actual.Validate(ValidationRuleSet.GetDefaultRuleSet())
+                  .OfType<AsyncApiValidatorWarning>()
+                  .Should()
+                  .BeEmpty();
+        }
+
+        [Test]
+        public void V2_Validate_WithUnresolvedNamedType_CreatesWarning()
+        {
+            var input = """
+            {
+              "type": "record",
+              "name": "Container",
+              "fields" : [
+                {"name": "missing", "type": "MissingType"}
+              ]
+            }
+            """;
+
+            var actual = new AsyncApiStringReader().ReadFragment<AsyncApiAvroSchema>(input, AsyncApiVersion.AsyncApi2_0, out var diagnostic);
+
+            diagnostic.Errors.Should().BeEmpty();
+            diagnostic.Warnings.Should()
+                      .ContainSingle(w => w.Message == "Avro named type 'MissingType' is referenced but was not defined before use.");
+
+            actual.Validate(ValidationRuleSet.GetDefaultRuleSet())
+                  .OfType<AsyncApiValidatorWarning>()
+                  .Should()
+                  .ContainSingle(w => w.Message == "Avro named type 'MissingType' is referenced but was not defined before use.");
+        }
+
+        [Test]
+        public void V2_Validate_WithUnresolvedMapValuesNamedType_CreatesWarning()
+        {
+            var input = """
+            {
+              "type": "record",
+              "name": "Container",
+              "fields" : [
+                {
+                  "name": "itemsByKey",
+                  "type": {
+                    "type": "map",
+                    "values": "MissingType"
+                  }
+                }
+              ]
+            }
+            """;
+
+            var actual = new AsyncApiStringReader().ReadFragment<AsyncApiAvroSchema>(input, AsyncApiVersion.AsyncApi2_0, out var diagnostic);
+
+            diagnostic.Errors.Should().BeEmpty();
+            diagnostic.Warnings.Should()
+                      .ContainSingle(w => w.Message == "Avro named type 'MissingType' is referenced but was not defined before use.");
+
+            actual.Validate(ValidationRuleSet.GetDefaultRuleSet())
+                  .OfType<AsyncApiValidatorWarning>()
+                  .Should()
+                  .ContainSingle(w => w.Message == "Avro named type 'MissingType' is referenced but was not defined before use.");
+        }
+
+        [Test]
+        public void V2_ReadDocument_WithRecursiveNamedType_DeserializesAndValidates()
+        {
+            var input = """
+            asyncapi: '2.6.0'
+            info:
+              title: Avro named type test
+              version: '1.0.0'
+            channels:
+              list:
+                publish:
+                  message:
+                    name: ListMessage
+                    payload:
+                      type: record
+                      name: LongList
+                      fields:
+                        - name: value
+                          type: long
+                        - name: next
+                          type:
+                            - 'null'
+                            - LongList
+                    schemaFormat: application/vnd.apache.avro
+            """;
+
+            var document = new AsyncApiStringReader().Read(input, out var diagnostic);
+
+            diagnostic.Errors.Should().BeEmpty();
+            diagnostic.Warnings.Should().BeEmpty();
+
+            var message = document.Operations.Values.First(operation => operation.Action == AsyncApiAction.Receive).Messages.First();
+            var record = message.Payload.Schema.As<AvroRecord>();
+            var union = record.Fields[1].Type.As<AvroUnion>();
+            var namedType = union.Types[1].As<AvroNamedType>();
+
+            namedType.Name.Should().Be("LongList");
+            namedType.Target.Should().BeSameAs(record);
+        }
+
+        [Test]
+        public void V2_ReadDocument_WithUnresolvedNamedType_CreatesWarning()
+        {
+            var input = """
+            asyncapi: '2.6.0'
+            info:
+              title: Avro named type test
+              version: '1.0.0'
+            channels:
+              list:
+                publish:
+                  message:
+                    name: ListMessage
+                    payload:
+                      type: record
+                      name: LongList
+                      fields:
+                        - name: value
+                          type: long
+                        - name: next
+                          type:
+                            - 'null'
+                            - MissingType
+                    schemaFormat: application/vnd.apache.avro
+            """;
+
+            new AsyncApiStringReader().Read(input, out var diagnostic);
+
+            diagnostic.Errors.Should().BeEmpty();
+            diagnostic.Warnings.Should()
+                      .ContainSingle(w => w.Message == "Avro named type 'MissingType' is referenced but was not defined before use.");
+        }
+
+        [Test]
+        public void V2_AvroSchema_WithPrimitiveSchema_ConvertsToPrimitiveType()
+        {
+            AsyncApiAvroSchema schema = AvroPrimitiveType.String;
+
+            ((AvroPrimitiveType)schema).Should().Be(AvroPrimitiveType.String);
         }
     }
 }
