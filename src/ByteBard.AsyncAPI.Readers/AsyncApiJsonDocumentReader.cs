@@ -165,9 +165,14 @@ namespace ByteBard.AsyncAPI.Readers
             if (this.settings.RuleSet != null && this.settings.RuleSet.Rules.Count > 0)
             {
                 var errors = element.Validate(this.settings.RuleSet);
-                foreach (var item in errors)
+                foreach (var item in errors.OfType<AsyncApiValidatorError>())
                 {
                     diagnostic.Errors.Add(item);
+                }
+
+                foreach (var item in errors.OfType<AsyncApiValidatorWarning>())
+                {
+                    diagnostic.Warnings.Add(item);
                 }
             }
 
