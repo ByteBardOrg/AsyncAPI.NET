@@ -41,12 +41,14 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: Setup .NET
-      uses: actions/setup-dotnet@v1
+      uses: actions/setup-dotnet@v4
       with:
-        dotnet-version: '8.0.x'
-        include-prerelease: true
+        dotnet-version: |
+          8.0.x
+          9.0.x
+          10.0.x
     - name: Restore dependencies
-      run: dotnet restore     
+      run: dotnet restore
     - name: Build
       run: dotnet build --no-restore
     - name: Test

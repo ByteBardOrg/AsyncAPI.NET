@@ -38,8 +38,13 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v1
         
-      - name: Setup .NET Core @ Latest
-        uses: actions/setup-dotnet@v1
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: |
+            8.0.x
+            9.0.x
+            10.0.x
 
       - run: echo ${{env.GITHUB_RUN_NUMBER_WITH_OFFSET}}
       - name: Build ${{ matrix.package-name }} project and pack NuGet package

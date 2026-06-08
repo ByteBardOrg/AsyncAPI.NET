@@ -66,9 +66,14 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v1
         
-      - name: Setup .NET Core @ Latest
+      - name: Setup .NET
         if: needs.prereleaseCheck.outputs.trigger_release == 'true'
-        uses: actions/setup-dotnet@v1
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: |
+            8.0.x
+            9.0.x
+            10.0.x
 
       - name: Build ${{ matrix.package-name }} project and pack NuGet package
         if: needs.prereleaseCheck.outputs.trigger_release == 'true'
