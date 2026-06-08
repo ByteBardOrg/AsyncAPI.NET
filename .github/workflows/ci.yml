@@ -29,6 +29,7 @@ jobs:
     - name: Scan PR diff
       uses: ByteBardOrg/obfuscan-action@v1
       with:
+        github-token: ${{ secrets.GITHUB_TOKEN }}
         fail-on: block
 
   build:
