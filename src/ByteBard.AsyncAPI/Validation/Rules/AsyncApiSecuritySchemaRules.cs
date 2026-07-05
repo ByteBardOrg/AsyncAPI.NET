@@ -96,7 +96,7 @@ namespace ByteBard.AsyncAPI.Validation.Rules
 
         private static readonly Dictionary<string, Func<AsyncApiSecurityScheme, bool>> RequiredFieldsByType = new()
         {
-            { "name", sc => sc.Type is SecuritySchemeType.ApiKey },
+            { "name", sc => sc.Type is SecuritySchemeType.HttpApiKey },
             { "in", sc => sc.Type is SecuritySchemeType.ApiKey or SecuritySchemeType.HttpApiKey },
             { "scheme", sc => sc.Type is SecuritySchemeType.Http },
             { "flows", sc => sc.Type is SecuritySchemeType.OAuth2 },
