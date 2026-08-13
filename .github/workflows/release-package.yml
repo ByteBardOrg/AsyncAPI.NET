@@ -13,42 +13,27 @@ jobs:
     name: Check release
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v1
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+        persist-credentials: false
+
+    - name: Get release token
+      id: get-token
+      uses: actions/create-github-app-token@v1
+      with:
+        app-id: ${{ secrets.APP_ID }}
+        private-key: ${{ secrets.APP_SECRET }}
 
     - name: Semantic Release
       uses: cycjimmy/semantic-release-action@v3
       id: semantic
       with:
         extra_plugins: |
-          conventional-changelog-conventionalcommits
+          @semantic-release/changelog@6.0.3
+          @semantic-release/git@10.0.1
       env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-    
-    - name: Get token
-      if: steps.semantic.outputs.new_release_published == 'true'
-      id: get_token
-      uses: actions/create-github-app-token@v1
-      with:
-        app-id: ${{ secrets.APP_ID }}
-        private-key: ${{ secrets.APP_SECRET }}
-        
-    - name: Commit changes
-      if: steps.semantic.outputs.new_release_published == 'true'
-      env:
-        GITHUB_TOKEN: ${{ steps.get_token.outputs.token }}
-        FILE_TO_COMMIT: CHANGELOG.md
-        DESTINATION_BRANCH: ${{ github.ref }}
-      run: |
-        cat CHANGELOG.md
-      #  export MESSAGE="chore: update $FILE_TO_COMMIT"
-      #  export SHA=$( git rev-parse $DESTINATION_BRANCH:$FILE_TO_COMMIT )
-      #  export CONTENT=$( base64 -i $FILE_TO_COMMIT )
-      #  gh api --method PUT /repos/:owner/:repo/contents/$FILE_TO_COMMIT \
-      #    --field message="$MESSAGE" \
-      #    --field content="$CONTENT" \
-      #    --field encoding="base64" \
-      #    --field branch="$DESTINATION_BRANCH" \
-      #    --field sha="$SHA"
+        GITHUB_TOKEN: ${{ steps.get-token.outputs.token }}
 
     outputs:
       trigger_release: ${{ steps.semantic.outputs.new_release_published }}
