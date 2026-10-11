@@ -8,6 +8,14 @@ namespace ByteBard.AsyncAPI.Bindings
 
     public static class BindingHelpers
     {
+        /// <summary>
+        /// Parses a nested object using the supplied field handlers.
+        /// </summary>
+        /// <param name="node">The nested object to parse.</param>
+        /// <param name="fixedFieldMap">Handlers for recognized property names; other properties follow the reader's unmapped-member setting.</param>
+        /// <returns>A new instance populated from recognized fields, which may be incomplete when field parsing reports errors.</returns>
+        /// <remarks>Field-level reader and AsyncAPI exceptions are recorded as diagnostics; other handler exceptions propagate.</remarks>
+        /// <exception cref="ByteBard.AsyncAPI.Readers.Exceptions.AsyncApiReaderException"><paramref name="node"/> is not a map.</exception>
         public static T ParseMap<T>(this ParseNode node, FixedFieldMap<T> fixedFieldMap)
             where T : new()
         {

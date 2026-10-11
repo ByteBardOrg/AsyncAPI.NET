@@ -23,6 +23,13 @@ namespace ByteBard.AsyncAPI.Bindings
 
     public static class BindingsCollection
     {
+        /// <summary>
+        /// Adds the source items to the destination collection.
+        /// </summary>
+        /// <returns>The same destination collection, after adding the items.</returns>
+        /// <remarks>Enumeration and collection errors propagate; items already added are not rolled back.</remarks>
+        /// <exception cref="ArgumentNullException"><paramref name="destination"/> or <paramref name="source"/> is null.</exception>
+        /// <exception cref="NotSupportedException">The destination collection does not support adding items.</exception>
         public static TCollection Add<TCollection, TItem>(this TCollection destination, IEnumerable<TItem> source)
             where TCollection : ICollection<TItem>
         {

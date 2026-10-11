@@ -16,6 +16,10 @@ namespace ByteBard.AsyncAPI.Bindings.Solace
             { "topicSubscriptions", (a, n) => a.TopicSubscriptions = n.CreateSimpleList(s => s.GetScalarValue()) },
         };
 
+        /// <summary>
+        /// Writes the topic settings object, omitting null or empty topic subscriptions.
+        /// </summary>
+        /// <exception cref="ArgumentNullException"><paramref name="writer"/> is null.</exception>
         public void Serialize(IAsyncApiWriter writer)
         {
             if (writer is null) throw new ArgumentNullException(nameof(writer));

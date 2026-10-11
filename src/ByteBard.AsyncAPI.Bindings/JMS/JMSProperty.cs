@@ -11,6 +11,10 @@ namespace ByteBard.AsyncAPI.Bindings.JMS
 
         public AsyncApiAny Value { get; set; }
 
+        /// <summary>
+        /// Writes the connection property object, preserving the JSON type of its value and omitting unset fields.
+        /// </summary>
+        /// <exception cref="System.NullReferenceException"><paramref name="writer"/> is null.</exception>
         public void Serialize(IAsyncApiWriter writer)
         {
             writer.WriteStartObject();

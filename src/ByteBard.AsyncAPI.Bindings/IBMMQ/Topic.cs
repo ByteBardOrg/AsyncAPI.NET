@@ -10,6 +10,10 @@ namespace ByteBard.AsyncAPI.Bindings.IBMMQ
         public bool? DurablePermitted { get; set; }
         public bool? LastMsgRetained { get; set; }
 
+        /// <summary>
+        /// Writes the IBM MQ topic settings object, omitting unset values.
+        /// </summary>
+        /// <exception cref="System.NullReferenceException"><paramref name="writer"/> is null.</exception>
         public void Serialize(IAsyncApiWriter writer)
         {
             writer.WriteStartObject();

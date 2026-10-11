@@ -24,6 +24,10 @@ namespace ByteBard.AsyncAPI.Bindings.Solace
             { "maxTtl", (a, n) => a.MaxTtl = n.GetScalarValue() },
         };
 
+        /// <summary>
+        /// Writes the queue settings object, omitting unset values and empty topic subscriptions.
+        /// </summary>
+        /// <exception cref="ArgumentNullException"><paramref name="writer"/> is null.</exception>
         public void Serialize(IAsyncApiWriter writer)
         {
             if (writer is null) throw new ArgumentNullException(nameof(writer));

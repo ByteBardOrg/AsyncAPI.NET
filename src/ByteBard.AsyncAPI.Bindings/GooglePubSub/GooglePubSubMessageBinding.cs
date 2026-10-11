@@ -26,9 +26,22 @@ namespace ByteBard.AsyncAPI.Bindings.GooglePubSub
             { "name", (a, n) => { a.Name = n.GetScalarValue(); } },
         };
 
+        /// <summary>
+        /// Writes the Google Pub/Sub message binding object and its extensions for AsyncAPI 2.0.
+        /// </summary>
+        /// <exception cref="ArgumentNullException"><paramref name="writer"/> is null.</exception>
         public override void SerializeV2(IAsyncApiWriter writer) => this.SerializeV3(writer);
+        /// <summary>
+        /// Writes the Google Pub/Sub message binding object and its extensions for AsyncAPI 3.0.
+        /// </summary>
+        /// <exception cref="ArgumentNullException"><paramref name="writer"/> is null.</exception>
         public override void SerializeV3(IAsyncApiWriter writer) => this.SerializeProperties(writer);
 
+        /// <summary>
+        /// Writes the Google Pub/Sub message binding object and its extensions for AsyncAPI 3.0.
+        /// </summary>
+        /// <remarks>An unset binding version is omitted.</remarks>
+        /// <exception cref="ArgumentNullException"><paramref name="writer"/> is null.</exception>
         public override void SerializeProperties(IAsyncApiWriter writer)
         {
             if (writer is null) throw new ArgumentNullException(nameof(writer));

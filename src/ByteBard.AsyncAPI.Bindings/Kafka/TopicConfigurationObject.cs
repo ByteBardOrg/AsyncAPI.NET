@@ -72,6 +72,11 @@
         /// </summary>
         public Dictionary<string, AsyncApiAny> AdditionalProperties { get; set; } = new();
 
+        /// <summary>
+        /// Writes the topic configuration object, including additional settings whose names do not match fixed fields.
+        /// </summary>
+        /// <remarks>Additional settings with fixed field names are skipped even when the corresponding fixed value is unset.</remarks>
+        /// <exception cref="ArgumentNullException"><paramref name="writer"/> is null.</exception>
         public void Serialize(IAsyncApiWriter writer)
         {
             if (writer is null)

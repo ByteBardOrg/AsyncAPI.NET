@@ -7,6 +7,10 @@ namespace ByteBard.AsyncAPI.Bindings.GooglePubSub
     {
         public string Name { get; set; }
 
+        /// <summary>
+        /// Writes the message schema object, omitting an unset name.
+        /// </summary>
+        /// <exception cref="System.NullReferenceException"><paramref name="writer"/> is null.</exception>
         public void Serialize(IAsyncApiWriter writer)
         {
             writer.WriteStartObject();
