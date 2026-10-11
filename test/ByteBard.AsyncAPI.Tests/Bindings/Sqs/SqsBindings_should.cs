@@ -71,6 +71,7 @@ namespace ByteBard.AsyncAPI.Tests.Bindings.Sqs
                         queueXPropertyName: queueXPropertyValue
                     deadLetterQueue:
                       name: myQueue_error
+                      fifoQueue: false
                       deliveryDelay: 0
                       visibilityTimeout: 0
                       receiveMessageWaitTime: 0
@@ -276,6 +277,7 @@ namespace ByteBard.AsyncAPI.Tests.Bindings.Sqs
                   sqs:
                     queues:
                       - name: myQueue
+                        fifoQueue: false
                         deliveryDelay: 30
                         visibilityTimeout: 60
                         receiveMessageWaitTime: 0
@@ -312,6 +314,7 @@ namespace ByteBard.AsyncAPI.Tests.Bindings.Sqs
                         x-queueExtension:
                           queueXPropertyName: queueXPropertyValue
                       - name: myQueue_error
+                        fifoQueue: false
                         deliveryDelay: 0
                         visibilityTimeout: 0
                         receiveMessageWaitTime: 0
