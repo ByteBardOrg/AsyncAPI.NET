@@ -13,8 +13,8 @@ namespace ByteBard.AsyncAPI.Bindings.IBMMQ
         {
             writer.WriteStartObject();
             writer.WriteOptionalProperty("objectName", this.ObjectName);
-            writer.WriteOptionalProperty("isPartitioned", this.IsPartitioned);
-            writer.WriteOptionalProperty("exclusive", this.Exclusive);
+            writer.WriteOptionalProperty<bool>("isPartitioned", this.IsPartitioned);
+            writer.WriteOptionalProperty<bool>("exclusive", this.Exclusive);
             writer.WriteEndObject();
         }
     }

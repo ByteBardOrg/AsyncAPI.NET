@@ -36,10 +36,10 @@ namespace ByteBard.AsyncAPI.Tests.Bindings.IBMMQ
             channel.Bindings.Add(new IBMMQChannelBinding
             {
                 DestinationType = "queue", MaxMsgLength = 0,
-                Queue = new Queue { ObjectName = "ORDERS", IsPartitioned = false, Exclusive = true },
+                Queue = new Queue { ObjectName = "ORDERS", IsPartitioned = false, Exclusive = false },
             });
             var channelYaml = channel.SerializeAsYaml(version);
-            channelYaml.Should().Contain("isPartitioned: false").And.Contain("maxMsgLength: 0").And.NotContain("topic:");
+            channelYaml.Should().Contain("isPartitioned: false").And.Contain("exclusive: false").And.Contain("maxMsgLength: 0").And.NotContain("topic:");
             new AsyncApiStringReader(new AsyncApiReaderSettings { Bindings = Parsers })
                 .ReadFragment<AsyncApiChannel>(channelYaml, version, out _).Should().BeEquivalentTo(channel);
 
@@ -47,24 +47,45 @@ namespace ByteBard.AsyncAPI.Tests.Bindings.IBMMQ
             topicChannel.Bindings.Add(new IBMMQChannelBinding
             {
                 DestinationType = "topic",
-                Topic = new Topic { StringValue = "orders/#", ObjectName = "ORDERS.TOPIC", DurablePermitted = false, LastMsgRetained = true },
+                Topic = new Topic { StringValue = "orders/#", ObjectName = "ORDERS.TOPIC", DurablePermitted = false, LastMsgRetained = false },
             });
             var topicYaml = topicChannel.SerializeAsYaml(version);
-            topicYaml.Should().Contain("string: orders/#").And.NotContain("queue:");
+            topicYaml.Should().Contain("string: orders/#").And.Contain("durablePermitted: false").And.Contain("lastMsgRetained: false").And.NotContain("queue:");
             new AsyncApiStringReader(new AsyncApiReaderSettings { Bindings = Parsers })
                 .ReadFragment<AsyncApiChannel>(topicYaml, version, out _).Should().BeEquivalentTo(topicChannel);
 
             var message = new AsyncApiMessage();
-            message.Bindings.Add(new IBMMQMessageBinding { Type = "binary", Headers = "STRING", Description = "event headers", Expiry = 0 });
+            message.Bindings.Add(new IBMMQMessageBinding { Type = "binary", Headers = "STRING", Description = "event headers", Expiry = 2592000000L });
             var messageYaml = message.SerializeAsYaml(version);
-            messageYaml.Should().Contain("headers: STRING").And.Contain("expiry: 0");
+            messageYaml.Should().Contain("headers: STRING").And.Contain("expiry: 2592000000");
             new AsyncApiStringReader(new AsyncApiReaderSettings { Bindings = Parsers })
                 .ReadFragment<AsyncApiMessage>(messageYaml, version, out _).Should().BeEquivalentTo(message);
+
+            var zeroExpiryMessage = new AsyncApiMessage();
+            zeroExpiryMessage.Bindings.Add(new IBMMQMessageBinding { Expiry = 0 });
+            var zeroExpiryYaml = zeroExpiryMessage.SerializeAsYaml(version);
+            zeroExpiryYaml.Should().Contain("expiry: 0");
+            new AsyncApiStringReader(new AsyncApiReaderSettings { Bindings = Parsers })
+                .ReadFragment<AsyncApiMessage>(zeroExpiryYaml, version, out _).Should().BeEquivalentTo(zeroExpiryMessage);
 
             var absent = new AsyncApiServer();
             absent.Bindings.Add(new IBMMQServerBinding());
             var absentYaml = absent.SerializeAsYaml(version);
             absentYaml.Should().NotContain("multiEndpointServer").And.NotContain("heartBeatInterval").And.NotContain("bindingVersion");
+
+            var absentChannel = new AsyncApiChannel();
+            absentChannel.Bindings.Add(new IBMMQChannelBinding { Queue = new Queue() });
+            var absentChannelYaml = absentChannel.SerializeAsYaml(version);
+            absentChannelYaml.Should().NotContain("isPartitioned").And.NotContain("exclusive");
+            new AsyncApiStringReader(new AsyncApiReaderSettings { Bindings = Parsers })
+                .ReadFragment<AsyncApiChannel>(absentChannelYaml, version, out _).Should().BeEquivalentTo(absentChannel);
+
+            var absentTopicChannel = new AsyncApiChannel();
+            absentTopicChannel.Bindings.Add(new IBMMQChannelBinding { Topic = new Topic() });
+            var absentTopicYaml = absentTopicChannel.SerializeAsYaml(version);
+            absentTopicYaml.Should().NotContain("durablePermitted").And.NotContain("lastMsgRetained");
+            new AsyncApiStringReader(new AsyncApiReaderSettings { Bindings = Parsers })
+                .ReadFragment<AsyncApiChannel>(absentTopicYaml, version, out _).Should().BeEquivalentTo(absentTopicChannel);
         }
     }
 }

@@ -74,5 +74,41 @@ namespace ByteBard.AsyncAPI.Tests.Bindings.ROS2
             diagnostics.Warnings.Should().BeEmpty();
             parsed.Bindings["ros2"].Should().BeEquivalentTo(binding);
         }
+
+        [TestCase(AsyncApiVersion.AsyncApi2_0)]
+        [TestCase(AsyncApiVersion.AsyncApi3_0)]
+        public void ServerBinding_RoundTripsUpperBoundaryDomainId(AsyncApiVersion version)
+        {
+            var binding = new ROS2ServerBinding { DomainId = 231 };
+            var server = new AsyncApiServer { Host = "localhost", Protocol = "ros2" };
+            server.Bindings.Add(binding);
+
+            var actual = server.SerializeAsYaml(version);
+            actual.Should().Contain("domainId: 231");
+
+            var settings = new AsyncApiReaderSettings { Bindings = new[] { new ROS2ServerBinding() } };
+            var parsed = new AsyncApiStringReader(settings).ReadFragment<AsyncApiServer>(actual, version, out var diagnostics);
+            diagnostics.Errors.Should().BeEmpty();
+            diagnostics.Warnings.Should().BeEmpty();
+            parsed.Bindings["ros2"].Should().BeEquivalentTo(binding);
+        }
+
+        [TestCase(AsyncApiVersion.AsyncApi2_0)]
+        [TestCase(AsyncApiVersion.AsyncApi3_0)]
+        public void ServerBinding_OmitsUnsetDomainId(AsyncApiVersion version)
+        {
+            var binding = new ROS2ServerBinding();
+            var server = new AsyncApiServer { Host = "localhost", Protocol = "ros2" };
+            server.Bindings.Add(binding);
+
+            var actual = server.SerializeAsYaml(version);
+            actual.Should().NotContain("domainId:");
+
+            var settings = new AsyncApiReaderSettings { Bindings = new[] { new ROS2ServerBinding() } };
+            var parsed = new AsyncApiStringReader(settings).ReadFragment<AsyncApiServer>(actual, version, out var diagnostics);
+            diagnostics.Errors.Should().BeEmpty();
+            diagnostics.Warnings.Should().BeEmpty();
+            parsed.Bindings["ros2"].Should().BeEquivalentTo(binding);
+        }
     }
 }

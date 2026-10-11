@@ -34,7 +34,7 @@ namespace ByteBard.AsyncAPI.Bindings.IBMMQ
             writer.WriteOptionalProperty("groupId", this.GroupId);
             writer.WriteOptionalProperty("ccdtQueueManagerName", this.CcdtQueueManagerName);
             writer.WriteOptionalProperty("cipherSpec", this.CipherSpec);
-            writer.WriteOptionalProperty("multiEndpointServer", this.MultiEndpointServer);
+            writer.WriteOptionalProperty<bool>("multiEndpointServer", this.MultiEndpointServer);
             writer.WriteOptionalProperty("heartBeatInterval", this.HeartBeatInterval);
             writer.WriteOptionalProperty("bindingVersion", this.BindingVersion);
             writer.WriteExtensions(this.Extensions);

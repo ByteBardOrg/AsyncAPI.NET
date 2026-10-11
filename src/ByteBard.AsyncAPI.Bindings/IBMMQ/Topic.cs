@@ -15,8 +15,8 @@ namespace ByteBard.AsyncAPI.Bindings.IBMMQ
             writer.WriteStartObject();
             writer.WriteOptionalProperty("string", this.StringValue);
             writer.WriteOptionalProperty("objectName", this.ObjectName);
-            writer.WriteOptionalProperty("durablePermitted", this.DurablePermitted);
-            writer.WriteOptionalProperty("lastMsgRetained", this.LastMsgRetained);
+            writer.WriteOptionalProperty<bool>("durablePermitted", this.DurablePermitted);
+            writer.WriteOptionalProperty<bool>("lastMsgRetained", this.LastMsgRetained);
             writer.WriteEndObject();
         }
     }

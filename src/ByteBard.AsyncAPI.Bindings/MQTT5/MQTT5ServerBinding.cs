@@ -24,7 +24,7 @@ namespace ByteBard.AsyncAPI.Bindings.MQTT5
         public override void SerializeV2(IAsyncApiWriter writer) => this.SerializeProperties(writer, AsyncApiVersion.AsyncApi2_0);
         public override void SerializeV3(IAsyncApiWriter writer) => this.SerializeProperties(writer, AsyncApiVersion.AsyncApi3_0);
 
-        public override void SerializeProperties(IAsyncApiWriter writer) => this.SerializeProperties(writer, AsyncApiVersion.AsyncApi2_0);
+        public override void SerializeProperties(IAsyncApiWriter writer) => this.SerializeProperties(writer, AsyncApiVersion.AsyncApi3_0);
 
         private void SerializeProperties(IAsyncApiWriter writer, AsyncApiVersion version)
         {

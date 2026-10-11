@@ -35,7 +35,8 @@ namespace ByteBard.AsyncAPI.Tests.Bindings.GooglePubSub
                 .And.Contain("allowedPersistenceRegions:")
                 .And.Contain("firstRevisionId: '1'");
             var settings = new AsyncApiReaderSettings { Bindings = Parsers };
-            var parsedChannel = new AsyncApiStringReader(settings).ReadFragment<AsyncApiChannel>(channelYaml, version, out _);
+            var parsedChannel = new AsyncApiStringReader(settings).ReadFragment<AsyncApiChannel>(channelYaml, version, out var channelDiagnostics);
+            channelDiagnostics.Errors.Should().BeEmpty();
             parsedChannel.Should().BeEquivalentTo(channel);
 
             var message = new AsyncApiMessage();
@@ -47,7 +48,8 @@ namespace ByteBard.AsyncAPI.Tests.Bindings.GooglePubSub
             });
             var messageYaml = message.SerializeAsYaml(version);
             messageYaml.Should().Contain("orderingKey: customer-7").And.Contain("projects/p/schemas/orders");
-            var parsedMessage = new AsyncApiStringReader(settings).ReadFragment<AsyncApiMessage>(messageYaml, version, out _);
+            var parsedMessage = new AsyncApiStringReader(settings).ReadFragment<AsyncApiMessage>(messageYaml, version, out var messageDiagnostics);
+            messageDiagnostics.Errors.Should().BeEmpty();
             parsedMessage.Should().BeEquivalentTo(message);
         }
     }

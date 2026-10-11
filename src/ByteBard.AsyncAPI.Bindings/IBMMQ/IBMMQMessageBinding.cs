@@ -9,7 +9,7 @@ namespace ByteBard.AsyncAPI.Bindings.IBMMQ
         public string Type { get; set; }
         public string Headers { get; set; }
         public string Description { get; set; }
-        public int? Expiry { get; set; }
+        public long? Expiry { get; set; }
 
         public override string BindingKey => "ibmmq";
 
@@ -19,7 +19,7 @@ namespace ByteBard.AsyncAPI.Bindings.IBMMQ
             { "type", (a, n) => { a.Type = n.GetScalarValue(); } },
             { "headers", (a, n) => { a.Headers = n.GetScalarValue(); } },
             { "description", (a, n) => { a.Description = n.GetScalarValue(); } },
-            { "expiry", (a, n) => { a.Expiry = n.GetIntegerValue(); } },
+            { "expiry", (a, n) => { a.Expiry = n.GetLongValue(); } },
         };
 
         public override void SerializeV2(IAsyncApiWriter writer) => this.SerializeV3(writer);

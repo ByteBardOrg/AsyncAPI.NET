@@ -18,7 +18,8 @@ namespace ByteBard.AsyncAPI.Tests.Bindings.AnypointMQ
             var yaml = original.SerializeAsYaml(version);
             yaml.Should().Contain("destination: orders").And.Contain("destinationType: queue").And.NotContain("bindingVersion");
             var settings = new AsyncApiReaderSettings { Bindings = new[] { new AnypointMQChannelBinding() } };
-            var parsed = new AsyncApiStringReader(settings).ReadFragment<AsyncApiChannel>(yaml, version, out _);
+            var parsed = new AsyncApiStringReader(settings).ReadFragment<AsyncApiChannel>(yaml, version, out var diagnostics);
+            diagnostics.Errors.Should().BeEmpty();
 
             parsed.Bindings["anypointmq"].Should().BeEquivalentTo(original.Bindings["anypointmq"]);
         }
@@ -37,7 +38,8 @@ namespace ByteBard.AsyncAPI.Tests.Bindings.AnypointMQ
             var yaml = original.SerializeAsYaml(version);
             yaml.Should().Contain("headers:").And.Contain("traceId:").And.Contain("bindingVersion: 0.1.0");
             var settings = new AsyncApiReaderSettings { Bindings = new[] { new AnypointMQMessageBinding() } };
-            var parsed = new AsyncApiStringReader(settings).ReadFragment<AsyncApiMessage>(yaml, version, out _);
+            var parsed = new AsyncApiStringReader(settings).ReadFragment<AsyncApiMessage>(yaml, version, out var diagnostics);
+            diagnostics.Errors.Should().BeEmpty();
 
             parsed.Bindings["anypointmq"].Should().BeEquivalentTo(original.Bindings["anypointmq"]);
         }
