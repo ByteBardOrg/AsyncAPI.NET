@@ -1,6 +1,7 @@
 namespace ByteBard.AsyncAPI.Bindings.Kafka
 {
     using System;
+    using System.Collections.Generic;
     using ByteBard.AsyncAPI.Models;
     using ByteBard.AsyncAPI.Readers.ParseNodes;
     using ByteBard.AsyncAPI.Writers;
@@ -37,7 +38,7 @@ namespace ByteBard.AsyncAPI.Bindings.Kafka
             { "bindingVersion", (a, n) => { a.BindingVersion = n.GetScalarValue(); } },
             { "topic", (a, n) => { a.Topic = n.GetScalarValue(); } },
             { "partitions", (a, n) => { a.Partitions = n.GetIntegerValue(); } },
-            { "topicConfiguration", (a, n) => { a.TopicConfiguration = n.ParseMap(kafkaChannelTopicConfigurationObjectFixedFields); } },
+            { "topicConfiguration", (a, n) => { a.TopicConfiguration = ParseTopicConfiguration(n); } },
             { "replicas", (a, n) => { a.Replicas = n.GetIntegerValue(); } },
         };
 
@@ -53,6 +54,27 @@ namespace ByteBard.AsyncAPI.Bindings.Kafka
             { "confluent.value.schema.validation", (a, n) => { a.ConfluentValueSchemaValidation = n.GetBooleanValue(); } },
             { "confluent.value.subject.name.strategy", (a, n) => { a.ConfluentValueSubjectName = n.GetScalarValue(); } },
         };
+
+        private static TopicConfigurationObject ParseTopicConfiguration(ParseNode node)
+        {
+            var mapNode = node.CheckMapNode(node.Context.GetLocation());
+            var configuration = new TopicConfigurationObject();
+            var emptyPatternFields = new Dictionary<Func<string, bool>, Action<TopicConfigurationObject, string, ParseNode>>();
+
+            foreach (var propertyNode in mapNode)
+            {
+                if (kafkaChannelTopicConfigurationObjectFixedFields.ContainsKey(propertyNode.Name))
+                {
+                    propertyNode.ParseField(configuration, kafkaChannelTopicConfigurationObjectFixedFields, emptyPatternFields);
+                }
+                else
+                {
+                    configuration.AdditionalProperties[propertyNode.Name] = propertyNode.Value.CreateAny();
+                }
+            }
+
+            return configuration;
+        }
 
         public override void SerializeV2(IAsyncApiWriter writer)
         {

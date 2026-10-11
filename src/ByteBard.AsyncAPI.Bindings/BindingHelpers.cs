@@ -1,5 +1,7 @@
 namespace ByteBard.AsyncAPI.Bindings
 {
+    using System;
+    using System.Collections.Generic;
     using ByteBard.AsyncAPI.Models.Interfaces;
     using ByteBard.AsyncAPI.Readers;
     using ByteBard.AsyncAPI.Readers.ParseNodes;
@@ -16,10 +18,11 @@ namespace ByteBard.AsyncAPI.Bindings
             }
 
             var instance = new T();
+            var emptyPatternFields = new Dictionary<Func<string, bool>, Action<T, string, ParseNode>>();
 
             foreach (var propertyNode in mapNode)
             {
-                propertyNode.ParseField(instance, fixedFieldMap, null);
+                propertyNode.ParseField(instance, fixedFieldMap, emptyPatternFields);
             }
 
             return instance;

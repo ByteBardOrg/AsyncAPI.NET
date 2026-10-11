@@ -8,6 +8,19 @@
 
     public class TopicConfigurationObject : IAsyncApiElement
     {
+        private static readonly HashSet<string> FixedFieldNames = new()
+        {
+            AsyncApiConstants.CleanupPolicy,
+            AsyncApiConstants.RetentionMilliseconds,
+            AsyncApiConstants.RetentionBytes,
+            AsyncApiConstants.DeleteRetentionMilliseconds,
+            AsyncApiConstants.MaxMessageBytes,
+            AsyncApiConstants.ConfluentKeySchemaValidation,
+            AsyncApiConstants.ConfluentKeySubjectName,
+            AsyncApiConstants.ConfluentValueSchemaValidation,
+            AsyncApiConstants.ConfluentValueSubjectName,
+        };
+
         /// <summary>
         /// The cleanup.policy configuration option.
         /// </summary>
@@ -53,6 +66,12 @@
         /// </summary>
         public string ConfluentValueSubjectName { get; set; }
 
+        /// <summary>
+        /// Additional Kafka topic configuration values not represented by fixed properties.
+        /// Values are retained as JSON-backed <see cref="AsyncApiAny"/> instances.
+        /// </summary>
+        public Dictionary<string, AsyncApiAny> AdditionalProperties { get; set; } = new();
+
         public void Serialize(IAsyncApiWriter writer)
         {
             if (writer is null)
@@ -70,6 +89,18 @@
             writer.WriteOptionalProperty(AsyncApiConstants.ConfluentKeySubjectName, this.ConfluentKeySubjectName);
             writer.WriteOptionalProperty<bool>(AsyncApiConstants.ConfluentValueSchemaValidation, this.ConfluentValueSchemaValidation);
             writer.WriteOptionalProperty(AsyncApiConstants.ConfluentValueSubjectName, this.ConfluentValueSubjectName);
+            if (this.AdditionalProperties != null)
+            {
+                foreach (var property in this.AdditionalProperties)
+                {
+                    if (!FixedFieldNames.Contains(property.Key))
+                    {
+                        writer.WritePropertyName(property.Key);
+                        writer.WriteAny(property.Value);
+                    }
+                }
+            }
+
             writer.WriteEndObject();
         }
     }
