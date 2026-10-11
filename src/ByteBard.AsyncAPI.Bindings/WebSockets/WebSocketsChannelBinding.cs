@@ -23,7 +23,7 @@ namespace ByteBard.AsyncAPI.Bindings.WebSockets
         /// </summary>
         public AsyncApiJsonSchema Headers { get; set; }
 
-        public override string BindingKey => "websockets";
+        public override string BindingKey => "ws";
 
         protected override FixedFieldMap<WebSocketsChannelBinding> FixedFieldMap => new()
         {

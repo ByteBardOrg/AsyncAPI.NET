@@ -74,7 +74,7 @@ namespace ByteBard.AsyncAPI.Bindings.Sqs
 
             writer.WriteStartObject();
             writer.WriteRequiredProperty("name", this.Name);
-            writer.WriteOptionalProperty("fifoQueue", this.FifoQueue);
+            writer.WriteRequiredProperty("fifoQueue", this.FifoQueue);
             writer.WriteOptionalProperty("deduplicationScope", this.DeduplicationScope?.GetDisplayName());
             writer.WriteOptionalProperty("fifoThroughputLimit", this.FifoThroughputLimit?.GetDisplayName());
             writer.WriteOptionalProperty("deliveryDelay", this.DeliveryDelay);

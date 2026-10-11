@@ -119,7 +119,7 @@
         public const string Method = "method";
         public const string SchemaIdPayloadEncoding = "schemaIdPayloadEncoding";
         public const string SchemaLookupStrategy = "schemaLookupStrategy";
-        public const string SchemaIdLocation = "SchemaIdLocation";
+        public const string SchemaIdLocation = "schemaIdLocation";
         public const string Query = "query";
         public const string GroupId = "groupId";
         public const string ClientId = "clientId";
