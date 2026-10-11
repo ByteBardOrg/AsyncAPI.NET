@@ -16,7 +16,7 @@
             var expected =
                 """
                 bindings:
-                  websockets:
+                  ws:
                     method: POST
                     query:
                       description: this mah query
