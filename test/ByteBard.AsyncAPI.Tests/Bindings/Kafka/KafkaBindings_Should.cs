@@ -117,7 +117,7 @@
                   kafka:
                     key:
                       description: this mah other binding
-                    SchemaIdLocation: test
+                    schemaIdLocation: test
                     schemaIdPayloadEncoding: test
                     schemaLookupStrategy: header
                 """;
