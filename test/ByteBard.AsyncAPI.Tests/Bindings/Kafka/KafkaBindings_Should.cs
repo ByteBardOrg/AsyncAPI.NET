@@ -1,6 +1,7 @@
 ﻿namespace ByteBard.AsyncAPI.Tests.Bindings.Kafka
 {
     using System.Collections.Generic;
+    using System.Text.Json.Nodes;
     using FluentAssertions;
     using ByteBard.AsyncAPI.Bindings;
     using ByteBard.AsyncAPI.Bindings.Kafka;
@@ -10,6 +11,39 @@
 
     internal class KafkaBindings_Should : TestBase
     {
+        [Test]
+        public void V2_KafkaTopicConfiguration_PreservesAdditionalScalarAndListValues()
+        {
+            var yaml = """
+                bindings:
+                  kafka:
+                    topicConfiguration:
+                      custom.string: value
+                      custom.integer: 12
+                      custom.boolean: false
+                      custom.list:
+                        - one
+                        - 2
+                        - true
+                """;
+            var settings = new AsyncApiReaderSettings { Bindings = BindingsCollection.Kafka };
+            var reader = new AsyncApiStringReader(settings);
+
+            var channel = reader.ReadFragment<AsyncApiChannel>(yaml, AsyncApiVersion.AsyncApi2_0, out var diagnostic);
+            diagnostic.Errors.Should().BeEmpty();
+
+            var serialized = channel.SerializeAsYaml(AsyncApiVersion.AsyncApi2_0);
+            var roundTripped = reader.ReadFragment<AsyncApiChannel>(serialized, AsyncApiVersion.AsyncApi2_0, out diagnostic);
+
+            diagnostic.Errors.Should().BeEmpty();
+            var configuration = ((KafkaChannelBinding)roundTripped.Bindings["kafka"]).TopicConfiguration;
+            configuration.AdditionalProperties["custom.string"].GetValue<string>().Should().Be("value");
+            configuration.AdditionalProperties["custom.integer"].GetValue<decimal>().Should().Be(12);
+            configuration.AdditionalProperties["custom.boolean"].GetValue<bool>().Should().BeFalse();
+            configuration.AdditionalProperties["custom.list"].GetNode().Should().BeOfType<JsonArray>();
+            configuration.AdditionalProperties["custom.list"].GetNode().ToJsonString().Should().Be("[\"one\",2,true]");
+        }
+
         [Test]
         public void V2_KafkaChannelBinding_WithFilledObject_SerializesAndDeserializes()
         {
