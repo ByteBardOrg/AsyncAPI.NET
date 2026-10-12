@@ -8,6 +8,10 @@ namespace ByteBard.AsyncAPI.Bindings.GooglePubSub
     {
         public IEnumerable<string> AllowedPersistenceRegions { get; set; }
 
+        /// <summary>
+        /// Writes the message storage policy object, omitting null or empty persistence regions.
+        /// </summary>
+        /// <exception cref="System.NullReferenceException"><paramref name="writer"/> is null.</exception>
         public void Serialize(IAsyncApiWriter writer)
         {
             writer.WriteStartObject();

@@ -54,21 +54,40 @@
             { "messageExpiryInterval", (a, n) => { a.MessageExpiryIntervalValue = MQTTIntegerOrSchema.Parse(n); } },
         };
 
+        /// <summary>
+        /// Writes the MQTT operation binding object and its extensions for AsyncAPI 2.0.
+        /// </summary>
+        /// <exception cref="ArgumentNullException"><paramref name="writer"/> is null.</exception>
         public override void SerializeV2(IAsyncApiWriter writer)
         {
             this.SerializeProperties(writer, AsyncApiVersion.AsyncApi2_0);
         }
 
+        /// <summary>
+        /// Writes the MQTT operation binding object and its extensions for AsyncAPI 3.0.
+        /// </summary>
+        /// <exception cref="ArgumentNullException"><paramref name="writer"/> is null.</exception>
         public override void SerializeV3(IAsyncApiWriter writer)
         {
             this.SerializeProperties(writer, AsyncApiVersion.AsyncApi3_0);
         }
 
+        /// <summary>
+        /// Writes the MQTT operation binding object and its extensions for AsyncAPI 3.0.
+        /// </summary>
+        /// <remarks>Unset QoS and retain values are omitted. Message expiry is written as an integer or schema.</remarks>
+        /// <exception cref="ArgumentNullException"><paramref name="writer"/> is null.</exception>
         public override void SerializeProperties(IAsyncApiWriter writer)
         {
             this.SerializeProperties(writer, AsyncApiVersion.AsyncApi3_0);
         }
 
+        /// <summary>
+        /// Writes the MQTT operation binding object and extensions, using the selected version for nested schemas.
+        /// </summary>
+        /// <param name="writer">The writer receiving the value.</param>
+        /// <param name="version">Uses AsyncAPI 2.0 schema serialization for <see cref="AsyncApiVersion.AsyncApi2_0"/>; otherwise uses AsyncAPI 3.0.</param>
+        /// <exception cref="ArgumentNullException"><paramref name="writer"/> is null.</exception>
         private void SerializeProperties(IAsyncApiWriter writer, AsyncApiVersion version)
         {
             if (writer is null)

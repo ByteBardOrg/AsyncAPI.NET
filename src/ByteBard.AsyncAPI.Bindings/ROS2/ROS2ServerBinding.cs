@@ -21,10 +21,23 @@ namespace ByteBard.AsyncAPI.Bindings.ROS2
             { "domainId", (a, n) => { a.DomainId = n.GetIntegerValueOrDefault(); } },
         };
 
+        /// <summary>
+        /// Writes the ROS 2 server binding object and its extensions for AsyncAPI 2.0.
+        /// </summary>
+        /// <exception cref="ArgumentNullException"><paramref name="writer"/> is null.</exception>
         public override void SerializeV2(IAsyncApiWriter writer) => this.SerializeV3(writer);
 
+        /// <summary>
+        /// Writes the ROS 2 server binding object and its extensions for AsyncAPI 3.0.
+        /// </summary>
+        /// <exception cref="ArgumentNullException"><paramref name="writer"/> is null.</exception>
         public override void SerializeV3(IAsyncApiWriter writer) => this.SerializeProperties(writer);
 
+        /// <summary>
+        /// Writes the ROS 2 server binding object and its extensions for AsyncAPI 3.0.
+        /// </summary>
+        /// <remarks>BindingVersion is not written.</remarks>
+        /// <exception cref="ArgumentNullException"><paramref name="writer"/> is null.</exception>
         public override void SerializeProperties(IAsyncApiWriter writer)
         {
             if (writer is null) throw new ArgumentNullException(nameof(writer));

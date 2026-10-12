@@ -80,21 +80,40 @@
             { "retain", (a, n) => { a.Retain = n.GetBooleanValue(); } },
         };
 
+        /// <summary>
+        /// Writes the MQTT server binding object and its extensions for AsyncAPI 2.0.
+        /// </summary>
+        /// <exception cref="ArgumentNullException"><paramref name="writer"/> is null.</exception>
         public override void SerializeV2(IAsyncApiWriter writer)
         {
             this.SerializeProperties(writer, AsyncApiVersion.AsyncApi2_0);
         }
 
+        /// <summary>
+        /// Writes the MQTT server binding object and its extensions for AsyncAPI 3.0.
+        /// </summary>
+        /// <exception cref="ArgumentNullException"><paramref name="writer"/> is null.</exception>
         public override void SerializeV3(IAsyncApiWriter writer)
         {
             this.SerializeProperties(writer, AsyncApiVersion.AsyncApi3_0);
         }
 
+        /// <summary>
+        /// Writes the MQTT server binding object and its extensions for AsyncAPI 3.0.
+        /// </summary>
+        /// <remarks>An unset client ID is omitted. Session expiry and maximum packet size are written as integers or schemas.</remarks>
+        /// <exception cref="ArgumentNullException"><paramref name="writer"/> is null.</exception>
         public override void SerializeProperties(IAsyncApiWriter writer)
         {
             this.SerializeProperties(writer, AsyncApiVersion.AsyncApi3_0);
         }
 
+        /// <summary>
+        /// Writes the MQTT server binding object and extensions, using the selected version for nested schemas.
+        /// </summary>
+        /// <param name="writer">The writer receiving the value.</param>
+        /// <param name="version">Uses AsyncAPI 2.0 schema serialization for <see cref="AsyncApiVersion.AsyncApi2_0"/>; otherwise uses AsyncAPI 3.0.</param>
+        /// <exception cref="ArgumentNullException"><paramref name="writer"/> is null.</exception>
         private void SerializeProperties(IAsyncApiWriter writer, AsyncApiVersion version)
         {
             if (writer is null)
@@ -114,6 +133,14 @@
             writer.WriteEndObject();
         }
 
+        /// <summary>
+        /// Writes a named integer or schema property, omitting it when the value is null.
+        /// </summary>
+        /// <param name="writer">The writer receiving the value.</param>
+        /// <param name="name">The property name to write.</param>
+        /// <param name="value">The integer or schema to write, or null to omit the property.</param>
+        /// <param name="version">Uses AsyncAPI 2.0 schema serialization for <see cref="AsyncApiVersion.AsyncApi2_0"/>; otherwise uses AsyncAPI 3.0.</param>
+        /// <exception cref="ArgumentNullException">A value is present and <paramref name="writer"/> or <paramref name="name"/> is null.</exception>
         private void WriteIntegerOrSchema(IAsyncApiWriter writer, string name, MQTTIntegerOrSchema value, AsyncApiVersion version)
         {
             if (value?.LongInteger is long integer) writer.WriteRequiredProperty(name, integer);

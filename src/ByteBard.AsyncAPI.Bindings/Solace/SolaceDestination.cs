@@ -14,6 +14,10 @@ namespace ByteBard.AsyncAPI.Bindings.Solace
         public SolaceQueue Queue { get; set; }
         public SolaceTopic Topic { get; set; }
 
+        /// <summary>
+        /// Writes the destination object with any queue, topic, and binding version settings.
+        /// </summary>
+        /// <exception cref="ArgumentNullException"><paramref name="writer"/> is null.</exception>
         public void Serialize(IAsyncApiWriter writer)
         {
             if (writer is null) throw new ArgumentNullException(nameof(writer));

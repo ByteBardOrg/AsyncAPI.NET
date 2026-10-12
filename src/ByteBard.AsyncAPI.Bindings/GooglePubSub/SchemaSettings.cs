@@ -10,6 +10,10 @@ namespace ByteBard.AsyncAPI.Bindings.GooglePubSub
         public string LastRevisionId { get; set; }
         public string Name { get; set; }
 
+        /// <summary>
+        /// Writes the schema settings object, omitting unset values.
+        /// </summary>
+        /// <exception cref="System.NullReferenceException"><paramref name="writer"/> is null.</exception>
         public void Serialize(IAsyncApiWriter writer)
         {
             writer.WriteStartObject();

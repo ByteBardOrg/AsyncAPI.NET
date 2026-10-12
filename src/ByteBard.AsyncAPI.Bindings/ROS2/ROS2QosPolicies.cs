@@ -27,6 +27,10 @@ namespace ByteBard.AsyncAPI.Bindings.ROS2
             { "leaseDuration", (a, n) => { a.LeaseDuration = n.GetIntegerValueOrDefault(); } },
         };
 
+        /// <summary>
+        /// Writes the QoS policy object, omitting unset values and preserving zero and negative numeric values.
+        /// </summary>
+        /// <exception cref="System.NullReferenceException"><paramref name="writer"/> is null.</exception>
         internal void Serialize(IAsyncApiWriter writer)
         {
             writer.WriteStartObject();

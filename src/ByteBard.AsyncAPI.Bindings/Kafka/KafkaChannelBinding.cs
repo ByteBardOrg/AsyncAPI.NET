@@ -55,6 +55,12 @@ namespace ByteBard.AsyncAPI.Bindings.Kafka
             { "confluent.value.subject.name.strategy", (a, n) => { a.ConfluentValueSubjectName = n.GetScalarValue(); } },
         };
 
+        /// <summary>
+        /// Parses known topic settings and retains other settings as JSON values in AdditionalProperties.
+        /// </summary>
+        /// <returns>A new topic configuration; known fields with parsing errors may remain unset.</returns>
+        /// <remarks>Reader and AsyncAPI exceptions from known field handlers are recorded as diagnostics.</remarks>
+        /// <exception cref="ByteBard.AsyncAPI.Readers.Exceptions.AsyncApiReaderException"><paramref name="node"/> is not a map.</exception>
         private static TopicConfigurationObject ParseTopicConfiguration(ParseNode node)
         {
             var mapNode = node.CheckMapNode(node.Context.GetLocation());
