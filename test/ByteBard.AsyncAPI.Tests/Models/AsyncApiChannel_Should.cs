@@ -36,7 +36,7 @@
         {
             var expected = """
                 bindings:
-                  websockets:
+                  ws:
                     method: POST
                     query:
                       properties:
