@@ -29,9 +29,6 @@ namespace ByteBard.AsyncAPI.Readers
             where TBinding : IBinding
         {
             var context = mapNode.Context;
-
-            // TBinding is the binding interface (e.g. IChannelBinding), so drop the leading "I" for the diagnostic.
-            var bindingType = typeof(TBinding).Name.Substring(1);
             var bindings = new AsyncApiBindings<TBinding>();
             foreach (var property in mapNode)
             {
@@ -42,6 +39,9 @@ namespace ByteBard.AsyncAPI.Readers
 
                 if (!parsers.TryGetValue(property.Name, out var parser))
                 {
+                    // TBinding is the binding interface (e.g. IChannelBinding), so drop the leading "I" for the diagnostic.
+                    var bindingType = typeof(TBinding).Name.Substring(1);
+
                     // Reported as an error because the binding is dropped from the model and cannot be written back.
                     context.Diagnostic.Errors.Add(
                         new AsyncApiError(context.GetLocation(), $"{bindingType} {property.Name} is not found"));
