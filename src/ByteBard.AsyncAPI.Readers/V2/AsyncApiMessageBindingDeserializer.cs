@@ -1,4 +1,4 @@
-﻿namespace ByteBard.AsyncAPI.Readers
+namespace ByteBard.AsyncAPI.Readers
 {
     using ByteBard.AsyncAPI.Extensions;
     using ByteBard.AsyncAPI.Models;
@@ -22,7 +22,7 @@
                 return new AsyncApiBindingsReference<IMessageBinding>(pointer);
             }
 
-            return BindingDeserializer.LoadBindings("MessageBinding", mapNode, node.Context.MessageBindingParsers, messageBindingPatternFields);
+            return BindingDeserializer.LoadBindings(mapNode, node.Context.MessageBindingParsers, messageBindingPatternFields);
         }
     }
 }

@@ -1,4 +1,4 @@
-﻿namespace ByteBard.AsyncAPI.Readers
+namespace ByteBard.AsyncAPI.Readers
 {
     using System.Collections.Generic;
     using System.Linq;
@@ -23,13 +23,15 @@
         }
 
         internal static AsyncApiBindings<TBinding> LoadBindings<TBinding>(
-            string bindingType,
             MapNode mapNode,
             IDictionary<string, IBindingParser<TBinding>> parsers,
             PatternFieldMap<AsyncApiBindings<TBinding>> patternFields)
             where TBinding : IBinding
         {
             var context = mapNode.Context;
+
+            // TBinding is the binding interface (e.g. IChannelBinding), so drop the leading "I" for the diagnostic.
+            var bindingType = typeof(TBinding).Name.Substring(1);
             var bindings = new AsyncApiBindings<TBinding>();
             foreach (var property in mapNode)
             {
