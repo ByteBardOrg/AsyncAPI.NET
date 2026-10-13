@@ -40,8 +40,9 @@
 
                 if (!parsers.TryGetValue(property.Name, out var parser))
                 {
-                    context.Diagnostic.Warnings.Add(
-                        new AsyncApiError(context.GetLocation(), $"{bindingType} '{property.Name}' was ignored because no binding parser is registered for it."));
+                    // Reported as an error because the binding is dropped from the model and cannot be written back.
+                    context.Diagnostic.Errors.Add(
+                        new AsyncApiError(context.GetLocation(), $"{bindingType} {property.Name} is not found"));
                     continue;
                 }
 

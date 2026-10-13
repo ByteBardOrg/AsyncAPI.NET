@@ -55,30 +55,58 @@ namespace ByteBard.AsyncAPI.Tests.Bindings
 
         [TestCase(AsyncApiVersion.AsyncApi2_0)]
         [TestCase(AsyncApiVersion.AsyncApi3_0)]
-        public void ServerBindings_WithUnregisteredBinding_AddsWarning(AsyncApiVersion version)
+        public void ServerBindings_WithUnregisteredBinding_AddsError(AsyncApiVersion version)
         {
-            AssertUnregisteredBindingWarns<IServerBinding>(version, "ServerBinding");
+            AssertUnregisteredBindingErrors<IServerBinding>(version, "ServerBinding");
         }
 
         [TestCase(AsyncApiVersion.AsyncApi2_0)]
         [TestCase(AsyncApiVersion.AsyncApi3_0)]
-        public void ChannelBindings_WithUnregisteredBinding_AddsWarning(AsyncApiVersion version)
+        public void ChannelBindings_WithUnregisteredBinding_AddsError(AsyncApiVersion version)
         {
-            AssertUnregisteredBindingWarns<IChannelBinding>(version, "ChannelBinding");
+            AssertUnregisteredBindingErrors<IChannelBinding>(version, "ChannelBinding");
         }
 
         [TestCase(AsyncApiVersion.AsyncApi2_0)]
         [TestCase(AsyncApiVersion.AsyncApi3_0)]
-        public void OperationBindings_WithUnregisteredBinding_AddsWarning(AsyncApiVersion version)
+        public void OperationBindings_WithUnregisteredBinding_AddsError(AsyncApiVersion version)
         {
-            AssertUnregisteredBindingWarns<IOperationBinding>(version, "OperationBinding");
+            AssertUnregisteredBindingErrors<IOperationBinding>(version, "OperationBinding");
         }
 
         [TestCase(AsyncApiVersion.AsyncApi2_0)]
         [TestCase(AsyncApiVersion.AsyncApi3_0)]
-        public void MessageBindings_WithUnregisteredBinding_AddsWarning(AsyncApiVersion version)
+        public void MessageBindings_WithUnregisteredBinding_AddsError(AsyncApiVersion version)
         {
-            AssertUnregisteredBindingWarns<IMessageBinding>(version, "MessageBinding");
+            AssertUnregisteredBindingErrors<IMessageBinding>(version, "MessageBinding");
+        }
+
+        [TestCase(AsyncApiVersion.AsyncApi2_0)]
+        [TestCase(AsyncApiVersion.AsyncApi3_0)]
+        public void ServerBindings_WithRegisteredAndUnregisteredBinding_ReserializesOnlyRegisteredBinding(AsyncApiVersion version)
+        {
+            AssertUnregisteredBindingIsNotReserialized<IServerBinding>(version);
+        }
+
+        [TestCase(AsyncApiVersion.AsyncApi2_0)]
+        [TestCase(AsyncApiVersion.AsyncApi3_0)]
+        public void ChannelBindings_WithRegisteredAndUnregisteredBinding_ReserializesOnlyRegisteredBinding(AsyncApiVersion version)
+        {
+            AssertUnregisteredBindingIsNotReserialized<IChannelBinding>(version);
+        }
+
+        [TestCase(AsyncApiVersion.AsyncApi2_0)]
+        [TestCase(AsyncApiVersion.AsyncApi3_0)]
+        public void OperationBindings_WithRegisteredAndUnregisteredBinding_ReserializesOnlyRegisteredBinding(AsyncApiVersion version)
+        {
+            AssertUnregisteredBindingIsNotReserialized<IOperationBinding>(version);
+        }
+
+        [TestCase(AsyncApiVersion.AsyncApi2_0)]
+        [TestCase(AsyncApiVersion.AsyncApi3_0)]
+        public void MessageBindings_WithRegisteredAndUnregisteredBinding_ReserializesOnlyRegisteredBinding(AsyncApiVersion version)
+        {
+            AssertUnregisteredBindingIsNotReserialized<IMessageBinding>(version);
         }
 
         private static AsyncApiBindings<TBinding> Read<TBinding>(string input, AsyncApiVersion version, out AsyncApiDiagnostic diagnostic)
@@ -102,17 +130,33 @@ namespace ByteBard.AsyncAPI.Tests.Bindings
             bindings.Extensions.Keys.Should().BeEquivalentTo("x-myextension");
         }
 
-        private static void AssertUnregisteredBindingWarns<TBinding>(AsyncApiVersion version, string bindingType)
+        private static void AssertUnregisteredBindingErrors<TBinding>(AsyncApiVersion version, string bindingType)
             where TBinding : IBinding
         {
             // Act
             var bindings = Read<TBinding>(BindingsWithUnknownBinding, version, out var diagnostic);
 
             // Assert
-            diagnostic.Errors.Should().BeEmpty();
-            diagnostic.Warnings.Select(w => w.Message).Should().BeEquivalentTo(
-                $"{bindingType} 'unknown' was ignored because no binding parser is registered for it.");
+            diagnostic.Errors.Select(e => e.Message).Should().BeEquivalentTo($"{bindingType} unknown is not found");
+            diagnostic.Warnings.Should().BeEmpty();
             bindings.Keys.Should().BeEquivalentTo("kafka");
+        }
+
+        private static void AssertUnregisteredBindingIsNotReserialized<TBinding>(AsyncApiVersion version)
+            where TBinding : IBinding
+        {
+            // Arrange
+            var bindings = Read<TBinding>(BindingsWithUnknownBinding, version, out var diagnostic);
+
+            // Act
+            var reserialized = bindings.SerializeAsYaml(version);
+
+            // Assert
+            // The model has no way to hold a binding without a parser, so it is lost on write.
+            // That is why reading it must stay an error.
+            diagnostic.Errors.Should().ContainSingle();
+            reserialized.Should().Contain("kafka");
+            reserialized.Should().NotContain("unknown");
         }
     }
 }
