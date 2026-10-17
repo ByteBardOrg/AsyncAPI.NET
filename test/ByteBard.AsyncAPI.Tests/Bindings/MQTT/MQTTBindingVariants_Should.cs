@@ -111,5 +111,35 @@ namespace ByteBard.AsyncAPI.Tests.Bindings.MQTT
             var yaml = new MQTTOperationBinding().SerializeAsYaml(AsyncApiVersion.AsyncApi3_0);
             yaml.Should().NotContain("qos:").And.NotContain("retain:");
         }
+
+        [TestCase(AsyncApiVersion.AsyncApi2_0)]
+        [TestCase(AsyncApiVersion.AsyncApi3_0)]
+        public void LastWill_WithoutTopicAndRetain_RoundTripsWithoutAddingThem(AsyncApiVersion version)
+        {
+            var settings = new AsyncApiReaderSettings { Bindings = BindingsCollection.MQTT };
+            var yaml = (version == AsyncApiVersion.AsyncApi2_0 ? "url" : "host") + ": localhost\n" +
+                """
+                protocol: mqtt
+                bindings:
+                  mqtt:
+                    lastWill:
+                      qos: 1
+                """;
+
+            var server = new AsyncApiStringReader(settings).ReadFragment<AsyncApiServer>(yaml, version, out var diagnostics);
+            diagnostics.Errors.Should().BeEmpty();
+
+            var actual = server.SerializeAsYaml(version);
+            actual.Should().Contain("qos: 1").And.NotContain("topic:").And.NotContain("retain:");
+        }
+
+        [Test]
+        public void LastWill_WithExplicitRetainFalse_WritesRetain()
+        {
+            var lastWill = new LastWill { Topic = "/last-wills", Retain = false };
+            var server = new MQTTServerBinding { LastWill = lastWill };
+
+            server.SerializeAsYaml(AsyncApiVersion.AsyncApi3_0).Should().Contain("topic: /last-wills").And.Contain("retain: false");
+        }
     }
 }

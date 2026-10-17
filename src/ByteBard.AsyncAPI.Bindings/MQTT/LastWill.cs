@@ -6,6 +6,8 @@
 
     public class LastWill : IAsyncApiElement
     {
+        private bool? retain;
+
         /// <summary>
         /// The topic where the Last Will and Testament message will be sent.
         /// </summary>
@@ -26,7 +28,11 @@
         /// <summary>
         /// Whether the broker should retain the Last Will and Testament message or not.
         /// </summary>
-        public bool Retain { get; set; }
+        public bool Retain
+        {
+            get => this.retain ?? false;
+            set => this.retain = value;
+        }
 
         public void Serialize(IAsyncApiWriter writer)
         {
@@ -36,10 +42,10 @@
             }
 
             writer.WriteStartObject();
-            writer.WriteRequiredProperty("topic", this.Topic);
+            writer.WriteOptionalProperty("topic", this.Topic);
             writer.WriteOptionalProperty("qos", (int?)this.QoS);
             writer.WriteOptionalProperty("message", this.Message);
-            writer.WriteRequiredProperty("retain", this.Retain);
+            writer.WriteOptionalProperty("retain", this.retain);
             writer.WriteEndObject();
         }
     }
