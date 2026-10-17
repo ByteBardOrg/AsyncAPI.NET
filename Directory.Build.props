@@ -1,0 +1,6 @@
+<Project>
+  <PropertyGroup>
+    <!-- Overriding Equals or == without GetHashCode breaks hash-based collections and LINQ Distinct. -->
+    <WarningsAsErrors>$(WarningsAsErrors);CS0659;CS0661</WarningsAsErrors>
+  </PropertyGroup>
+</Project>
