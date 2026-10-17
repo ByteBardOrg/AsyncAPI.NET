@@ -70,8 +70,8 @@ namespace ByteBard.AsyncAPI.Readers
         {
             { "type", (a, n) => { } },
             { "logicalType", (a, n) => { } },
-            { "precision", (a, n) => a.Precision = int.Parse(n.GetScalarValue()) },
-            { "scale", (a, n) => a.Scale = int.Parse(n.GetScalarValue()) },
+            { "precision", (a, n) => a.Precision = n.GetIntegerValue() },
+            { "scale", (a, n) => a.Scale = n.GetIntegerValue() },
         };
 
         private static readonly FixedFieldMap<AvroUUID> UUIDFixedFields = new()
