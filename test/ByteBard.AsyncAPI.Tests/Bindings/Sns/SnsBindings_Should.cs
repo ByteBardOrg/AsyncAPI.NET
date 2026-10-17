@@ -85,18 +85,18 @@ namespace ByteBard.AsyncAPI.Tests.Bindings.Sns
                         {
                             Effect = Effect.Deny,
                             Principal = new PrincipalStar(),
-                            Action = new StringOrStringList(new AsyncApiAny(new List<string>()
+                            Action = new List<string>()
                             {
                                 "sns:Publish",
                                 "sns:Delete",
-                            })),
+                            },
                             Condition = new Condition(new Dictionary<string, Dictionary<string, StringOrStringList>>
                             {
                                 {
                                     "StringEquals", new Dictionary<string, StringOrStringList>
                                     {
                                         {
-                                            "aws:username", new StringOrStringList(new AsyncApiAny(new List<string>() { "johndoe", "mrsmith" }))
+                                            "aws:username", new List<string>() { "johndoe", "mrsmith" }
                                         },
                                     }
                                 },
@@ -106,16 +106,16 @@ namespace ByteBard.AsyncAPI.Tests.Bindings.Sns
                         {
                             Effect = Effect.Allow,
                             Principal = new PrincipalObject(new KeyValuePair<string, StringOrStringList>(
-                                "AWS", new StringOrStringList(new AsyncApiAny(new List<string>
-                                    { "arn:aws:iam::123456789012:user/alex.wichmann", "arn:aws:iam::123456789012:user/dec.kolakowski" })))),
-                            Action = new StringOrStringList(new AsyncApiAny("sns:Create")),
+                                "AWS", new List<string>
+                                    { "arn:aws:iam::123456789012:user/alex.wichmann", "arn:aws:iam::123456789012:user/dec.kolakowski" })),
+                            Action = "sns:Create",
                             Condition = new Condition(new Dictionary<string, Dictionary<string, StringOrStringList>>
                             {
                                 {
                                     "NumericLessThanEquals", new Dictionary<string, StringOrStringList>
                                     {
                                         {
-                                            "aws:MultiFactorAuthAge", new StringOrStringList(new AsyncApiAny("3600"))
+                                            "aws:MultiFactorAuthAge", "3600"
                                         },
                                     }
                                 },
