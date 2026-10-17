@@ -1,7 +1,6 @@
 ﻿namespace ByteBard.AsyncAPI.Tests.Bindings.Http
 {
     using System.Linq;
-    using System.Net;
     using FluentAssertions;
     using ByteBard.AsyncAPI.Bindings;
     using ByteBard.AsyncAPI.Bindings.Http;
@@ -156,7 +155,7 @@
                 {
                     Description = "response headers",
                 },
-                StatusCode = HttpStatusCode.OK,
+                StatusCode = 200,
             });
 
             // Act
@@ -179,7 +178,7 @@
                 {
                     Description = "response headers",
                 },
-                StatusCode = HttpStatusCode.OK,
+                StatusCode = 200,
             });
 
             // Act
@@ -188,6 +187,80 @@
             // Assert
             actual.Should().NotContain("statusCode");
             actual.Should().Contain("bindingVersion: 0.2.0");
+        }
+
+        [Test]
+        public void V3_HttpMessageBinding_ReadsStatusCode()
+        {
+            var yaml =
+                """
+                bindings:
+                  http:
+                    statusCode: 404
+                """;
+
+            var settings = new AsyncApiReaderSettings { Bindings = BindingsCollection.Http };
+            var message = new AsyncApiStringReader(settings).ReadFragment<AsyncApiMessage>(yaml, AsyncApiVersion.AsyncApi3_0, out var diagnostics);
+
+            diagnostics.Errors.Should().BeEmpty();
+            ((HttpMessageBinding)message.Bindings["http"]).StatusCode.Should().Be(404);
+        }
+
+        [TestCase("not-found")]
+        [TestCase("200.5")]
+        public void V3_HttpMessageBinding_WithInvalidStatusCode_ReportsError(string statusCode)
+        {
+            var yaml =
+                "bindings:\n" +
+                "  http:\n" +
+                "    statusCode: " + statusCode + "\n";
+
+            var settings = new AsyncApiReaderSettings { Bindings = BindingsCollection.Http };
+            new AsyncApiStringReader(settings).ReadFragment<AsyncApiMessage>(yaml, AsyncApiVersion.AsyncApi3_0, out var diagnostics);
+
+            diagnostics.Errors.Should().ContainSingle().Which.Message.Should().Contain("could not parse to integer");
+        }
+
+        [TestCase(100)]
+        [TestCase(599)]
+        [TestCase(425)] // Too Early (RFC 8470), not a System.Net.HttpStatusCode member
+        [TestCase(499)] // nginx client closed request
+        [TestCase(520)] // Cloudflare unknown error
+        public void V3_HttpMessageBinding_WithValidStatusCode_ReportsNoErrorAndRoundTrips(int statusCode)
+        {
+            var yaml =
+                "bindings:\n" +
+                "  http:\n" +
+                "    statusCode: " + statusCode + "\n";
+
+            var settings = new AsyncApiReaderSettings { Bindings = BindingsCollection.Http };
+            var message = new AsyncApiStringReader(settings).ReadFragment<AsyncApiMessage>(yaml, AsyncApiVersion.AsyncApi3_0, out var diagnostics);
+
+            diagnostics.Errors.Should().BeEmpty();
+            ((HttpMessageBinding)message.Bindings["http"]).StatusCode.Should().Be(statusCode);
+            message.SerializeAsYaml(AsyncApiVersion.AsyncApi3_0).Should().Contain("statusCode: " + statusCode);
+        }
+
+        [TestCase(0)]
+        [TestCase(42)]
+        [TestCase(99)]
+        [TestCase(600)]
+        [TestCase(-200)]
+        public void V3_HttpMessageBinding_WithOutOfRangeStatusCode_ReportsErrorAndKeepsValue(int statusCode)
+        {
+            var yaml =
+                "bindings:\n" +
+                "  http:\n" +
+                "    statusCode: " + statusCode + "\n";
+
+            var settings = new AsyncApiReaderSettings { Bindings = BindingsCollection.Http };
+            var message = new AsyncApiStringReader(settings).ReadFragment<AsyncApiMessage>(yaml, AsyncApiVersion.AsyncApi3_0, out var diagnostics);
+
+            var error = diagnostics.Errors.Should().ContainSingle().Subject;
+            error.Message.Should().Contain("must be between 100 and 599");
+            error.Pointer.Should().EndWith("statusCode");
+            ((HttpMessageBinding)message.Bindings["http"]).StatusCode.Should().Be(statusCode);
+            message.SerializeAsYaml(AsyncApiVersion.AsyncApi3_0).Should().Contain("statusCode: " + statusCode);
         }
     }
 }
