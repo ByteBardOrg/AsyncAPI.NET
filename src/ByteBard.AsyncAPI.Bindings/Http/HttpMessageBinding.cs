@@ -35,8 +35,25 @@ namespace ByteBard.AsyncAPI.Bindings.Http
         {
             { "bindingVersion", (a, n) => { a.BindingVersion = n.GetScalarValue(); } },
             { "headers", (a, n) => { a.Headers = AsyncApiJsonSchemaDeserializer.LoadSchema(n); } },
-            { "statusCode", (a, n) => { a.StatusCode = (HttpStatusCode)n.GetIntegerValue(); } },
+            { "statusCode", (a, n) => { a.StatusCode = LoadStatusCode(n); } },
         };
+
+        /// <summary>
+        /// Reads the status code, reporting values outside the RFC 9110 range (100-599) as errors.
+        /// </summary>
+        /// <remarks>An out-of-range value is still kept so the document can be written back unchanged.</remarks>
+        private static HttpStatusCode LoadStatusCode(ParseNode node)
+        {
+            var code = node.GetIntegerValue();
+            if (code < 100 || code > 599)
+            {
+                node.Context.Diagnostic.Errors.Add(new AsyncApiError(
+                    node.Context.GetLocation(),
+                    $"statusCode {code} is not a valid HTTP status code. It must be between 100 and 599."));
+            }
+
+            return (HttpStatusCode)code;
+        }
 
         public override void SerializeV2(IAsyncApiWriter writer)
         {

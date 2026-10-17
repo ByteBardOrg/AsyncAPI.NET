@@ -221,5 +221,43 @@
 
             diagnostics.Errors.Should().ContainSingle().Which.Message.Should().Contain("could not parse to integer");
         }
+
+        [TestCase(100)]
+        [TestCase(599)]
+        public void V3_HttpMessageBinding_WithBoundaryStatusCode_ReportsNoError(int statusCode)
+        {
+            var yaml =
+                "bindings:\n" +
+                "  http:\n" +
+                "    statusCode: " + statusCode + "\n";
+
+            var settings = new AsyncApiReaderSettings { Bindings = BindingsCollection.Http };
+            var message = new AsyncApiStringReader(settings).ReadFragment<AsyncApiMessage>(yaml, AsyncApiVersion.AsyncApi3_0, out var diagnostics);
+
+            diagnostics.Errors.Should().BeEmpty();
+            ((HttpMessageBinding)message.Bindings["http"]).StatusCode.Should().Be((HttpStatusCode)statusCode);
+        }
+
+        [TestCase(0)]
+        [TestCase(42)]
+        [TestCase(99)]
+        [TestCase(600)]
+        [TestCase(-200)]
+        public void V3_HttpMessageBinding_WithOutOfRangeStatusCode_ReportsErrorAndKeepsValue(int statusCode)
+        {
+            var yaml =
+                "bindings:\n" +
+                "  http:\n" +
+                "    statusCode: " + statusCode + "\n";
+
+            var settings = new AsyncApiReaderSettings { Bindings = BindingsCollection.Http };
+            var message = new AsyncApiStringReader(settings).ReadFragment<AsyncApiMessage>(yaml, AsyncApiVersion.AsyncApi3_0, out var diagnostics);
+
+            var error = diagnostics.Errors.Should().ContainSingle().Subject;
+            error.Message.Should().Contain("must be between 100 and 599");
+            error.Pointer.Should().EndWith("statusCode");
+            ((HttpMessageBinding)message.Bindings["http"]).StatusCode.Should().Be((HttpStatusCode)statusCode);
+            message.SerializeAsYaml(AsyncApiVersion.AsyncApi3_0).Should().Contain("statusCode: " + statusCode);
+        }
     }
 }
