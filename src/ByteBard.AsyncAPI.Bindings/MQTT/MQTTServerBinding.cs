@@ -36,28 +36,16 @@
         /// <summary>
         /// Interval in seconds the broker maintains a session
         /// for a disconnected client until this interval expires.
+        /// Either an <see cref="MQTTInteger"/> or an <see cref="MQTTIntegerSchema"/>.
         /// </summary>
-        public int? SessionExpiryInterval
-        {
-            get => this.SessionExpiryIntervalValue?.Integer;
-            set => this.SessionExpiryIntervalValue = value.HasValue ? MQTTIntegerOrSchema.FromInteger(value.Value) : null;
-        }
-
-        /// <summary>The integer-or-schema session expiry interval value.</summary>
-        public MQTTIntegerOrSchema SessionExpiryIntervalValue { get; set; }
+        public MQTTIntegerOrSchema SessionExpiryInterval { get; set; }
 
         /// <summary>
         /// Number of bytes representing the maximum packet size
         /// the client is willing to accept.
+        /// Either an <see cref="MQTTInteger"/> or an <see cref="MQTTIntegerSchema"/>.
         /// </summary>
-        public int? MaximumPacketSize
-        {
-            get => this.MaximumPacketSizeValue?.Integer;
-            set => this.MaximumPacketSizeValue = value.HasValue ? MQTTIntegerOrSchema.FromInteger(value.Value) : null;
-        }
-
-        /// <summary>The integer-or-schema maximum packet size value.</summary>
-        public MQTTIntegerOrSchema MaximumPacketSizeValue { get; set; }
+        public MQTTIntegerOrSchema MaximumPacketSize { get; set; }
 
         public override string BindingKey => "mqtt";
 
@@ -68,8 +56,8 @@
             { "cleanSession", (a, n) => { a.CleanSession = n.GetBooleanValue(); } },
             { "lastWill", (a, n) => { a.LastWill = n.ParseMap(LastWillFixedFields); } },
             { "keepAlive", (a, n) => { a.KeepAlive = n.GetIntegerValue(); } },
-            { "sessionExpiryInterval", (a, n) => { a.SessionExpiryIntervalValue = MQTTIntegerOrSchema.Parse(n); } },
-            { "maximumPacketSize", (a, n) => { a.MaximumPacketSizeValue = MQTTIntegerOrSchema.Parse(n); } },
+            { "sessionExpiryInterval", (a, n) => { a.SessionExpiryInterval = MQTTIntegerOrSchema.Parse(n); } },
+            { "maximumPacketSize", (a, n) => { a.MaximumPacketSize = MQTTIntegerOrSchema.Parse(n); } },
         };
 
         private static FixedFieldMap<LastWill> LastWillFixedFields = new()
@@ -126,8 +114,8 @@
             writer.WriteOptionalProperty("cleanSession", this.CleanSession);
             writer.WriteOptionalObject("lastWill", this.LastWill, (w, l) => l.Serialize(w));
             writer.WriteOptionalProperty("keepAlive", this.KeepAlive);
-            this.WriteIntegerOrSchema(writer, "sessionExpiryInterval", this.SessionExpiryIntervalValue, version);
-            this.WriteIntegerOrSchema(writer, "maximumPacketSize", this.MaximumPacketSizeValue, version);
+            this.WriteIntegerOrSchema(writer, "sessionExpiryInterval", this.SessionExpiryInterval, version);
+            this.WriteIntegerOrSchema(writer, "maximumPacketSize", this.MaximumPacketSize, version);
             writer.WriteOptionalProperty(AsyncApiConstants.BindingVersion, this.BindingVersion);
             writer.WriteExtensions(this.Extensions);
             writer.WriteEndObject();
@@ -143,12 +131,13 @@
         /// <exception cref="ArgumentNullException">A value is present and <paramref name="writer"/> or <paramref name="name"/> is null.</exception>
         private void WriteIntegerOrSchema(IAsyncApiWriter writer, string name, MQTTIntegerOrSchema value, AsyncApiVersion version)
         {
-            if (value?.LongInteger is long integer) writer.WriteRequiredProperty(name, integer);
-            else if (value?.Schema != null) writer.WriteOptionalObject(name, value.Schema, (w, schema) =>
+            if (value == null)
             {
-                if (version == AsyncApiVersion.AsyncApi2_0) schema.SerializeV2(w);
-                else schema.SerializeV3(w);
-            });
+                return;
+            }
+
+            writer.WritePropertyName(name);
+            value.Serialize(writer, version);
         }
     }
 }
