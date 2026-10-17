@@ -14,6 +14,8 @@
     {
         private AsyncApiServer target;
 
+        private AsyncApiServer Resolved => this.Target ?? throw this.Reference.CreateUnresolvedException();
+
         private AsyncApiServer Target
         {
             get
@@ -28,29 +30,29 @@
             this.Reference = new AsyncApiReference(reference, ReferenceType.Server);
         }
 
-        public override string Host { get => this.Target?.Host; set => this.Target.Host = value; }
+        public override string Host { get => this.Target?.Host; set => this.Resolved.Host = value; }
 
-        public override string PathName { get => this.Target?.PathName; set => this.Target.PathName = value; }
+        public override string PathName { get => this.Target?.PathName; set => this.Resolved.PathName = value; }
 
-        public override string Protocol { get => this.Target?.Protocol; set => this.Target.Protocol = value; }
+        public override string Protocol { get => this.Target?.Protocol; set => this.Resolved.Protocol = value; }
 
-        public override string ProtocolVersion { get => this.Target?.ProtocolVersion; set => this.Target.ProtocolVersion = value; }
+        public override string ProtocolVersion { get => this.Target?.ProtocolVersion; set => this.Resolved.ProtocolVersion = value; }
 
-        public override string Description { get => this.Target?.Description; set => this.Target.Description = value; }
+        public override string Description { get => this.Target?.Description; set => this.Resolved.Description = value; }
 
-        public override string Title { get => this.Target?.Title; set => this.Target.Title = value; }
+        public override string Title { get => this.Target?.Title; set => this.Resolved.Title = value; }
 
-        public override string Summary { get => this.Target?.Summary; set => this.Target.Summary = value; }
+        public override string Summary { get => this.Target?.Summary; set => this.Resolved.Summary = value; }
 
-        public override IDictionary<string, AsyncApiServerVariable> Variables { get => this.Target?.Variables; set => this.Target.Variables = value; }
+        public override IDictionary<string, AsyncApiServerVariable> Variables { get => this.Target?.Variables; set => this.Resolved.Variables = value; }
 
-        public override IList<AsyncApiSecurityScheme> Security { get => this.Target?.Security; set => this.Target.Security = value; }
+        public override IList<AsyncApiSecurityScheme> Security { get => this.Target?.Security; set => this.Resolved.Security = value; }
 
-        public override IList<AsyncApiTag> Tags { get => this.Target?.Tags; set => this.Target.Tags = value; }
+        public override IList<AsyncApiTag> Tags { get => this.Target?.Tags; set => this.Resolved.Tags = value; }
 
-        public override AsyncApiBindings<IServerBinding> Bindings { get => this.Target?.Bindings; set => this.Target.Bindings = value; }
+        public override AsyncApiBindings<IServerBinding> Bindings { get => this.Target?.Bindings; set => this.Resolved.Bindings = value; }
 
-        public override IDictionary<string, IAsyncApiExtension> Extensions { get => this.Target?.Extensions; set => this.Target.Extensions = value; }
+        public override IDictionary<string, IAsyncApiExtension> Extensions { get => this.Target?.Extensions; set => this.Resolved.Extensions = value; }
 
         public AsyncApiReference Reference { get; set; }
 
@@ -75,6 +77,11 @@
                 return this.Equals(reference);
             }
 
+            if (this.Target is null || other.Target is null)
+            {
+                return this.Target is null && other.Target is null && this.Reference == other.Reference;
+            }
+
             return this.Target == other.Target;
         }
 
@@ -95,7 +102,12 @@
 
         public bool Equals(AsyncApiServer other)
         {
-            return this.Target == other;
+            return other is not null && this.Target == other;
+        }
+
+        public override int GetHashCode()
+        {
+            return this.Target?.GetHashCode() ?? this.Reference?.GetHashCode() ?? 0;
         }
 
         public override void SerializeV2(IAsyncApiWriter writer)
@@ -108,7 +120,7 @@
             else
             {
                 this.Reference.Workspace = writer.Workspace;
-                this.Target.SerializeV2(writer);
+                this.Resolved.SerializeV2(writer);
             }
         }
 
@@ -122,7 +134,7 @@
             else
             {
                 this.Reference.Workspace = writer.Workspace;
-                this.Target.SerializeV3(writer);
+                this.Resolved.SerializeV3(writer);
             }
         }
     }

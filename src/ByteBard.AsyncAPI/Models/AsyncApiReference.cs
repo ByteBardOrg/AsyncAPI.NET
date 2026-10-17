@@ -151,6 +151,19 @@
             return this.Equals(reference);
         }
 
+        public override int GetHashCode()
+        {
+            return this.Reference?.GetHashCode() ?? 0;
+        }
+
+        /// <summary>
+        /// Creates the exception thrown when the referenced element is needed but the reference cannot be resolved.
+        /// </summary>
+        internal InvalidOperationException CreateUnresolvedException()
+        {
+            return new InvalidOperationException($"The reference '{this.Reference}' is not resolved, so the element it points to is not available.");
+        }
+
         /// <summary>
         /// Serialize <see cref="AsyncApiReference"/> to Async Api.
         /// </summary>

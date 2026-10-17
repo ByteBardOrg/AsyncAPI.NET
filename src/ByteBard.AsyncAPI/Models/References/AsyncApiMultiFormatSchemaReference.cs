@@ -13,6 +13,8 @@ namespace ByteBard.AsyncAPI.Models
     {
         private AsyncApiMultiFormatSchema target;
 
+        private AsyncApiMultiFormatSchema Resolved => this.Target ?? throw this.Reference.CreateUnresolvedException();
+
         private AsyncApiMultiFormatSchema Target
         {
             get
@@ -27,9 +29,9 @@ namespace ByteBard.AsyncAPI.Models
             this.Reference = new AsyncApiReference(reference, ReferenceType.Schema);
         }
 
-        public override string SchemaFormat { get => this.Target?.SchemaFormat; set => this.Target.SchemaFormat = value; }
+        public override string SchemaFormat { get => this.Target?.SchemaFormat; set => this.Resolved.SchemaFormat = value; }
 
-        public override IAsyncApiSchema Schema { get => this.Target?.Schema; set => this.Target.Schema = value; }
+        public override IAsyncApiSchema Schema { get => this.Target?.Schema; set => this.Resolved.Schema = value; }
 
         public AsyncApiReference Reference { get; set; }
 
@@ -45,7 +47,7 @@ namespace ByteBard.AsyncAPI.Models
             else
             {
                 this.Reference.Workspace = writer.Workspace;
-                this.Target.SerializeV2(writer);
+                this.Resolved.SerializeV2(writer);
             }
         }
 
@@ -59,7 +61,7 @@ namespace ByteBard.AsyncAPI.Models
             else
             {
                 this.Reference.Workspace = writer.Workspace;
-                this.Target.SerializeV3(writer);
+                this.Resolved.SerializeV3(writer);
             }
         }
     }
