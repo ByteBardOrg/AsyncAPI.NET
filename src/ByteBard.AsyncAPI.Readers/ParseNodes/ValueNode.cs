@@ -1,6 +1,7 @@
 namespace ByteBard.AsyncAPI.Readers.ParseNodes
 {
     using System;
+    using System.Globalization;
     using System.Text.Json.Nodes;
     using ByteBard.AsyncAPI.Exceptions;
     using ByteBard.AsyncAPI.Models;
@@ -47,7 +48,7 @@ namespace ByteBard.AsyncAPI.Readers.ParseNodes
 
         public override int GetIntegerValue()
         {
-            if (int.TryParse(this.GetScalarValue(), out int value))
+            if (int.TryParse(this.GetScalarValue(), NumberStyles.Integer, this.Context.Settings.CultureInfo, out int value))
             {
                 return value;
             }
@@ -57,7 +58,7 @@ namespace ByteBard.AsyncAPI.Readers.ParseNodes
 
         public override int? GetIntegerValueOrDefault(int? defaultValue = null)
         {
-            if (int.TryParse(this.GetScalarValue(), out int value))
+            if (int.TryParse(this.GetScalarValue(), NumberStyles.Integer, this.Context.Settings.CultureInfo, out int value))
             {
                 return value;
             }
@@ -67,7 +68,7 @@ namespace ByteBard.AsyncAPI.Readers.ParseNodes
 
         public override long GetLongValue()
         {
-            if (long.TryParse(this.GetScalarValue(), out long value))
+            if (long.TryParse(this.GetScalarValue(), NumberStyles.Integer, this.Context.Settings.CultureInfo, out long value))
             {
                 return value;
             }
@@ -77,7 +78,7 @@ namespace ByteBard.AsyncAPI.Readers.ParseNodes
 
         public override long? GetLongValueOrDefault(long? defaultValue = null)
         {
-            if (long.TryParse(this.GetScalarValue(), out long value))
+            if (long.TryParse(this.GetScalarValue(), NumberStyles.Integer, this.Context.Settings.CultureInfo, out long value))
             {
                 return value;
             }
