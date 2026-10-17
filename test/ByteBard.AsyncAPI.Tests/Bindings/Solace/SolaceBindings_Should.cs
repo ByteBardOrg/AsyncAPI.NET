@@ -20,8 +20,8 @@ namespace ByteBard.AsyncAPI.Tests.Bindings.Solace
             operation.Bindings.Add(new SolaceOperationBinding
             {
                 DmqEligible = false,
-                TimeToLive = new SolaceIntegerOrSchema { Integer = 0 },
-                Priority = new SolaceIntegerOrSchema { Integer = 7 },
+                TimeToLive = 0,
+                Priority = 7,
                 Destinations =
                 {
                     new SolaceDestination
@@ -60,14 +60,8 @@ namespace ByteBard.AsyncAPI.Tests.Bindings.Solace
             };
             operation.Bindings.Add(new SolaceOperationBinding
             {
-                TimeToLive = new SolaceIntegerOrSchema
-                {
-                    Schema = new AsyncApiJsonSchema { Description = "ttl schema" },
-                },
-                Priority = new SolaceIntegerOrSchema
-                {
-                    Schema = new AsyncApiJsonSchemaReference("#/components/schemas/Priority"),
-                },
+                TimeToLive = new AsyncApiJsonSchema { Description = "ttl schema" },
+                Priority = new AsyncApiJsonSchemaReference("#/components/schemas/Priority"),
             });
 
             var document = new AsyncApiDocument
@@ -96,8 +90,8 @@ namespace ByteBard.AsyncAPI.Tests.Bindings.Solace
             diagnostics.Errors.Should().BeEmpty();
             var binding = reparsed.Operations.Values.Should().ContainSingle().Which.Bindings.Values.Should()
                 .ContainSingle().Which.Should().BeOfType<SolaceOperationBinding>().Subject;
-            binding.TimeToLive.Schema.Description.Should().Be("ttl schema");
-            ((AsyncApiJsonSchemaReference)binding.Priority.Schema).Reference.Reference.Should().Be("#/components/schemas/Priority");
+            binding.TimeToLive.Should().BeOfType<SolaceIntegerSchema>().Which.Schema.Description.Should().Be("ttl schema");
+            binding.Priority.Should().BeOfType<SolaceIntegerSchema>().Which.Schema.Should().BeOfType<AsyncApiJsonSchemaReference>().Which.Reference.Reference.Should().Be("#/components/schemas/Priority");
         }
 
         [TestCase(AsyncApiVersion.AsyncApi2_0)]
@@ -108,7 +102,7 @@ namespace ByteBard.AsyncAPI.Tests.Bindings.Solace
             var operation = new AsyncApiOperation();
             operation.Bindings.Add(new SolaceOperationBinding
             {
-                TimeToLive = new SolaceIntegerOrSchema { Integer = largeTtl },
+                TimeToLive = largeTtl,
             });
 
             var yaml = operation.SerializeAsYaml(version);
@@ -118,22 +112,20 @@ namespace ByteBard.AsyncAPI.Tests.Bindings.Solace
             settings.Bindings = new List<IBindingParser<IBinding>> { new SolaceOperationBinding() };
             var parsed = new AsyncApiStringReader(settings).ReadFragment<AsyncApiOperation>(yaml, version, out _);
             var binding = parsed.Bindings.Should().ContainSingle().Which.Value.Should().BeOfType<SolaceOperationBinding>().Subject;
-            binding.TimeToLive.Integer.Should().Be(largeTtl);
+            binding.TimeToLive.Should().BeOfType<SolaceInteger>().Which.Value.Should().Be(largeTtl);
         }
 
         [Test]
-        public void OperationBinding_RejectsEmptyIntegerOrSchemaBeforeWriting()
+        public void IntegerOrSchema_ConvertsImplicitlyToAndFromItsAlternatives()
         {
-            var operation = new AsyncApiOperation();
-            operation.Bindings.Add(new SolaceOperationBinding
-            {
-                TimeToLive = new SolaceIntegerOrSchema(),
-            });
+            var schema = new AsyncApiJsonSchema { Type = SchemaType.Integer };
+            var binding = new SolaceOperationBinding { TimeToLive = 2592000000L, Priority = schema };
 
-            var exception = FluentActions.Invoking(() => operation.SerializeAsYaml(AsyncApiVersion.AsyncApi2_0))
-                .Should().Throw<System.InvalidOperationException>()
-                .Which;
-            exception.Message.Should().Contain("must contain an integer or a schema");
+            long timeToLive = binding.TimeToLive.Should().BeOfType<SolaceInteger>().Subject;
+            AsyncApiJsonSchema priority = binding.Priority.Should().BeOfType<SolaceIntegerSchema>().Subject;
+
+            timeToLive.Should().Be(2592000000L);
+            priority.Should().BeSameAs(schema);
         }
 
         [TestCase(AsyncApiVersion.AsyncApi2_0)]
