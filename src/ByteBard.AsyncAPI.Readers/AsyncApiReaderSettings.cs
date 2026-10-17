@@ -73,7 +73,7 @@ namespace ByteBard.AsyncAPI.Readers
         /// <summary>
         /// Uri where relative references should be resolved from when using the External Reference Loader.
         /// </summary>
-        public Uri? BaseUri { get; set; }
+        public Uri BaseUri { get; set; }
         
         /// <summary>
         /// External reference reader implementation provided by users for reading external resources.

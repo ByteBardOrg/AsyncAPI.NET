@@ -15,7 +15,7 @@
         /// <summary>
         /// An optional string representation of this channel's address. The address is typically the "topic name", "routing key", "event type", or "path". When null or absent, it MUST be interpreted as unknown. This is useful when the address is generated dynamically at runtime or can't be known upfront. It MAY contain Channel Address Expressions. Query parameters and fragments SHALL NOT be used, instead use bindings to define them.
         /// </summary>
-        public virtual string? Address { get; set; }
+        public virtual string Address { get; set; }
 
         /// <summary>
         /// A map of the messages that will be sent to this channel by any application at any time. Every message sent to this channel MUST be valid against one, and only one, of the message objects defined in this map.

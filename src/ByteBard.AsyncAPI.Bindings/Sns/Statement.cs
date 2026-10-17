@@ -26,7 +26,7 @@ namespace ByteBard.AsyncAPI.Bindings.Sns
         /// <summary>
         /// The resource(s) that this policy applies to.
         /// </summary>
-        public StringOrStringList? Resource { get; set; }
+        public StringOrStringList Resource { get; set; }
 
         /// <summary>
         /// Specific circumstances under which the policy grants permission.
