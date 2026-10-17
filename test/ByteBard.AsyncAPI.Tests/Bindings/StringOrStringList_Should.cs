@@ -13,47 +13,44 @@ namespace ByteBard.AsyncAPI.Tests.Bindings
     public class StringOrStringList_Should : TestBase
     {
         [Test]
-        public void V2_StringOrStringList_IsInitialised_WhenPassedStringOrStringList()
+        public void StringOrStringList_ConvertsImplicitlyToAndFromItsAlternatives()
         {
-            // Arrange
-            var stringValue = new StringOrStringList(new AsyncApiAny("AsyncApi"));
-            var listValue = new StringOrStringList(
-                new AsyncApiAny(new List<string>()
-                {
-                    "Async",
-                    "Api",
-                }));
+            StringOrStringList stringValue = "AsyncApi";
+            StringOrStringList listValue = new List<string> { "Async", "Api" };
+            StringOrStringList arrayValue = new[] { "Async", "Api" };
 
-            // Assert
-            stringValue.Value.GetValue<string>().Should().Be("AsyncApi");
-            listValue.Value.GetValue<List<string>>()
-                .Should().BeEquivalentTo(new List<string>() { "Async", "Api" });
+            string single = stringValue.Should().BeOfType<SingleString>().Subject;
+            string[] list = listValue.Should().BeOfType<StringList>().Subject;
+
+            single.Should().Be("AsyncApi");
+            list.Should().Equal("Async", "Api");
+            arrayValue.Should().BeOfType<StringList>().Which.Values.Should().Equal("Async", "Api");
+            ((StringOrStringList)(string)null).Should().BeNull();
         }
 
         [Test]
-        public void V2_StringOrStringList_ThrowsArgumentException_WhenIntialisedWithoutStringOrStringList()
+        public void StringList_RejectsNullItems()
         {
-            // Assert
-            var ex = Assert.Throws<ArgumentException>(() => new StringOrStringList(new AsyncApiAny(true)));
+            var act = () => new StringList(new[] { "x", null });
 
-            // Assert
-            ex.Message.Should().Be("StringOrStringList should be a string value or a string list.");
+            act.Should().Throw<ArgumentException>().WithMessage("StringList items cannot be null.*");
         }
 
         [Test]
-        public void V2_StringOrStringList_ThrowsArgumentException_WhenIntialisedWithListOfNonStrings()
+        public void StringOrStringList_ReportsAMapAsAReaderError()
         {
-            // Assert
-            var ex = Assert.Throws<ArgumentException>(() => new StringOrStringList(
-                new AsyncApiAny(new List<object>()
-                {
-                    "x",
-                    1,
-                    "y",
-                })));
+            var yaml = """
+                bindings:
+                  testBinding:
+                    testProperty:
+                      key: value
+                """;
+            var settings = new AsyncApiReaderSettings { Bindings = new[] { new StringOrStringListTestBinding() } };
 
-            // Assert
-            ex.Message.Should().Be("StringOrStringList value should only contain string items.");
+            new AsyncApiStringReader(settings).ReadFragment<AsyncApiChannel>(yaml, AsyncApiVersion.AsyncApi2_0, out var diagnostics);
+
+            diagnostics.Errors.Should().ContainSingle()
+                .Which.Message.Should().Contain("should contain a string value or a list of strings");
         }
 
         [Test]
@@ -69,7 +66,7 @@ namespace ByteBard.AsyncAPI.Tests.Bindings
             var channel = new AsyncApiChannel();
             channel.Bindings.Add(new StringOrStringListTestBinding
             {
-                TestProperty = new StringOrStringList(new AsyncApiAny("someValue")),
+                TestProperty = "someValue",
             });
 
             // Act
@@ -102,12 +99,12 @@ namespace ByteBard.AsyncAPI.Tests.Bindings
             var channel = new AsyncApiChannel();
             channel.Bindings.Add(new StringOrStringListTestBinding
             {
-                TestProperty = new StringOrStringList(new AsyncApiAny(new List<string>
+                TestProperty = new List<string>
                 {
                     "someValue01",
                     "someValue02",
                     "someValue03",
-                })),
+                },
             });
 
             // Act
@@ -144,13 +141,13 @@ namespace ByteBard.AsyncAPI.Tests.Bindings
         public override void SerializeProperties(IAsyncApiWriter writer)
         {
             writer.WriteStartObject();
-            writer.WriteRequiredObject("testProperty", this.TestProperty, (w, t) => t.Value.Write(w));
+            writer.WriteRequiredObject("testProperty", this.TestProperty, (w, t) => t.Write(w));
             writer.WriteEndObject();
         }
 
         protected override FixedFieldMap<StringOrStringListTestBinding> FixedFieldMap => new()
         {
-            { "testProperty", (a, n) => { a.TestProperty = new StringOrStringList(n.CreateAny()); } },
+            { "testProperty", (a, n) => { a.TestProperty = StringOrStringList.Parse(n); } },
         };
     }
 }

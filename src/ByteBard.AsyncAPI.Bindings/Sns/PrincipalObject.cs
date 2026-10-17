@@ -21,7 +21,7 @@ public class PrincipalObject : Principal
         }
 
         writer.WriteStartObject();
-        writer.WriteRequiredObject(this.Value.Key, this.Value.Value, (w, t) => t.Value.Write(w));
+        writer.WriteRequiredObject(this.Value.Key, this.Value.Value, (w, t) => t.Write(w));
         writer.WriteEndObject();
     }
 }

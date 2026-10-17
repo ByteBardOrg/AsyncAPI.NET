@@ -136,19 +136,19 @@ namespace ByteBard.AsyncAPI.Tests.Bindings.Sqs
                             {
                                 Effect = Effect.Deny,
                                 Principal = new PrincipalObject(new KeyValuePair<string, StringOrStringList>(
-                                    "AWS", new StringOrStringList(new AsyncApiAny("arn:aws:iam::123456789012:user/alex.wichmann")))),
-                                Action = new StringOrStringList(new AsyncApiAny(new List<string>
+                                    "AWS", "arn:aws:iam::123456789012:user/alex.wichmann")),
+                                Action = new List<string>
                                 {
                                     "sqs:SendMessage",
                                     "sqs:ReceiveMessage",
-                                })),
+                                },
                                 Condition = new Condition(new Dictionary<string, Dictionary<string, StringOrStringList>>
                                 {
                                     {
                                         "StringEquals", new Dictionary<string, StringOrStringList>
                                         {
                                             {
-                                                "aws:username", new StringOrStringList(new AsyncApiAny(new List<string> { "johndoe", "mrsmith" }))
+                                                "aws:username", new List<string> { "johndoe", "mrsmith" }
                                             },
                                         }
                                     },
@@ -168,16 +168,16 @@ namespace ByteBard.AsyncAPI.Tests.Bindings.Sqs
                             {
                                 Effect = Effect.Allow,
                                 Principal = new PrincipalObject(new KeyValuePair<string, StringOrStringList>(
-                                    "AWS", new StringOrStringList(new AsyncApiAny(new List<string>
-                                        { "arn:aws:iam::123456789012:user/alex.wichmann", "arn:aws:iam::123456789012:user/dec.kolakowski" })))),
-                                Action = new StringOrStringList(new AsyncApiAny("sqs:CreateQueue")),
+                                    "AWS", new List<string>
+                                        { "arn:aws:iam::123456789012:user/alex.wichmann", "arn:aws:iam::123456789012:user/dec.kolakowski" })),
+                                Action = "sqs:CreateQueue",
                                 Condition = new Condition(new Dictionary<string, Dictionary<string, StringOrStringList>>
                                 {
                                     {
                                         "NumericLessThanEquals", new Dictionary<string, StringOrStringList>
                                         {
                                             {
-                                                "aws:MultiFactorAuthAge", new StringOrStringList(new AsyncApiAny("3600"))
+                                                "aws:MultiFactorAuthAge", "3600"
                                             },
                                         }
                                     },
@@ -227,11 +227,11 @@ namespace ByteBard.AsyncAPI.Tests.Bindings.Sqs
                             {
                                 Effect = Effect.Allow,
                                 Principal = new PrincipalObject(new KeyValuePair<string, StringOrStringList>(
-                                    "Service", new StringOrStringList(new AsyncApiAny("s3.amazonaws.com")))),
-                                Action = new StringOrStringList(new AsyncApiAny(new List<string>
+                                    "Service", "s3.amazonaws.com")),
+                                Action = new List<string>
                                 {
                                     "sqs:*",
-                                })),
+                                },
                             },
                         },
                     },
@@ -383,12 +383,12 @@ namespace ByteBard.AsyncAPI.Tests.Bindings.Sqs
                                 {
                                     Effect = Effect.Deny,
                                     Principal = new PrincipalObject(new KeyValuePair<string, StringOrStringList>(
-                                        "AWS", new StringOrStringList(new AsyncApiAny("arn:aws:iam::123456789012:user/alex.wichmann")))),
-                                    Action = new StringOrStringList(new AsyncApiAny(new List<string>()
+                                        "AWS", "arn:aws:iam::123456789012:user/alex.wichmann")),
+                                    Action = new List<string>()
                                     {
                                         "sqs:SendMessage",
                                         "sqs:ReceiveMessage",
-                                    })),
+                                    },
                                     Extensions = new Dictionary<string, IAsyncApiExtension>()
                                     {
                                         {
@@ -404,9 +404,9 @@ namespace ByteBard.AsyncAPI.Tests.Bindings.Sqs
                                 {
                                     Effect = Effect.Allow,
                                     Principal = new PrincipalObject(new KeyValuePair<string, StringOrStringList>(
-                                        "AWS", new StringOrStringList(new AsyncApiAny(new List<string>
-                                            { "arn:aws:iam::123456789012:user/alex.wichmann", "arn:aws:iam::123456789012:user/dec.kolakowski" })))),
-                                    Action = new StringOrStringList(new AsyncApiAny("sqs:CreateQueue")),
+                                        "AWS", new List<string>
+                                            { "arn:aws:iam::123456789012:user/alex.wichmann", "arn:aws:iam::123456789012:user/dec.kolakowski" })),
+                                    Action = "sqs:CreateQueue",
                                 },
                             },
                             Extensions = new Dictionary<string, IAsyncApiExtension>()
@@ -452,11 +452,11 @@ namespace ByteBard.AsyncAPI.Tests.Bindings.Sqs
                                 {
                                     Effect = Effect.Allow,
                                     Principal = new PrincipalObject(new KeyValuePair<string, StringOrStringList>(
-                                        "AWS", new StringOrStringList(new AsyncApiAny("arn:aws:iam::123456789012:user/alex.wichmann")))),
-                                    Action = new StringOrStringList(new AsyncApiAny(new List<string>
+                                        "AWS", "arn:aws:iam::123456789012:user/alex.wichmann")),
+                                    Action = new List<string>
                                     {
                                         "sqs:*",
-                                    })),
+                                    },
                                 },
                             },
                         },

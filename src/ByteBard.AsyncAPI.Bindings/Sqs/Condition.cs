@@ -27,7 +27,7 @@ public class Condition : IAsyncApiElement
         writer.WriteStartObject();
         foreach (var conditionValue in this.Value)
         {
-            writer.WriteRequiredMap(conditionValue.Key, conditionValue.Value, (w, t) => t.Value.Write(w));
+            writer.WriteRequiredMap(conditionValue.Key, conditionValue.Value, (w, t) => t.Write(w));
         }
 
         writer.WriteEndObject();
