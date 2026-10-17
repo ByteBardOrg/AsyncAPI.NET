@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using ByteBard.AsyncAPI.Models.Interfaces;
+using ByteBard.AsyncAPI.Readers.Exceptions;
 using ByteBard.AsyncAPI.Readers.ParseNodes;
 using ByteBard.AsyncAPI.Writers;
 
@@ -49,8 +50,10 @@ public class Condition : IAsyncApiElement
                                     .ToDictionary(x => x.Key, x => x.Value)));
                                 break;
                             default:
-                                throw new ArgumentException($"An error occured while parsing a {nameof(Condition)} node. " +
-                                                            $"AWS condition values should be one or more key value pairs.");
+                                throw new AsyncApiReaderException(
+                                    $"An error occured while parsing a {nameof(Condition)} node. " +
+                                    $"AWS condition values should be one or more key value pairs.",
+                                    node.Context);
                         }
                     }
 
@@ -58,8 +61,10 @@ public class Condition : IAsyncApiElement
                 }
 
             default:
-                throw new ArgumentException($"An error occured while parsing a {nameof(Condition)} node. " +
-                                            $"Node should contain a collection of condition types.");
+                throw new AsyncApiReaderException(
+                    $"An error occured while parsing a {nameof(Condition)} node. " +
+                    $"Node should contain a collection of condition types.",
+                    node.Context);
         }
     }
 }

@@ -6,6 +6,7 @@ namespace ByteBard.AsyncAPI.Bindings
     using System.Text.Json.Nodes;
     using ByteBard.AsyncAPI.Models;
     using ByteBard.AsyncAPI.Models.Interfaces;
+    using ByteBard.AsyncAPI.Readers.Exceptions;
     using ByteBard.AsyncAPI.Readers.ParseNodes;
 
     public class StringOrStringList : IAsyncApiElement
@@ -40,8 +41,10 @@ namespace ByteBard.AsyncAPI.Bindings
                     }
 
                 default:
-                    throw new ArgumentException($"An error occured while parsing a {nameof(StringOrStringList)} node. " +
-                                                $"Node should contain a string value or a list of strings.");
+                    throw new AsyncApiReaderException(
+                        $"An error occured while parsing a {nameof(StringOrStringList)} node. " +
+                        $"Node should contain a string value or a list of strings.",
+                        node.Context);
             }
         }
 
