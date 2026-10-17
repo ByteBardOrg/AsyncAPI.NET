@@ -65,9 +65,9 @@
         {
             { "bindingVersion", (a, n) => { a.BindingVersion = n.GetScalarValue(); } },
             { "clientId", (a, n) => { a.ClientId = n.GetScalarValue(); } },
-            { "cleanSession", (a, n) => { a.CleanSession = n.GetBooleanValueOrDefault(); } },
+            { "cleanSession", (a, n) => { a.CleanSession = n.GetBooleanValue(); } },
             { "lastWill", (a, n) => { a.LastWill = n.ParseMap(LastWillFixedFields); } },
-            { "keepAlive", (a, n) => { a.KeepAlive = n.GetIntegerValueOrDefault(); } },
+            { "keepAlive", (a, n) => { a.KeepAlive = n.GetIntegerValue(); } },
             { "sessionExpiryInterval", (a, n) => { a.SessionExpiryIntervalValue = MQTTIntegerOrSchema.Parse(n); } },
             { "maximumPacketSize", (a, n) => { a.MaximumPacketSizeValue = MQTTIntegerOrSchema.Parse(n); } },
         };
@@ -75,7 +75,7 @@
         private static FixedFieldMap<LastWill> LastWillFixedFields = new()
         {
             { "topic", (a, n) => { a.Topic = n.GetScalarValue(); } },
-            { "qos", (a, n) => { a.QoS = (uint?)n.GetIntegerValueOrDefault(); } },
+            { "qos", (a, n) => { a.QoS = (uint?)n.GetIntegerValue(); } },
             { "message", (a, n) => { a.Message = n.GetScalarValue(); } },
             { "retain", (a, n) => { a.Retain = n.GetBooleanValue(); } },
         };

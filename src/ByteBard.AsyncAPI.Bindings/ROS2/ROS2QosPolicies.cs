@@ -21,10 +21,10 @@ namespace ByteBard.AsyncAPI.Bindings.ROS2
             { "reliability", (a, n) => { a.Reliability = n.GetScalarValue(); } },
             { "history", (a, n) => { a.History = n.GetScalarValue(); } },
             { "durability", (a, n) => { a.Durability = n.GetScalarValue(); } },
-            { "lifespan", (a, n) => { a.Lifespan = n.GetIntegerValueOrDefault(); } },
-            { "deadline", (a, n) => { a.Deadline = n.GetIntegerValueOrDefault(); } },
+            { "lifespan", (a, n) => { a.Lifespan = n.GetIntegerValue(); } },
+            { "deadline", (a, n) => { a.Deadline = n.GetIntegerValue(); } },
             { "liveliness", (a, n) => { a.Liveliness = n.GetScalarValue(); } },
-            { "leaseDuration", (a, n) => { a.LeaseDuration = n.GetIntegerValueOrDefault(); } },
+            { "leaseDuration", (a, n) => { a.LeaseDuration = n.GetIntegerValue(); } },
         };
 
         /// <summary>

@@ -18,7 +18,7 @@ namespace ByteBard.AsyncAPI.Bindings.ROS2
         protected override FixedFieldMap<ROS2ServerBinding> FixedFieldMap => new()
         {
             { "rmwImplementation", (a, n) => { a.RmwImplementation = n.GetScalarValue(); } },
-            { "domainId", (a, n) => { a.DomainId = n.GetIntegerValueOrDefault(); } },
+            { "domainId", (a, n) => { a.DomainId = n.GetIntegerValue(); } },
         };
 
         /// <summary>
