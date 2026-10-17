@@ -46,8 +46,8 @@
                     Retain = false,
                 },
                 KeepAlive = 60,
-                SessionExpiryIntervalValue = MQTTIntegerOrSchema.FromInteger(600),
-                MaximumPacketSizeValue = MQTTIntegerOrSchema.FromInteger(1200),
+                SessionExpiryInterval = 600,
+                MaximumPacketSize = 1200,
             });
 
             // Act
@@ -82,7 +82,7 @@
             {
                 QoS = 2,
                 Retain = true,
-                MessageExpiryIntervalValue = MQTTIntegerOrSchema.FromInteger(60),
+                MessageExpiryInterval = 60,
             });
 
             // Act

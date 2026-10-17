@@ -34,20 +34,9 @@
 
         /// <summary>
         /// Interval in seconds or a Schema Object containing the definition of the lifetime of the message.
+        /// Either an <see cref="MQTTInteger"/> or an <see cref="MQTTIntegerSchema"/>.
         /// </summary>
-        /// <remarks>
-        /// Returns null when the value is a schema or does not fit in an Int32 (MQTT allows up to 4294967295).
-        /// Use <see cref="MessageExpiryIntervalValue"/> to read every value.
-        /// </remarks>
-        [Obsolete("Returns null for schema values and values above Int32.MaxValue. Use MessageExpiryIntervalValue instead.")]
-        public int? MessageExpiryInterval
-        {
-            get => this.MessageExpiryIntervalValue?.Integer;
-            set => this.MessageExpiryIntervalValue = value.HasValue ? MQTTIntegerOrSchema.FromInteger(value.Value) : null;
-        }
-
-        /// <summary>The integer-or-schema message expiry interval value.</summary>
-        public MQTTIntegerOrSchema MessageExpiryIntervalValue { get; set; }
+        public MQTTIntegerOrSchema MessageExpiryInterval { get; set; }
 
         public override string BindingKey => "mqtt";
 
@@ -56,7 +45,7 @@
             { "bindingVersion", (a, n) => { a.BindingVersion = n.GetScalarValue(); } },
             { "qos", (a, n) => { a.QoS = n.GetIntegerValue(); } },
             { "retain", (a, n) => { a.Retain = n.GetBooleanValue(); } },
-            { "messageExpiryInterval", (a, n) => { a.MessageExpiryIntervalValue = MQTTIntegerOrSchema.Parse(n); } },
+            { "messageExpiryInterval", (a, n) => { a.MessageExpiryInterval = MQTTIntegerOrSchema.Parse(n); } },
         };
 
         /// <summary>
@@ -103,12 +92,12 @@
             writer.WriteStartObject();
             writer.WriteOptionalProperty("qos", this.qos);
             writer.WriteOptionalProperty("retain", this.retain);
-            if (this.MessageExpiryIntervalValue?.LongInteger is long integer) writer.WriteRequiredProperty("messageExpiryInterval", integer);
-            else if (this.MessageExpiryIntervalValue?.Schema != null) writer.WriteOptionalObject("messageExpiryInterval", this.MessageExpiryIntervalValue.Schema, (w, schema) =>
+            if (this.MessageExpiryInterval != null)
             {
-                if (version == AsyncApiVersion.AsyncApi2_0) schema.SerializeV2(w);
-                else schema.SerializeV3(w);
-            });
+                writer.WritePropertyName("messageExpiryInterval");
+                this.MessageExpiryInterval.Serialize(writer, version);
+            }
+
             writer.WriteOptionalProperty("bindingVersion", this.BindingVersion);
             writer.WriteExtensions(this.Extensions);
             writer.WriteEndObject();

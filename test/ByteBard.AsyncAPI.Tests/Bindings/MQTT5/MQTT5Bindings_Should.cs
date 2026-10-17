@@ -16,17 +16,17 @@ namespace ByteBard.AsyncAPI.Tests.Bindings.MQTT5
         {
             var binding = new MQTT5ServerBinding
             {
-                SessionExpiryInterval = MQTTIntegerOrSchema.FromInteger(0),
+                SessionExpiryInterval = 0,
                 BindingVersion = "0.1.0",
             };
             var actual = binding.SerializeAsYaml(version);
             actual.Should().Contain("sessionExpiryInterval: 0").And.Contain("bindingVersion: 0.1.0");
 
-            binding.SessionExpiryInterval = MQTTIntegerOrSchema.FromInteger(-1);
+            binding.SessionExpiryInterval = -1;
             actual = binding.SerializeAsYaml(version);
             actual.Should().Contain("sessionExpiryInterval: -1");
 
-            binding.SessionExpiryInterval = MQTTIntegerOrSchema.FromLong(4294967295L);
+            binding.SessionExpiryInterval = 4294967295L;
             binding.SerializeAsYaml(version).Should().Contain("sessionExpiryInterval: 4294967295");
         }
 
@@ -36,13 +36,13 @@ namespace ByteBard.AsyncAPI.Tests.Bindings.MQTT5
         {
             var schemaBinding = new MQTT5ServerBinding
             {
-                SessionExpiryInterval = MQTTIntegerOrSchema.FromSchema(new AsyncApiJsonSchema { Type = SchemaType.Integer }),
+                SessionExpiryInterval = new MQTTIntegerSchema(new AsyncApiJsonSchema { Type = SchemaType.Integer }),
             };
             schemaBinding.SerializeAsYaml(version).Should().Contain("type: integer");
 
             var referenceBinding = new MQTT5ServerBinding
             {
-                SessionExpiryInterval = MQTTIntegerOrSchema.FromSchema(new AsyncApiJsonSchemaReference("#/components/schemas/interval")),
+                SessionExpiryInterval = new MQTTIntegerSchema(new AsyncApiJsonSchemaReference("#/components/schemas/interval")),
             };
             referenceBinding.SerializeAsYaml(version).Should().Contain("#/components/schemas/interval");
         }
@@ -64,13 +64,13 @@ namespace ByteBard.AsyncAPI.Tests.Bindings.MQTT5
             var parsed = reader.ReadFragment<AsyncApiServer>(yaml, version, out var diagnostics);
             diagnostics.Errors.Should().BeEmpty();
             var binding = parsed.Bindings["mqtt5"] as MQTT5ServerBinding;
-            binding.SessionExpiryInterval.Schema.Should().BeOfType<AsyncApiJsonSchemaReference>();
+            binding.SessionExpiryInterval.Should().BeOfType<MQTTIntegerSchema>().Which.Schema.Should().BeOfType<AsyncApiJsonSchemaReference>();
 
             var serialized = parsed.SerializeAsYaml(version);
             serialized.Should().Contain("#/components/schemas/interval");
             var reparsed = reader.ReadFragment<AsyncApiServer>(serialized, version, out var roundTripDiagnostics);
             roundTripDiagnostics.Errors.Should().BeEmpty();
-            (reparsed.Bindings["mqtt5"] as MQTT5ServerBinding).SessionExpiryInterval.Schema.Should().BeOfType<AsyncApiJsonSchemaReference>();
+            (reparsed.Bindings["mqtt5"] as MQTT5ServerBinding).SessionExpiryInterval.Should().BeOfType<MQTTIntegerSchema>().Which.Schema.Should().BeOfType<AsyncApiJsonSchemaReference>();
 
             var schemaYaml = (version == AsyncApiVersion.AsyncApi2_0 ? "url: localhost\nprotocol: mqtt\n" : "host: localhost\nprotocol: mqtt\n") + """
                 bindings:
@@ -81,7 +81,7 @@ namespace ByteBard.AsyncAPI.Tests.Bindings.MQTT5
                 """;
             var schemaParsed = reader.ReadFragment<AsyncApiServer>(schemaYaml, version, out var schemaDiagnostics);
             schemaDiagnostics.Errors.Should().BeEmpty();
-            (schemaParsed.Bindings["mqtt5"] as MQTT5ServerBinding).SessionExpiryInterval.Schema.Type.Should().Be(SchemaType.Integer);
+            (schemaParsed.Bindings["mqtt5"] as MQTT5ServerBinding).SessionExpiryInterval.Should().BeOfType<MQTTIntegerSchema>().Which.Schema.Type.Should().Be(SchemaType.Integer);
             schemaParsed.SerializeAsYaml(version).Should().Contain("minimum: 1");
         }
     }
