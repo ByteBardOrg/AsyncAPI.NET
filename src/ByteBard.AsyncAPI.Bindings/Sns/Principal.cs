@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using ByteBard.AsyncAPI.Models.Interfaces;
+using ByteBard.AsyncAPI.Readers.Exceptions;
 using ByteBard.AsyncAPI.Readers.ParseNodes;
 using ByteBard.AsyncAPI.Writers;
 
@@ -21,19 +22,23 @@ public abstract class Principal : IAsyncApiElement
                 var nodeValue = node.GetScalarValue();
                 if (!IsStarString(nodeValue))
                 {
-                    throw new ArgumentException($"An error occured while parsing a {nameof(Principal)} node. " +
-                                                $"Principal value without a property name can only be a string value of '*'.");
+                    throw new AsyncApiReaderException(
+                        $"An error occured while parsing a {nameof(Principal)} node. " +
+                        $"Principal value without a property name can only be a string value of '*'.",
+                        node.Context);
                 }
 
                 return new PrincipalStar();
 
             case MapNode mapNode:
                 {
-                    var propertyNode = mapNode.First();
-                    if (!IsValidPrincipalProperty(propertyNode.Name))
+                    var propertyNode = mapNode.FirstOrDefault();
+                    if (propertyNode == null || !IsValidPrincipalProperty(propertyNode.Name))
                     {
-                        throw new ArgumentException($"An error occured while parsing a {nameof(Principal)} node. " +
-                                                    $"Node should contain a valid AWS principal property name.");
+                        throw new AsyncApiReaderException(
+                            $"An error occured while parsing a {nameof(Principal)} node. " +
+                            $"Node should contain a valid AWS principal property name.",
+                            node.Context);
                     }
 
                     var principalValue = new KeyValuePair<string, StringOrStringList>(
@@ -44,8 +49,10 @@ public abstract class Principal : IAsyncApiElement
                 }
 
             default:
-                throw new ArgumentException($"An error occured while parsing a {nameof(Principal)} node. " +
-                                            $"Node should contain a string value of '*' or a valid AWS principal property.");
+                throw new AsyncApiReaderException(
+                    $"An error occured while parsing a {nameof(Principal)} node. " +
+                    $"Node should contain a string value of '*' or a valid AWS principal property.",
+                    node.Context);
         }
     }
 
