@@ -2,6 +2,7 @@ namespace ByteBard.AsyncAPI.Readers.ParseNodes
 {
     using System;
     using System.Globalization;
+    using System.Linq;
     using System.Text.Json.Nodes;
     using ByteBard.AsyncAPI.Exceptions;
     using ByteBard.AsyncAPI.Models;
@@ -53,7 +54,7 @@ namespace ByteBard.AsyncAPI.Readers.ParseNodes
                 return value;
             }
 
-            throw new AsyncApiReaderException("Value could not parse to integer.");
+            throw new AsyncApiReaderException(this.DescribeInvalidInteger("integer", int.MinValue, int.MaxValue), this.Context);
         }
 
         public override int? GetIntegerValueOrDefault(int? defaultValue = null)
@@ -73,7 +74,7 @@ namespace ByteBard.AsyncAPI.Readers.ParseNodes
                 return value;
             }
 
-            throw new AsyncApiReaderException("Value could not parse to long.");
+            throw new AsyncApiReaderException(this.DescribeInvalidInteger("long", long.MinValue, long.MaxValue), this.Context);
         }
 
         public override long? GetLongValueOrDefault(long? defaultValue = null)
@@ -93,7 +94,7 @@ namespace ByteBard.AsyncAPI.Readers.ParseNodes
                 return value;
             }
 
-            throw new AsyncApiReaderException("Value could not parse to bool.");
+            throw new AsyncApiReaderException($"Value '{this.GetScalarValue()}' could not parse to bool. Expected true or false.", this.Context);
         }
 
         public override bool? GetBooleanValueOrDefault(bool? defaultValue = null)
@@ -110,6 +111,20 @@ namespace ByteBard.AsyncAPI.Readers.ParseNodes
         {
             var value = this.GetScalarValue();
             return new AsyncApiAny(this.node);
+        }
+
+        /// <summary>
+        /// Describes why the scalar is not a valid integer of the given type, telling an out-of-range number apart from a value that is not a whole number.
+        /// </summary>
+        private string DescribeInvalidInteger(string typeName, long min, long max)
+        {
+            var value = this.GetScalarValue();
+            var digits = value?.Trim().TrimStart('+', '-');
+            var isWholeNumber = !string.IsNullOrEmpty(digits) && digits.All(c => c >= '0' && c <= '9');
+
+            return isWholeNumber
+                ? $"Value '{value}' could not parse to {typeName}. It must be between {min} and {max}."
+                : $"Value '{value}' could not parse to {typeName}. Expected a whole number.";
         }
     }
 }
