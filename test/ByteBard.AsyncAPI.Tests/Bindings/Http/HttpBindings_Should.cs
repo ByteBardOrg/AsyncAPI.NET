@@ -189,5 +189,37 @@
             actual.Should().NotContain("statusCode");
             actual.Should().Contain("bindingVersion: 0.2.0");
         }
+
+        [Test]
+        public void V3_HttpMessageBinding_ReadsStatusCode()
+        {
+            var yaml =
+                """
+                bindings:
+                  http:
+                    statusCode: 404
+                """;
+
+            var settings = new AsyncApiReaderSettings { Bindings = BindingsCollection.Http };
+            var message = new AsyncApiStringReader(settings).ReadFragment<AsyncApiMessage>(yaml, AsyncApiVersion.AsyncApi3_0, out var diagnostics);
+
+            diagnostics.Errors.Should().BeEmpty();
+            ((HttpMessageBinding)message.Bindings["http"]).StatusCode.Should().Be(HttpStatusCode.NotFound);
+        }
+
+        [TestCase("not-found")]
+        [TestCase("200.5")]
+        public void V3_HttpMessageBinding_WithInvalidStatusCode_ReportsError(string statusCode)
+        {
+            var yaml =
+                "bindings:\n" +
+                "  http:\n" +
+                "    statusCode: " + statusCode + "\n";
+
+            var settings = new AsyncApiReaderSettings { Bindings = BindingsCollection.Http };
+            new AsyncApiStringReader(settings).ReadFragment<AsyncApiMessage>(yaml, AsyncApiVersion.AsyncApi3_0, out var diagnostics);
+
+            diagnostics.Errors.Should().ContainSingle().Which.Message.Should().Contain("could not parse to integer");
+        }
     }
 }
