@@ -12,6 +12,8 @@ namespace ByteBard.AsyncAPI.Models
     {
         private AsyncApiSecurityScheme target;
 
+        private AsyncApiSecurityScheme Resolved => this.Target ?? throw this.Reference.CreateUnresolvedException();
+
         private AsyncApiSecurityScheme Target
         {
             get
@@ -26,25 +28,25 @@ namespace ByteBard.AsyncAPI.Models
             this.Reference = new AsyncApiReference(reference, ReferenceType.SecurityScheme);
         }
 
-        public override SecuritySchemeType Type { get => this.Target.Type; set => this.Target.Type = value; }
+        public override SecuritySchemeType Type { get => this.Resolved.Type; set => this.Resolved.Type = value; }
 
-        public override string Description { get => this.Target?.Description; set => this.Target.Description = value; }
+        public override string Description { get => this.Target?.Description; set => this.Resolved.Description = value; }
 
-        public override string Name { get => this.Target?.Name; set => this.Target.Name = value; }
+        public override string Name { get => this.Target?.Name; set => this.Resolved.Name = value; }
 
-        public override ParameterLocation? In { get => this.Target?.In; set => this.Target.In = value; }
+        public override ParameterLocation? In { get => this.Target?.In; set => this.Resolved.In = value; }
 
-        public override string Scheme { get => this.Target?.Scheme; set => this.Target.Scheme = value; }
+        public override string Scheme { get => this.Target?.Scheme; set => this.Resolved.Scheme = value; }
 
-        public override string BearerFormat { get => this.Target?.BearerFormat; set => this.Target.BearerFormat = value; }
+        public override string BearerFormat { get => this.Target?.BearerFormat; set => this.Resolved.BearerFormat = value; }
 
-        public override AsyncApiOAuthFlows Flows { get => this.Target?.Flows; set => this.Target.Flows = value; }
+        public override AsyncApiOAuthFlows Flows { get => this.Target?.Flows; set => this.Resolved.Flows = value; }
 
-        public override Uri OpenIdConnectUrl { get => this.Target?.OpenIdConnectUrl; set => this.Target.OpenIdConnectUrl = value; }
+        public override Uri OpenIdConnectUrl { get => this.Target?.OpenIdConnectUrl; set => this.Resolved.OpenIdConnectUrl = value; }
 
-        public override ISet<string> Scopes { get => this.Target?.Scopes; set => this.Target.Scopes = value; }
+        public override ISet<string> Scopes { get => this.Target?.Scopes; set => this.Resolved.Scopes = value; }
 
-        public override IDictionary<string, IAsyncApiExtension> Extensions { get => this.Target?.Extensions; set => this.Target.Extensions = value; }
+        public override IDictionary<string, IAsyncApiExtension> Extensions { get => this.Target?.Extensions; set => this.Resolved.Extensions = value; }
 
         public AsyncApiReference Reference { get; set; }
 
@@ -60,7 +62,7 @@ namespace ByteBard.AsyncAPI.Models
             else
             {
                 this.Reference.Workspace = writer.Workspace;
-                this.Target.SerializeV2(writer);
+                this.Resolved.SerializeV2(writer);
             }
         }
 
@@ -74,7 +76,7 @@ namespace ByteBard.AsyncAPI.Models
             else
             {
                 this.Reference.Workspace = writer.Workspace;
-                this.Target.SerializeV3(writer);
+                this.Resolved.SerializeV3(writer);
             }
         }
 

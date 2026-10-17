@@ -11,6 +11,8 @@
     {
         private AsyncApiOperationReply target;
 
+        private AsyncApiOperationReply Resolved => this.Target ?? throw this.Reference.CreateUnresolvedException();
+
         private AsyncApiOperationReply Target
         {
             get
@@ -25,13 +27,13 @@
             this.Reference = new AsyncApiReference(reference, ReferenceType.OperationReply);
         }
 
-        public override AsyncApiOperationReplyAddress Address { get => this.Target?.Address; set => this.Target.Address = value; }
+        public override AsyncApiOperationReplyAddress Address { get => this.Target?.Address; set => this.Resolved.Address = value; }
 
-        public override AsyncApiChannelReference Channel { get => this.Target?.Channel; set => this.Target.Channel = value; }
+        public override AsyncApiChannelReference Channel { get => this.Target?.Channel; set => this.Resolved.Channel = value; }
 
-        public override IList<AsyncApiMessageReference> Messages { get => this.Target?.Messages; set => this.Target.Messages = value; }
+        public override IList<AsyncApiMessageReference> Messages { get => this.Target?.Messages; set => this.Resolved.Messages = value; }
 
-        public override IDictionary<string, IAsyncApiExtension> Extensions { get => this.Target?.Extensions; set => this.Target.Extensions = value; }
+        public override IDictionary<string, IAsyncApiExtension> Extensions { get => this.Target?.Extensions; set => this.Resolved.Extensions = value; }
 
         public AsyncApiReference Reference { get; set; }
 
@@ -56,6 +58,11 @@
                 return this.Equals(reference);
             }
 
+            if (this.Target is null || other.Target is null)
+            {
+                return this.Target is null && other.Target is null && this.Reference == other.Reference;
+            }
+
             return this.Target == other.Target;
         }
 
@@ -76,7 +83,12 @@
 
         public bool Equals(AsyncApiOperationReply other)
         {
-            return this.Target == other;
+            return other is not null && this.Target == other;
+        }
+
+        public override int GetHashCode()
+        {
+            return this.Target?.GetHashCode() ?? this.Reference?.GetHashCode() ?? 0;
         }
 
         public override void SerializeV3(IAsyncApiWriter writer)
@@ -89,7 +101,7 @@
             else
             {
                 this.Reference.Workspace = writer.Workspace;
-                this.Target.SerializeV3(writer);
+                this.Resolved.SerializeV3(writer);
             }
         }
     }

@@ -14,6 +14,8 @@ namespace ByteBard.AsyncAPI.Models
     {
         private AsyncApiServerVariable target;
 
+        private AsyncApiServerVariable Resolved => this.Target ?? throw this.Reference.CreateUnresolvedException();
+
         private AsyncApiServerVariable Target
         {
             get
@@ -28,15 +30,15 @@ namespace ByteBard.AsyncAPI.Models
             this.Reference = new AsyncApiReference(reference, ReferenceType.ServerVariable);
         }
 
-        public override IList<string> Enum { get => this.Target?.Enum; set => this.Target.Enum = value; }
+        public override IList<string> Enum { get => this.Target?.Enum; set => this.Resolved.Enum = value; }
 
-        public override string Default { get => this.Target?.Default; set => this.Target.Default = value; }
+        public override string Default { get => this.Target?.Default; set => this.Resolved.Default = value; }
 
-        public override string Description { get => this.Target?.Description; set => this.Target.Description = value; }
+        public override string Description { get => this.Target?.Description; set => this.Resolved.Description = value; }
 
-        public override IList<string> Examples { get => this.Target?.Examples; set => this.Target.Examples = value; }
+        public override IList<string> Examples { get => this.Target?.Examples; set => this.Resolved.Examples = value; }
 
-        public override IDictionary<string, IAsyncApiExtension> Extensions { get => this.Target?.Extensions; set => this.Target.Extensions = value; }
+        public override IDictionary<string, IAsyncApiExtension> Extensions { get => this.Target?.Extensions; set => this.Resolved.Extensions = value; }
 
         public AsyncApiReference Reference { get; set; }
 
@@ -61,6 +63,11 @@ namespace ByteBard.AsyncAPI.Models
                 return this.Equals(reference);
             }
 
+            if (this.Target is null || other.Target is null)
+            {
+                return this.Target is null && other.Target is null && this.Reference == other.Reference;
+            }
+
             return this.Target == other.Target;
         }
 
@@ -81,7 +88,12 @@ namespace ByteBard.AsyncAPI.Models
 
         public bool Equals(AsyncApiServerVariable other)
         {
-            return this.Target == other;
+            return other is not null && this.Target == other;
+        }
+
+        public override int GetHashCode()
+        {
+            return this.Target?.GetHashCode() ?? this.Reference?.GetHashCode() ?? 0;
         }
 
         public override void SerializeV2(IAsyncApiWriter writer)
@@ -94,7 +106,7 @@ namespace ByteBard.AsyncAPI.Models
             else
             {
                 this.Reference.Workspace = writer.Workspace;
-                this.Target.SerializeV2(writer);
+                this.Resolved.SerializeV2(writer);
             }
         }
 
@@ -108,7 +120,7 @@ namespace ByteBard.AsyncAPI.Models
             else
             {
                 this.Reference.Workspace = writer.Workspace;
-                this.Target.SerializeV3(writer);
+                this.Resolved.SerializeV3(writer);
             }
         }
     }

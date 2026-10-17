@@ -11,6 +11,8 @@
     {
         private AsyncApiJsonSchema target;
 
+        private AsyncApiJsonSchema Resolved => this.Target ?? throw this.Reference.CreateUnresolvedException();
+
         private AsyncApiJsonSchema Target
         {
             get
@@ -35,259 +37,259 @@
         public override string Title
         {
             get => this.Target?.Title;
-            set => this.Target.Title = value;
+            set => this.Resolved.Title = value;
         }
 
         public override SchemaType? Type
         {
             get => this.Target?.Type;
-            set => this.Target.Type = value;
+            set => this.Resolved.Type = value;
         }
 
         public override string Format
         {
             get => this.Target?.Format;
-            set => this.Target.Format = value;
+            set => this.Resolved.Format = value;
         }
 
         public override string Description
         {
             get => this.Target?.Description;
-            set => this.Target.Description = value;
+            set => this.Resolved.Description = value;
         }
 
         public override double? Maximum
         {
             get => this.Target?.Maximum;
-            set => this.Target.Maximum = value;
+            set => this.Resolved.Maximum = value;
         }
 
         public override double? ExclusiveMaximum
         {
             get => this.Target?.ExclusiveMaximum;
-            set => this.Target.ExclusiveMaximum = value;
+            set => this.Resolved.ExclusiveMaximum = value;
         }
 
         public override double? Minimum
         {
             get => this.Target?.Minimum;
-            set => this.Target.Minimum = value;
+            set => this.Resolved.Minimum = value;
         }
 
         public override double? ExclusiveMinimum
         {
             get => this.Target?.ExclusiveMinimum;
-            set => this.Target.ExclusiveMinimum = value;
+            set => this.Resolved.ExclusiveMinimum = value;
         }
 
         public override int? MaxLength
         {
             get => this.Target?.MaxLength;
-            set => this.Target.MaxLength = value;
+            set => this.Resolved.MaxLength = value;
         }
 
         public override int? MinLength
         {
             get => this.Target?.MinLength;
-            set => this.Target.MinLength = value;
+            set => this.Resolved.MinLength = value;
         }
 
         public override string Pattern
         {
             get => this.Target?.Pattern;
-            set => this.Target.Pattern = value;
+            set => this.Resolved.Pattern = value;
         }
 
         public override double? MultipleOf
         {
             get => this.Target?.MultipleOf;
-            set => this.Target.MultipleOf = value;
+            set => this.Resolved.MultipleOf = value;
         }
 
         public override AsyncApiAny Default
         {
             get => this.Target?.Default;
-            set => this.Target.Default = value;
+            set => this.Resolved.Default = value;
         }
 
         public override bool ReadOnly
         {
-            get => this.Target.ReadOnly;
-            set => this.Target.ReadOnly = value;
+            get => this.Target?.ReadOnly ?? false;
+            set => this.Resolved.ReadOnly = value;
         }
 
         public override bool WriteOnly
         {
-            get => this.Target.WriteOnly;
-            set => this.Target.WriteOnly = value;
+            get => this.Target?.WriteOnly ?? false;
+            set => this.Resolved.WriteOnly = value;
         }
 
         public override IList<AsyncApiJsonSchema> AllOf
         {
             get => this.Target?.AllOf;
-            set => this.Target.AllOf = value;
+            set => this.Resolved.AllOf = value;
         }
 
         public override IList<AsyncApiJsonSchema> OneOf
         {
             get => this.Target?.OneOf;
-            set => this.Target.OneOf = value;
+            set => this.Resolved.OneOf = value;
         }
 
         public override IList<AsyncApiJsonSchema> AnyOf
         {
             get => this.Target?.AnyOf;
-            set => this.Target.AnyOf = value;
+            set => this.Resolved.AnyOf = value;
         }
 
         public override AsyncApiJsonSchema Not
         {
             get => this.Target?.Not;
-            set => this.Target.Not = value;
+            set => this.Resolved.Not = value;
         }
 
         public override AsyncApiJsonSchema Contains
         {
             get => this.Target?.Contains;
-            set => this.Target.Contains = value;
+            set => this.Resolved.Contains = value;
         }
 
         public override AsyncApiJsonSchema If
         {
             get => this.Target?.If;
-            set => this.Target.If = value;
+            set => this.Resolved.If = value;
         }
 
         public override AsyncApiJsonSchema Then
         {
             get => this.Target?.Then;
-            set => this.Target.Then = value;
+            set => this.Resolved.Then = value;
         }
 
         public override AsyncApiJsonSchema Else
         {
             get => this.Target?.Else;
-            set => this.Target.Else = value;
+            set => this.Resolved.Else = value;
         }
 
         public override ISet<string> Required
         {
             get => this.Target?.Required;
-            set => this.Target.Required = value;
+            set => this.Resolved.Required = value;
         }
 
         public override AsyncApiJsonSchema Items
         {
             get => this.Target?.Items;
-            set => this.Target.Items = value;
+            set => this.Resolved.Items = value;
         }
 
         public override AsyncApiJsonSchema AdditionalItems
         {
             get => this.Target?.AdditionalItems;
-            set => this.Target.AdditionalItems = value;
+            set => this.Resolved.AdditionalItems = value;
         }
 
         public override int? MaxItems
         {
             get => this.Target?.MaxItems;
-            set => this.Target.MaxItems = value;
+            set => this.Resolved.MaxItems = value;
         }
 
         public override int? MinItems
         {
             get => this.Target?.MinItems;
-            set => this.Target.MinItems = value;
+            set => this.Resolved.MinItems = value;
         }
 
         public override bool? UniqueItems
         {
             get => this.Target?.UniqueItems;
-            set => this.Target.UniqueItems = value;
+            set => this.Resolved.UniqueItems = value;
         }
 
         public override IDictionary<string, AsyncApiJsonSchema> Properties
         {
             get => this.Target?.Properties;
-            set => this.Target.Properties = value;
+            set => this.Resolved.Properties = value;
         }
 
         public override int? MaxProperties
         {
             get => this.Target?.MaxProperties;
-            set => this.Target.MaxProperties = value;
+            set => this.Resolved.MaxProperties = value;
         }
 
         public override int? MinProperties
         {
             get => this.Target?.MinProperties;
-            set => this.Target.MinProperties = value;
+            set => this.Resolved.MinProperties = value;
         }
 
         public override AsyncApiJsonSchema AdditionalProperties
         {
             get => this.Target?.AdditionalProperties;
-            set => this.Target.AdditionalProperties = value;
+            set => this.Resolved.AdditionalProperties = value;
         }
 
         public override IDictionary<string, AsyncApiJsonSchema> PatternProperties
         {
             get => this.Target?.PatternProperties;
-            set => this.Target.PatternProperties = value;
+            set => this.Resolved.PatternProperties = value;
         }
 
         public override AsyncApiJsonSchema PropertyNames
         {
             get => this.Target?.PropertyNames;
-            set => this.Target.PropertyNames = value;
+            set => this.Resolved.PropertyNames = value;
         }
 
         public override string Discriminator
         {
             get => this.Target?.Discriminator;
-            set => this.Target.Discriminator = value;
+            set => this.Resolved.Discriminator = value;
         }
 
         public override IList<AsyncApiAny> Enum
         {
             get => this.Target?.Enum;
-            set => this.Target.Enum = value;
+            set => this.Resolved.Enum = value;
         }
 
         public override IList<AsyncApiAny> Examples
         {
             get => this.Target?.Examples;
-            set => this.Target.Examples = value;
+            set => this.Resolved.Examples = value;
         }
 
         public override AsyncApiAny Const
         {
             get => this.Target?.Const;
-            set => this.Target.Const = value;
+            set => this.Resolved.Const = value;
         }
 
         public override bool Nullable
         {
-            get => this.Target.Nullable;
-            set => this.Target.Nullable = value;
+            get => this.Target?.Nullable ?? false;
+            set => this.Resolved.Nullable = value;
         }
 
         public override AsyncApiExternalDocumentation ExternalDocs
         {
             get => this.Target?.ExternalDocs;
-            set => this.Target.ExternalDocs = value;
+            set => this.Resolved.ExternalDocs = value;
         }
 
         public override bool Deprecated
         {
-            get => this.Target.Deprecated;
-            set => this.Target.Deprecated = value;
+            get => this.Target?.Deprecated ?? false;
+            set => this.Resolved.Deprecated = value;
         }
 
         public override IDictionary<string, IAsyncApiExtension> Extensions
         {
             get => this.Target?.Extensions;
-            set => this.Target.Extensions = value;
+            set => this.Resolved.Extensions = value;
         }
 
         public static bool operator !=(AsyncApiJsonSchemaReference left, AsyncApiJsonSchemaReference right) => !(left == right);
@@ -307,6 +309,11 @@
             if (other.Target is AsyncApiJsonSchemaReference reference)
             {
                 return this.Equals(reference);
+            }
+
+            if (this.Target is null || other.Target is null)
+            {
+                return this.Target is null && other.Target is null && this.Reference == other.Reference;
             }
 
             return this.Target == other.Target;
@@ -329,7 +336,12 @@
 
         public bool Equals(AsyncApiJsonSchema other)
         {
-            return this.Target == other;
+            return other is not null && this.Target == other;
+        }
+
+        public override int GetHashCode()
+        {
+            return this.Target?.GetHashCode() ?? this.Reference?.GetHashCode() ?? 0;
         }
 
         public override void SerializeV2(IAsyncApiWriter writer)
@@ -355,7 +367,7 @@
                 return;
             }
 
-            this.Target.SerializeV2(writer);
+            this.Resolved.SerializeV2(writer);
         }
 
         public override void SerializeV3(IAsyncApiWriter writer)
@@ -381,7 +393,7 @@
                 return;
             }
 
-            this.Target.SerializeV3(writer);
+            this.Resolved.SerializeV3(writer);
         }
     }
 }

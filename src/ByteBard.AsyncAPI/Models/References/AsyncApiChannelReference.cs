@@ -11,6 +11,8 @@ namespace ByteBard.AsyncAPI.Models
     {
         private AsyncApiChannel target;
 
+        private AsyncApiChannel Resolved => this.Target ?? throw this.Reference.CreateUnresolvedException();
+
         private AsyncApiChannel Target
         {
             get
@@ -25,27 +27,27 @@ namespace ByteBard.AsyncAPI.Models
             this.Reference = new AsyncApiReference(reference, ReferenceType.Channel);
         }
 
-        public override string Address { get => this.Target?.Address; set => this.Target.Address = value; }
+        public override string Address { get => this.Target?.Address; set => this.Resolved.Address = value; }
 
-        public override IDictionary<string, AsyncApiMessage> Messages { get => this.Target?.Messages; set => this.Target.Messages = value; }
+        public override IDictionary<string, AsyncApiMessage> Messages { get => this.Target?.Messages; set => this.Resolved.Messages = value; }
 
-        public override string Title { get => this.Target?.Title; set => this.Target.Title = value; }
+        public override string Title { get => this.Target?.Title; set => this.Resolved.Title = value; }
 
-        public override string Summary { get => this.Target?.Summary; set => this.Target.Summary = value; }
+        public override string Summary { get => this.Target?.Summary; set => this.Resolved.Summary = value; }
 
-        public override string Description { get => this.Target?.Description; set => this.Target.Description = value; }
+        public override string Description { get => this.Target?.Description; set => this.Resolved.Description = value; }
 
-        public override IList<AsyncApiServerReference> Servers { get => this.Target?.Servers; set => this.Target.Servers = value; }
+        public override IList<AsyncApiServerReference> Servers { get => this.Target?.Servers; set => this.Resolved.Servers = value; }
 
-        public override IDictionary<string, AsyncApiParameter> Parameters { get => this.Target?.Parameters; set => this.Target.Parameters = value; }
+        public override IDictionary<string, AsyncApiParameter> Parameters { get => this.Target?.Parameters; set => this.Resolved.Parameters = value; }
 
-        public override IList<AsyncApiTag> Tags { get => this.Target?.Tags; set => this.Target.Tags = value; }
+        public override IList<AsyncApiTag> Tags { get => this.Target?.Tags; set => this.Resolved.Tags = value; }
 
-        public override AsyncApiExternalDocumentation ExternalDocs { get => this.Target?.ExternalDocs; set => this.Target.ExternalDocs = value; }
+        public override AsyncApiExternalDocumentation ExternalDocs { get => this.Target?.ExternalDocs; set => this.Resolved.ExternalDocs = value; }
 
-        public override AsyncApiBindings<IChannelBinding> Bindings { get => this.Target?.Bindings; set => this.Target.Bindings = value; }
+        public override AsyncApiBindings<IChannelBinding> Bindings { get => this.Target?.Bindings; set => this.Resolved.Bindings = value; }
 
-        public override IDictionary<string, IAsyncApiExtension> Extensions { get => this.Target?.Extensions; set => this.Target.Extensions = value; }
+        public override IDictionary<string, IAsyncApiExtension> Extensions { get => this.Target?.Extensions; set => this.Resolved.Extensions = value; }
 
         public AsyncApiReference Reference { get; set; }
 
@@ -61,7 +63,7 @@ namespace ByteBard.AsyncAPI.Models
             else
             {
                 this.Reference.Workspace = writer.Workspace;
-                this.Target.SerializeV2(writer);
+                this.Resolved.SerializeV2(writer);
             }
         }
 
@@ -75,7 +77,7 @@ namespace ByteBard.AsyncAPI.Models
             else
             {
                 this.Reference.Workspace = writer.Workspace;
-                this.Target.SerializeV3(writer);
+                this.Resolved.SerializeV3(writer);
             }
         }
 
@@ -98,6 +100,11 @@ namespace ByteBard.AsyncAPI.Models
                 return this.Equals(reference);
             }
 
+            if (this.Target is null || other.Target is null)
+            {
+                return this.Target is null && other.Target is null && this.Reference == other.Reference;
+            }
+
             return this.Target == other.Target;
         }
 
@@ -118,7 +125,12 @@ namespace ByteBard.AsyncAPI.Models
 
         public bool Equals(AsyncApiChannel other)
         {
-            return this.Target == other;
+            return other is not null && this.Target == other;
+        }
+
+        public override int GetHashCode()
+        {
+            return this.Target?.GetHashCode() ?? this.Reference?.GetHashCode() ?? 0;
         }
     }
 }

@@ -11,6 +11,8 @@
     {
         private AsyncApiAvroSchema target;
 
+        private AsyncApiAvroSchema Resolved => this.Target ?? throw this.Reference.CreateUnresolvedException();
+
         private AsyncApiAvroSchema Target
         {
             get
@@ -27,7 +29,7 @@
 
         public override string Type => this.Target?.Type;
 
-        public override IDictionary<string, AsyncApiAny> Metadata { get => this.Target?.Metadata; set => this.Target.Metadata = value; }
+        public override IDictionary<string, AsyncApiAny> Metadata { get => this.Target?.Metadata; set => this.Resolved.Metadata = value; }
 
         public bool UnresolvedReference { get { return this.Target == null; } }
 
@@ -40,7 +42,7 @@
                 return null;
             }
 
-            return this.Target.As<T>();
+            return this.Resolved.As<T>();
         }
 
         public override bool Is<T>()
@@ -50,7 +52,7 @@
                 return false;
             }
 
-            return this.Target.Is<T>();
+            return this.Resolved.Is<T>();
         }
 
         public override bool TryGetAs<T>(out T result)
@@ -61,7 +63,7 @@
                 return false;
             }
 
-            return this.Target.TryGetAs(out result);
+            return this.Resolved.TryGetAs(out result);
         }
 
         public override void SerializeV2(IAsyncApiWriter writer)
@@ -77,7 +79,7 @@
                 return;
             }
 
-            this.Target.SerializeV2(writer);
+            this.Resolved.SerializeV2(writer);
         }
 
         public override void SerializeV3(IAsyncApiWriter writer)
@@ -93,7 +95,7 @@
                 return;
             }
 
-            this.Target.SerializeV3(writer);
+            this.Resolved.SerializeV3(writer);
         }
     }
 }

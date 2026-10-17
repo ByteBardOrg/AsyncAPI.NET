@@ -11,6 +11,8 @@
     {
         private AsyncApiOperationReplyAddress target;
 
+        private AsyncApiOperationReplyAddress Resolved => this.Target ?? throw this.Reference.CreateUnresolvedException();
+
         private AsyncApiOperationReplyAddress Target
         {
             get
@@ -25,11 +27,11 @@
             this.Reference = new AsyncApiReference(reference, ReferenceType.OperationReplyAddress);
         }
 
-        public override string Description { get => this.Target?.Description; set => this.Target.Description = value; }
+        public override string Description { get => this.Target?.Description; set => this.Resolved.Description = value; }
 
-        public override string Location { get => this.Target?.Location; set => this.Target.Location = value; }
+        public override string Location { get => this.Target?.Location; set => this.Resolved.Location = value; }
 
-        public override IDictionary<string, IAsyncApiExtension> Extensions { get => this.Target?.Extensions; set => this.Target.Extensions = value; }
+        public override IDictionary<string, IAsyncApiExtension> Extensions { get => this.Target?.Extensions; set => this.Resolved.Extensions = value; }
 
         public AsyncApiReference Reference { get; set; }
 
@@ -54,6 +56,11 @@
                 return this.Equals(reference);
             }
 
+            if (this.Target is null || other.Target is null)
+            {
+                return this.Target is null && other.Target is null && this.Reference == other.Reference;
+            }
+
             return this.Target == other.Target;
         }
 
@@ -74,7 +81,12 @@
 
         public bool Equals(AsyncApiOperationReplyAddress other)
         {
-            return this.Target == other;
+            return other is not null && this.Target == other;
+        }
+
+        public override int GetHashCode()
+        {
+            return this.Target?.GetHashCode() ?? this.Reference?.GetHashCode() ?? 0;
         }
 
         public override void SerializeV3(IAsyncApiWriter writer)
@@ -87,7 +99,7 @@
             else
             {
                 this.Reference.Workspace = writer.Workspace;
-                this.Target.SerializeV3(writer);
+                this.Resolved.SerializeV3(writer);
             }
         }
     }
