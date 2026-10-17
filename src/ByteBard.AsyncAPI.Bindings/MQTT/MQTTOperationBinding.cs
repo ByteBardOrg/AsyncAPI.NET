@@ -35,6 +35,11 @@
         /// <summary>
         /// Interval in seconds or a Schema Object containing the definition of the lifetime of the message.
         /// </summary>
+        /// <remarks>
+        /// Returns null when the value is a schema or does not fit in an Int32 (MQTT allows up to 4294967295).
+        /// Use <see cref="MessageExpiryIntervalValue"/> to read every value.
+        /// </remarks>
+        [Obsolete("Returns null for schema values and values above Int32.MaxValue. Use MessageExpiryIntervalValue instead.")]
         public int? MessageExpiryInterval
         {
             get => this.MessageExpiryIntervalValue?.Integer;

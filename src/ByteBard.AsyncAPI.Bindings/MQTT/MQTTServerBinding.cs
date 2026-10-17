@@ -37,6 +37,11 @@
         /// Interval in seconds the broker maintains a session
         /// for a disconnected client until this interval expires.
         /// </summary>
+        /// <remarks>
+        /// Returns null when the value is a schema or does not fit in an Int32 (MQTT allows up to 4294967295).
+        /// Use <see cref="SessionExpiryIntervalValue"/> to read every value.
+        /// </remarks>
+        [Obsolete("Returns null for schema values and values above Int32.MaxValue. Use SessionExpiryIntervalValue instead.")]
         public int? SessionExpiryInterval
         {
             get => this.SessionExpiryIntervalValue?.Integer;
@@ -50,6 +55,11 @@
         /// Number of bytes representing the maximum packet size
         /// the client is willing to accept.
         /// </summary>
+        /// <remarks>
+        /// Returns null when the value is a schema or does not fit in an Int32 (MQTT allows up to 4294967295).
+        /// Use <see cref="MaximumPacketSizeValue"/> to read every value.
+        /// </remarks>
+        [Obsolete("Returns null for schema values and values above Int32.MaxValue. Use MaximumPacketSizeValue instead.")]
         public int? MaximumPacketSize
         {
             get => this.MaximumPacketSizeValue?.Integer;

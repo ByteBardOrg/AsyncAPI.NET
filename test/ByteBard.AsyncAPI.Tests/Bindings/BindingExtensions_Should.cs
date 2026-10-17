@@ -55,7 +55,7 @@
             operation.Bindings.Add(new MQTTOperationBinding
             {
                 QoS = 23,
-                MessageExpiryInterval = 1,
+                MessageExpiryIntervalValue = MQTTIntegerOrSchema.FromInteger(1),
                 Retain = true,
             });
 
