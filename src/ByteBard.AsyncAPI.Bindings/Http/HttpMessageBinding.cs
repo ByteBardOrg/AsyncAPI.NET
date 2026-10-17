@@ -1,7 +1,6 @@
 namespace ByteBard.AsyncAPI.Bindings.Http
 {
     using System;
-    using System.Net;
     using ByteBard.AsyncAPI.Models;
     using ByteBard.AsyncAPI.Readers;
     using ByteBard.AsyncAPI.Readers.ParseNodes;
@@ -25,9 +24,10 @@ namespace ByteBard.AsyncAPI.Bindings.Http
 
         /// <summary>
         /// The HTTP response status code according to RFC 9110. `statusCode` is only relevant for messages referenced by the Operation Reply Object.
+        /// Stored as an integer so that codes without a <see cref="System.Net.HttpStatusCode"/> member (e.g. 425, 499, 520) are represented as-is.
         /// Note: This field is only serialized in AsyncAPI V3.
         /// </summary>
-        public HttpStatusCode? StatusCode { get; set; }
+        public int? StatusCode { get; set; }
 
         public override string BindingKey => "http";
 
@@ -42,7 +42,7 @@ namespace ByteBard.AsyncAPI.Bindings.Http
         /// Reads the status code, reporting values outside the RFC 9110 range (100-599) as errors.
         /// </summary>
         /// <remarks>An out-of-range value is still kept so the document can be written back unchanged.</remarks>
-        private static HttpStatusCode LoadStatusCode(ParseNode node)
+        private static int LoadStatusCode(ParseNode node)
         {
             var code = node.GetIntegerValue();
             if (code < 100 || code > 599)
@@ -52,7 +52,7 @@ namespace ByteBard.AsyncAPI.Bindings.Http
                     $"statusCode {code} is not a valid HTTP status code. It must be between 100 and 599."));
             }
 
-            return (HttpStatusCode)code;
+            return code;
         }
 
         public override void SerializeV2(IAsyncApiWriter writer)
@@ -81,7 +81,7 @@ namespace ByteBard.AsyncAPI.Bindings.Http
 
             if (this.StatusCode.HasValue)
             {
-                writer.WriteRequiredProperty(AsyncApiConstants.StatusCode, (int)this.StatusCode.Value);
+                writer.WriteRequiredProperty(AsyncApiConstants.StatusCode, this.StatusCode.Value);
             }
 
             writer.WriteOptionalProperty(AsyncApiConstants.BindingVersion, this.BindingVersion ?? V3BindingVersion);

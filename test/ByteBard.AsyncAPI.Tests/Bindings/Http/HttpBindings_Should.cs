@@ -1,7 +1,6 @@
 ﻿namespace ByteBard.AsyncAPI.Tests.Bindings.Http
 {
     using System.Linq;
-    using System.Net;
     using FluentAssertions;
     using ByteBard.AsyncAPI.Bindings;
     using ByteBard.AsyncAPI.Bindings.Http;
@@ -156,7 +155,7 @@
                 {
                     Description = "response headers",
                 },
-                StatusCode = HttpStatusCode.OK,
+                StatusCode = 200,
             });
 
             // Act
@@ -179,7 +178,7 @@
                 {
                     Description = "response headers",
                 },
-                StatusCode = HttpStatusCode.OK,
+                StatusCode = 200,
             });
 
             // Act
@@ -204,7 +203,7 @@
             var message = new AsyncApiStringReader(settings).ReadFragment<AsyncApiMessage>(yaml, AsyncApiVersion.AsyncApi3_0, out var diagnostics);
 
             diagnostics.Errors.Should().BeEmpty();
-            ((HttpMessageBinding)message.Bindings["http"]).StatusCode.Should().Be(HttpStatusCode.NotFound);
+            ((HttpMessageBinding)message.Bindings["http"]).StatusCode.Should().Be(404);
         }
 
         [TestCase("not-found")]
@@ -224,7 +223,10 @@
 
         [TestCase(100)]
         [TestCase(599)]
-        public void V3_HttpMessageBinding_WithBoundaryStatusCode_ReportsNoError(int statusCode)
+        [TestCase(425)] // Too Early (RFC 8470), not a System.Net.HttpStatusCode member
+        [TestCase(499)] // nginx client closed request
+        [TestCase(520)] // Cloudflare unknown error
+        public void V3_HttpMessageBinding_WithValidStatusCode_ReportsNoErrorAndRoundTrips(int statusCode)
         {
             var yaml =
                 "bindings:\n" +
@@ -235,7 +237,8 @@
             var message = new AsyncApiStringReader(settings).ReadFragment<AsyncApiMessage>(yaml, AsyncApiVersion.AsyncApi3_0, out var diagnostics);
 
             diagnostics.Errors.Should().BeEmpty();
-            ((HttpMessageBinding)message.Bindings["http"]).StatusCode.Should().Be((HttpStatusCode)statusCode);
+            ((HttpMessageBinding)message.Bindings["http"]).StatusCode.Should().Be(statusCode);
+            message.SerializeAsYaml(AsyncApiVersion.AsyncApi3_0).Should().Contain("statusCode: " + statusCode);
         }
 
         [TestCase(0)]
@@ -256,7 +259,7 @@
             var error = diagnostics.Errors.Should().ContainSingle().Subject;
             error.Message.Should().Contain("must be between 100 and 599");
             error.Pointer.Should().EndWith("statusCode");
-            ((HttpMessageBinding)message.Bindings["http"]).StatusCode.Should().Be((HttpStatusCode)statusCode);
+            ((HttpMessageBinding)message.Bindings["http"]).StatusCode.Should().Be(statusCode);
             message.SerializeAsYaml(AsyncApiVersion.AsyncApi3_0).Should().Contain("statusCode: " + statusCode);
         }
     }
