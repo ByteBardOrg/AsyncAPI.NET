@@ -80,30 +80,30 @@ namespace ByteBard.AsyncAPI.Readers
                 }
             },
             {
-                "maxLength", (a, n) => { a.MaxLength = ParseInteger(n); }
+                "maxLength", (a, n) => { a.MaxLength = n.GetIntegerValue(); }
             },
             {
-                "minLength", (a, n) => { a.MinLength = ParseInteger(n); }
+                "minLength", (a, n) => { a.MinLength = n.GetIntegerValue(); }
             },
             {
                 "pattern", (a, n) => { a.Pattern = n.GetScalarValue(); }
             },
             {
-                "maxItems", (a, n) => { a.MaxItems = ParseInteger(n); }
+                "maxItems", (a, n) => { a.MaxItems = n.GetIntegerValue(); }
             },
             {
-                "minItems", (a, n) => { a.MinItems = ParseInteger(n); }
+                "minItems", (a, n) => { a.MinItems = n.GetIntegerValue(); }
             },
             {
                 "uniqueItems", (a, n) => { a.UniqueItems = bool.Parse(n.GetScalarValue()); }
             },
             {
                 "maxProperties",
-                (a, n) => { a.MaxProperties = ParseInteger(n); }
+                (a, n) => { a.MaxProperties = n.GetIntegerValue(); }
             },
             {
                 "minProperties",
-                (a, n) => { a.MinProperties = ParseInteger(n); }
+                (a, n) => { a.MinProperties = n.GetIntegerValue(); }
             },
             {
                 "enum", (a, n) => { a.Enum = n.CreateListOfAny(); }
@@ -214,18 +214,6 @@ namespace ByteBard.AsyncAPI.Readers
                 "nullable", (a, n) => { a.Nullable = n.GetBooleanValue(); }
             },
         };
-
-        private static int ParseInteger(ParseNode node)
-        {
-            try
-            {
-                return int.Parse(node.GetScalarValue(), node.Context.Settings.CultureInfo);
-            }
-            catch (Exception e)
-            {
-                throw new AsyncApiReaderException("The value is out of range.", node.Context);
-            }
-        }
 
         private static readonly PatternFieldMap<AsyncApiJsonSchema> schemaPatternFields =
             new()

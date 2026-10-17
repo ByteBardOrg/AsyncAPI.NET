@@ -197,6 +197,7 @@ namespace ByteBard.AsyncAPI.Readers
                     continue;
                 }
 
+                var errorCount = diagnostic.Errors.Count;
                 IAsyncApiSerializable component = null;
                 if (reference.Reference.IsExternal)
                 {
@@ -215,7 +216,12 @@ namespace ByteBard.AsyncAPI.Readers
 
                 if (component == null)
                 {
-                    diagnostic.Errors.Add(new AsyncApiError(string.Empty, $"Unable to deserialize reference '{reference.Reference.Reference}'"));
+                    // Only add a generic error when resolving did not already explain what went wrong.
+                    if (diagnostic.Errors.Count == errorCount)
+                    {
+                        diagnostic.Errors.Add(new AsyncApiError(string.Empty, $"Unable to deserialize reference '{reference.Reference.Reference}'"));
+                    }
+
                     continue;
                 }
 
@@ -242,6 +248,7 @@ namespace ByteBard.AsyncAPI.Readers
                     continue;
                 }
 
+                var errorCount = diagnostic.Errors.Count;
                 IAsyncApiSerializable component = null;
                 if (reference.Reference.IsExternal)
                 {
@@ -260,7 +267,12 @@ namespace ByteBard.AsyncAPI.Readers
 
                 if (component == null)
                 {
-                    diagnostic.Errors.Add(new AsyncApiError(string.Empty, $"Unable to deserialize reference '{reference.Reference.Reference}'"));
+                    // Only add a generic error when resolving did not already explain what went wrong.
+                    if (diagnostic.Errors.Count == errorCount)
+                    {
+                        diagnostic.Errors.Add(new AsyncApiError(string.Empty, $"Unable to deserialize reference '{reference.Reference.Reference}'"));
+                    }
+
                     continue;
                 }
 
@@ -349,9 +361,9 @@ namespace ByteBard.AsyncAPI.Readers
             {
                 json = this.ReadToJson(stream);
             }
-            catch
+            catch (Exception ex)
             {
-                diagnostic.Errors.Add(new AsyncApiError(string.Empty, $"Unable to deserialize reference: '{reference.Reference.Reference}'"));
+                diagnostic.Errors.Add(new AsyncApiError(reference.Reference.Reference, $"Unable to deserialize reference '{reference.Reference.Reference}': {ex.Message}"));
                 return null;
             }
 
