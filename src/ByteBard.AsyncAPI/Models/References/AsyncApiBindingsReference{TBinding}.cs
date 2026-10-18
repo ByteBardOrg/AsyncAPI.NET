@@ -16,31 +16,29 @@
 
         private AsyncApiBindings<TBinding> target;
 
-        private AsyncApiBindings<TBinding> Resolved => this.Target ?? throw this.Reference.CreateUnresolvedException();
-
         private AsyncApiBindings<TBinding> Target
         {
             get
             {
                 this.target ??= this.Reference.Workspace?.ResolveReference<AsyncApiBindings<TBinding>>(this.Reference);
-                return this.target;
+                return this.target ?? throw this.Reference.CreateUnresolvedException();
             }
         }
 
         public override void Add(TBinding binding)
         {
-            this.Resolved.Add(binding);
+            this.Target.Add(binding);
         }
 
-        public override ICollection<string> Keys => this.Resolved.Keys;
+        public override ICollection<string> Keys => this.Target.Keys;
 
-        public override ICollection<TBinding> Values => this.Resolved.Values;
+        public override ICollection<TBinding> Values => this.Target.Values;
 
-        public override IDictionary<string, IAsyncApiExtension> Extensions => this.target.Extensions;
+        public override IDictionary<string, IAsyncApiExtension> Extensions => this.Target.Extensions;
 
-        public override int Count => this.Resolved.Count;
+        public override int Count => this.Target.Count;
 
-        public override bool IsReadOnly => this.Resolved.IsReadOnly;
+        public override bool IsReadOnly => this.Target.IsReadOnly;
 
         public AsyncApiBindingsReference(string reference)
         {
@@ -86,7 +84,7 @@
                 return;
             }
 
-            this.Resolved.SerializeV2(writer);
+            this.Target.SerializeV2(writer);
         }
 
         public override void SerializeV3(IAsyncApiWriter writer)
@@ -102,57 +100,57 @@
                 return;
             }
 
-            this.Resolved.SerializeV3(writer);
+            this.Target.SerializeV3(writer);
         }
 
         public override void Add(string key, TBinding value)
         {
-            this.Resolved.Add(key, value);
+            this.Target.Add(key, value);
         }
 
         public override bool ContainsKey(string key)
         {
-            return this.Resolved.ContainsKey(key);
+            return this.Target.ContainsKey(key);
         }
 
         public override bool Remove(string key)
         {
-            return this.Resolved.Remove(key);
+            return this.Target.Remove(key);
         }
 
         public override bool TryGetValue(string key, out TBinding value)
         {
-            return this.Resolved.TryGetValue(key, out value);
+            return this.Target.TryGetValue(key, out value);
         }
 
         public override void Add(KeyValuePair<string, TBinding> item)
         {
-            this.Resolved.Add(item);
+            this.Target.Add(item);
         }
 
         public override void Clear()
         {
-            this.Resolved.Clear();
+            this.Target.Clear();
         }
 
         public override bool Contains(KeyValuePair<string, TBinding> item)
         {
-            return this.Resolved.Contains(item);
+            return this.Target.Contains(item);
         }
 
         public override void CopyTo(KeyValuePair<string, TBinding>[] array, int arrayIndex)
         {
-            this.Resolved.CopyTo(array, arrayIndex);
+            this.Target.CopyTo(array, arrayIndex);
         }
 
         public override bool Remove(KeyValuePair<string, TBinding> item)
         {
-            return this.Resolved.Remove(item);
+            return this.Target.Remove(item);
         }
 
         public override IEnumerator<KeyValuePair<string, TBinding>> GetEnumerator()
         {
-            return this.Resolved.GetEnumerator();
+            return this.Target.GetEnumerator();
         }
     }
 }

@@ -4,6 +4,7 @@ namespace ByteBard.AsyncAPI.Tests
     using System.IO;
     using System.Linq;
     using ByteBard.AsyncAPI.Models;
+    using ByteBard.AsyncAPI.Models.Interfaces;
     using ByteBard.AsyncAPI.Readers;
     using ByteBard.AsyncAPI.Writers;
     using FluentAssertions;
@@ -116,6 +117,16 @@ namespace ByteBard.AsyncAPI.Tests
             var act = () => reference.Address = "users";
 
             act.Should().Throw<InvalidOperationException>().WithMessage("*#/components/channels/missing*");
+        }
+
+        [Test]
+        public void ReadingExtensionsOnAnUnresolvedBindingsReference_ThrowsWithTheReference()
+        {
+            var reference = new AsyncApiBindingsReference<IChannelBinding>("#/components/channelBindings/missing");
+
+            var act = () => reference.Extensions;
+
+            act.Should().Throw<InvalidOperationException>().WithMessage("*#/components/channelBindings/missing*");
         }
 
         [Test]
