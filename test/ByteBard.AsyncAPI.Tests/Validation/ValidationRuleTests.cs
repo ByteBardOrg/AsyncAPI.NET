@@ -219,6 +219,107 @@ public class ValidationRuleTests
   }
 
   [Test]
+  public void V3_OperationMessage_ReferencingAnInlineChannelMessage_Passes()
+  {
+    var input =
+      """
+      asyncapi: 3.0.0
+      info:
+        title: Chat Application
+        version: 1.0.0
+      channels:
+        chatPersonId:
+          address: chat.{personId}
+          messages:
+            messageReceived:
+              name: text
+              payload:
+                type: string
+      operations:
+        onMessageReceived:
+          title: Message received
+          action: receive
+          channel:
+            $ref: '#/channels/chatPersonId'
+          messages:
+            - $ref: '#/channels/chatPersonId/messages/messageReceived'
+      """;
+
+    new AsyncApiStringReader().Read(input, out var diagnostic);
+    diagnostic.Errors.Should().BeEmpty();
+  }
+
+  [Test]
+  public void V3_OperationMessage_ReferencingAChannelMessageThatReferencesAComponent_Passes()
+  {
+    var input =
+      """
+      asyncapi: 3.0.0
+      info:
+        title: Chat Application
+        version: 1.0.0
+      channels:
+        chatPersonId:
+          address: chat.{personId}
+          messages:
+            messageReceived:
+              $ref: '#/components/messages/messageReceived'
+      operations:
+        onMessageReceived:
+          title: Message received
+          action: receive
+          channel:
+            $ref: '#/channels/chatPersonId'
+          messages:
+            - $ref: '#/channels/chatPersonId/messages/messageReceived'
+      components:
+        messages:
+          messageReceived:
+            name: text
+            payload:
+              type: string
+      """;
+
+    new AsyncApiStringReader().Read(input, out var diagnostic);
+    diagnostic.Errors.Should().BeEmpty();
+  }
+
+  [Test]
+  public void V3_OperationMessage_ReferencingTheComponentAChannelMessageReferences_Passes()
+  {
+    var input =
+      """
+      asyncapi: 3.0.0
+      info:
+        title: Chat Application
+        version: 1.0.0
+      channels:
+        chatPersonId:
+          address: chat.{personId}
+          messages:
+            messageReceived:
+              $ref: '#/components/messages/messageReceived'
+      operations:
+        onMessageReceived:
+          title: Message received
+          action: receive
+          channel:
+            $ref: '#/channels/chatPersonId'
+          messages:
+            - $ref: '#/components/messages/messageReceived'
+      components:
+        messages:
+          messageReceived:
+            name: text
+            payload:
+              type: string
+      """;
+
+    new AsyncApiStringReader().Read(input, out var diagnostic);
+    diagnostic.Errors.Should().BeEmpty();
+  }
+
+  [Test]
   [TestCase("chat")]
   [TestCase("/some/chat/{personId}")]
   [TestCase("chat-{personId}")]

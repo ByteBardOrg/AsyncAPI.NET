@@ -92,6 +92,8 @@ namespace ByteBard.AsyncAPI.Validation.Rules
 
         private static bool OperationMessageReferencesAnyChannelMessage(
             AsyncApiMessageReference operationMessage, ICollection<AsyncApiMessage> channelMessages) =>
-            channelMessages.Any(channelMessage => channelMessage.Equals(operationMessage));
+            // Only references know how to compare themselves to their target, so an inline channel message
+            // has to be compared from the operation's side, and a referenced one from the channel's side.
+            channelMessages.Any(channelMessage => operationMessage.Equals(channelMessage) || channelMessage.Equals(operationMessage));
     }
 }
