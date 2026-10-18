@@ -2,7 +2,6 @@ namespace ByteBard.AsyncAPI.Models
 {
     using System;
     using System.Collections.Generic;
-    using System.Linq;
     using ByteBard.AsyncAPI.Models.Interfaces;
     using ByteBard.AsyncAPI.Writers;
 
@@ -129,9 +128,6 @@ namespace ByteBard.AsyncAPI.Models
                 writer.WriteStartObject();
                 if (loops.TryGetValue(typeof(AsyncApiJsonSchemaReference), out List<object> schemas))
                 {
-                    var asyncApiSchemas = schemas.Cast<AsyncApiJsonSchemaReference>().Distinct().ToList()
-                        .ToDictionary<AsyncApiJsonSchemaReference, string>(k => k.Reference.FragmentId);
-
                     writer.WriteOptionalMap(
                        AsyncApiConstants.Schemas,
                        this.Schemas,
@@ -395,9 +391,6 @@ namespace ByteBard.AsyncAPI.Models
                 writer.WriteStartObject();
                 if (loops.TryGetValue(typeof(AsyncApiMultiFormatSchemaReference), out List<object> schemas))
                 {
-                    var asyncApiSchemas = schemas.Cast<AsyncApiMultiFormatSchemaReference>().Distinct().ToList()
-                        .ToDictionary<AsyncApiMultiFormatSchemaReference, string>(k => k.Reference.FragmentId);
-
                     writer.WriteOptionalMap(
                        AsyncApiConstants.Schemas,
                        this.Schemas,

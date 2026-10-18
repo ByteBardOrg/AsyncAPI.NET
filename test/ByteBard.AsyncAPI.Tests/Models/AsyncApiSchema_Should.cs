@@ -712,5 +712,47 @@ namespace ByteBard.AsyncAPI.Tests.Models
 
             Assert.True(!yaml.Contains("else:"));
         }
+
+        /// <summary>
+        /// Regression test.
+        /// Bug: Inlining a recursive schema that is reached by more than one reference threw
+        /// "An item with the same key has already been added" when writing components.
+        /// </summary>
+        [Test]
+        public void V2_Serialize_WithInlinedReferences_RecursiveSchemaReachedTwice_DoesNotThrow()
+        {
+            var yaml =
+                """
+                asyncapi: 2.6.0
+                info:
+                  title: test
+                  version: 1.0.0
+                channels:
+                  first:
+                    publish:
+                      message:
+                        payload:
+                          $ref: '#/components/schemas/Node'
+                components:
+                  schemas:
+                    Node:
+                      type: object
+                      properties:
+                        next:
+                          $ref: '#/components/schemas/Node'
+                        prev:
+                          $ref: '#/components/schemas/Node'
+                """;
+            var document = new AsyncApiStringReader().Read(yaml, out var diagnostic);
+            diagnostic.Errors.Should().BeEmpty();
+
+            var outputString = new StringWriter();
+            var writer = new AsyncApiYamlWriter(outputString, new AsyncApiWriterSettings { ReferenceInline = ReferenceInlineSetting.InlineReferences });
+
+            var act = () => document.SerializeV2(writer);
+
+            act.Should().NotThrow();
+            outputString.ToString().Replace("\r\n", "\n").Should().Contain("components:\n  schemas:\n    Node:");
+        }
     }
 }
