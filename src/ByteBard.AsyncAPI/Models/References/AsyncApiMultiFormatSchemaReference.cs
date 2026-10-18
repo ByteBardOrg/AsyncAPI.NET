@@ -45,6 +45,11 @@ namespace ByteBard.AsyncAPI.Models
             else
             {
                 this.Reference.Workspace = writer.Workspace;
+                if (this.Target is null)
+                {
+                    throw new AsyncApiWriterException($"Cannot inline '{this.Reference.Reference}': the reference could not be resolved.");
+                }
+
                 this.Target.SerializeV2(writer);
             }
         }
@@ -59,6 +64,11 @@ namespace ByteBard.AsyncAPI.Models
             else
             {
                 this.Reference.Workspace = writer.Workspace;
+                if (this.Target is null)
+                {
+                    throw new AsyncApiWriterException($"Cannot inline '{this.Reference.Reference}': the reference could not be resolved.");
+                }
+
                 this.Target.SerializeV3(writer);
             }
         }

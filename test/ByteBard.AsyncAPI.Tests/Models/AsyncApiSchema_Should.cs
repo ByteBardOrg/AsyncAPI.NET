@@ -754,5 +754,677 @@ namespace ByteBard.AsyncAPI.Tests.Models
             act.Should().NotThrow();
             outputString.ToString().Replace("\r\n", "\n").Should().Contain("components:\n  schemas:\n    Node:");
         }
+
+        [Test]
+        public void V2_Serialize_WithInlinedReferences_RoundTripsYamlAndJson()
+        {
+            // Arrange
+            var input =
+                """
+                asyncapi: 2.6.0
+                info:
+                  title: test
+                  version: 1.0.0
+                channels:
+                  first:
+                    publish:
+                      message:
+                        payload:
+                          type: object
+                          properties:
+                            first:
+                              $ref: '#/components/schemas/Leaf'
+                            second:
+                              $ref: '#/components/schemas/Leaf'
+                            node:
+                              $ref: '#/components/schemas/Node'
+                components:
+                  schemas:
+                    Leaf:
+                      type: string
+                    Node:
+                      type: object
+                      properties:
+                        value:
+                          $ref: '#/components/schemas/Leaf'
+                        next:
+                          $ref: '#/components/schemas/Node'
+                """;
+
+            var expectedYaml =
+                """
+                asyncapi: 2.6.0
+                info:
+                  title: test
+                  version: 1.0.0
+                channels:
+                  first:
+                    publish:
+                      message:
+                        payload:
+                          type: object
+                          properties:
+                            first:
+                              type: string
+                            second:
+                              type: string
+                            node:
+                              $ref: '#/components/schemas/Node'
+                components:
+                  schemas:
+                    Leaf:
+                      type: string
+                    Node:
+                      type: object
+                      properties:
+                        value:
+                          type: string
+                        next:
+                          $ref: '#/components/schemas/Node'
+                """;
+
+            var expectedJson =
+                """
+                {
+                  "asyncapi": "2.6.0",
+                  "info": {
+                    "title": "test",
+                    "version": "1.0.0"
+                  },
+                  "channels": {
+                    "first": {
+                      "publish": {
+                        "message": {
+                          "payload": {
+                            "type": "object",
+                            "properties": {
+                              "first": {
+                                "type": "string"
+                              },
+                              "second": {
+                                "type": "string"
+                              },
+                              "node": {
+                                "$ref": "#/components/schemas/Node"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "components": {
+                    "schemas": {
+                      "Leaf": {
+                        "type": "string"
+                      },
+                      "Node": {
+                        "type": "object",
+                        "properties": {
+                          "value": {
+                            "type": "string"
+                          },
+                          "next": {
+                            "$ref": "#/components/schemas/Node"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+                """;
+
+            // Act & Assert
+            AssertRoundTrip(AsyncApiVersion.AsyncApi2_0, ReferenceInlineSetting.InlineReferences, input, expectedYaml, expectedJson);
+        }
+
+        [Test]
+        public void V3_Serialize_WithInlinedReferences_RoundTripsYamlAndJson()
+        {
+            // Arrange
+            var input =
+                """
+                asyncapi: 3.0.0
+                info:
+                  title: test
+                  version: 1.0.0
+                channels:
+                  first:
+                    messages:
+                      a:
+                        payload:
+                          type: object
+                          properties:
+                            first:
+                              $ref: '#/components/schemas/Leaf'
+                            second:
+                              $ref: '#/components/schemas/Leaf'
+                            node:
+                              $ref: '#/components/schemas/Node'
+                components:
+                  schemas:
+                    Leaf:
+                      type: string
+                    Node:
+                      type: object
+                      properties:
+                        value:
+                          $ref: '#/components/schemas/Leaf'
+                        next:
+                          $ref: '#/components/schemas/Node'
+                """;
+
+            var expectedYaml =
+                """
+                asyncapi: 3.1.0
+                info:
+                  title: test
+                  version: 1.0.0
+                channels:
+                  first:
+                    messages:
+                      a:
+                        payload:
+                          schemaFormat: application/vnd.aai.asyncapi+json;version=3.0.0
+                          schema:
+                            type: object
+                            properties:
+                              first:
+                                type: string
+                              second:
+                                type: string
+                              node:
+                                $ref: '#/components/schemas/Node'
+                components:
+                  schemas:
+                    Leaf:
+                      schemaFormat: application/vnd.aai.asyncapi+json;version=3.0.0
+                      schema:
+                        type: string
+                    Node:
+                      schemaFormat: application/vnd.aai.asyncapi+json;version=3.0.0
+                      schema:
+                        type: object
+                        properties:
+                          value:
+                            type: string
+                          next:
+                            $ref: '#/components/schemas/Node'
+                """;
+
+            var expectedJson =
+                """
+                {
+                  "asyncapi": "3.1.0",
+                  "info": {
+                    "title": "test",
+                    "version": "1.0.0"
+                  },
+                  "channels": {
+                    "first": {
+                      "messages": {
+                        "a": {
+                          "payload": {
+                            "schemaFormat": "application/vnd.aai.asyncapi+json;version=3.0.0",
+                            "schema": {
+                              "type": "object",
+                              "properties": {
+                                "first": {
+                                  "type": "string"
+                                },
+                                "second": {
+                                  "type": "string"
+                                },
+                                "node": {
+                                  "$ref": "#/components/schemas/Node"
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "components": {
+                    "schemas": {
+                      "Leaf": {
+                        "schemaFormat": "application/vnd.aai.asyncapi+json;version=3.0.0",
+                        "schema": {
+                          "type": "string"
+                        }
+                      },
+                      "Node": {
+                        "schemaFormat": "application/vnd.aai.asyncapi+json;version=3.0.0",
+                        "schema": {
+                          "type": "object",
+                          "properties": {
+                            "value": {
+                              "type": "string"
+                            },
+                            "next": {
+                              "$ref": "#/components/schemas/Node"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+                """;
+
+            // Act & Assert
+            AssertRoundTrip(AsyncApiVersion.AsyncApi3_0, ReferenceInlineSetting.InlineReferences, input, expectedYaml, expectedJson);
+        }
+
+        [Test]
+        public void V2_Serialize_WithoutInlinedReferences_RoundTripsYamlAndJson()
+        {
+            // Arrange
+            var input =
+                """
+                asyncapi: 2.6.0
+                info:
+                  title: test
+                  version: 1.0.0
+                channels:
+                  first:
+                    publish:
+                      message:
+                        payload:
+                          type: object
+                          properties:
+                            first:
+                              $ref: '#/components/schemas/Leaf'
+                            second:
+                              $ref: '#/components/schemas/Leaf'
+                            node:
+                              $ref: '#/components/schemas/Node'
+                components:
+                  schemas:
+                    Leaf:
+                      type: string
+                    Node:
+                      type: object
+                      properties:
+                        value:
+                          $ref: '#/components/schemas/Leaf'
+                        next:
+                          $ref: '#/components/schemas/Node'
+                """;
+
+            var expectedYaml =
+                """
+                asyncapi: 2.6.0
+                info:
+                  title: test
+                  version: 1.0.0
+                channels:
+                  first:
+                    publish:
+                      message:
+                        $ref: '#/components/messages/anonymous-message-1'
+                components:
+                  schemas:
+                    Leaf:
+                      type: string
+                    Node:
+                      type: object
+                      properties:
+                        value:
+                          $ref: '#/components/schemas/Leaf'
+                        next:
+                          $ref: '#/components/schemas/Node'
+                  messages:
+                    anonymous-message-1:
+                      payload:
+                        type: object
+                        properties:
+                          first:
+                            $ref: '#/components/schemas/Leaf'
+                          second:
+                            $ref: '#/components/schemas/Leaf'
+                          node:
+                            $ref: '#/components/schemas/Node'
+                """;
+
+            var expectedJson =
+                """
+                {
+                  "asyncapi": "2.6.0",
+                  "info": {
+                    "title": "test",
+                    "version": "1.0.0"
+                  },
+                  "channels": {
+                    "first": {
+                      "publish": {
+                        "message": {
+                          "$ref": "#/components/messages/anonymous-message-1"
+                        }
+                      }
+                    }
+                  },
+                  "components": {
+                    "schemas": {
+                      "Leaf": {
+                        "type": "string"
+                      },
+                      "Node": {
+                        "type": "object",
+                        "properties": {
+                          "value": {
+                            "$ref": "#/components/schemas/Leaf"
+                          },
+                          "next": {
+                            "$ref": "#/components/schemas/Node"
+                          }
+                        }
+                      }
+                    },
+                    "messages": {
+                      "anonymous-message-1": {
+                        "payload": {
+                          "type": "object",
+                          "properties": {
+                            "first": {
+                              "$ref": "#/components/schemas/Leaf"
+                            },
+                            "second": {
+                              "$ref": "#/components/schemas/Leaf"
+                            },
+                            "node": {
+                              "$ref": "#/components/schemas/Node"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+                """;
+
+            // Act & Assert
+            AssertRoundTrip(AsyncApiVersion.AsyncApi2_0, ReferenceInlineSetting.DoNotInlineReferences, input, expectedYaml, expectedJson);
+        }
+
+        [Test]
+        public void V3_Serialize_WithoutInlinedReferences_RoundTripsYamlAndJson()
+        {
+            // Arrange
+            var input =
+                """
+                asyncapi: 3.0.0
+                info:
+                  title: test
+                  version: 1.0.0
+                channels:
+                  first:
+                    messages:
+                      a:
+                        payload:
+                          type: object
+                          properties:
+                            first:
+                              $ref: '#/components/schemas/Leaf'
+                            second:
+                              $ref: '#/components/schemas/Leaf'
+                            node:
+                              $ref: '#/components/schemas/Node'
+                components:
+                  schemas:
+                    Leaf:
+                      type: string
+                    Node:
+                      type: object
+                      properties:
+                        value:
+                          $ref: '#/components/schemas/Leaf'
+                        next:
+                          $ref: '#/components/schemas/Node'
+                """;
+
+            var expectedYaml =
+                """
+                asyncapi: 3.1.0
+                info:
+                  title: test
+                  version: 1.0.0
+                channels:
+                  first:
+                    messages:
+                      a:
+                        payload:
+                          schemaFormat: application/vnd.aai.asyncapi+json;version=3.0.0
+                          schema:
+                            type: object
+                            properties:
+                              first:
+                                $ref: '#/components/schemas/Leaf'
+                              second:
+                                $ref: '#/components/schemas/Leaf'
+                              node:
+                                $ref: '#/components/schemas/Node'
+                components:
+                  schemas:
+                    Leaf:
+                      schemaFormat: application/vnd.aai.asyncapi+json;version=3.0.0
+                      schema:
+                        type: string
+                    Node:
+                      schemaFormat: application/vnd.aai.asyncapi+json;version=3.0.0
+                      schema:
+                        type: object
+                        properties:
+                          value:
+                            $ref: '#/components/schemas/Leaf'
+                          next:
+                            $ref: '#/components/schemas/Node'
+                """;
+
+            var expectedJson =
+                """
+                {
+                  "asyncapi": "3.1.0",
+                  "info": {
+                    "title": "test",
+                    "version": "1.0.0"
+                  },
+                  "channels": {
+                    "first": {
+                      "messages": {
+                        "a": {
+                          "payload": {
+                            "schemaFormat": "application/vnd.aai.asyncapi+json;version=3.0.0",
+                            "schema": {
+                              "type": "object",
+                              "properties": {
+                                "first": {
+                                  "$ref": "#/components/schemas/Leaf"
+                                },
+                                "second": {
+                                  "$ref": "#/components/schemas/Leaf"
+                                },
+                                "node": {
+                                  "$ref": "#/components/schemas/Node"
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "components": {
+                    "schemas": {
+                      "Leaf": {
+                        "schemaFormat": "application/vnd.aai.asyncapi+json;version=3.0.0",
+                        "schema": {
+                          "type": "string"
+                        }
+                      },
+                      "Node": {
+                        "schemaFormat": "application/vnd.aai.asyncapi+json;version=3.0.0",
+                        "schema": {
+                          "type": "object",
+                          "properties": {
+                            "value": {
+                              "$ref": "#/components/schemas/Leaf"
+                            },
+                            "next": {
+                              "$ref": "#/components/schemas/Node"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+                """;
+
+            // Act & Assert
+            AssertRoundTrip(AsyncApiVersion.AsyncApi3_0, ReferenceInlineSetting.DoNotInlineReferences, input, expectedYaml, expectedJson);
+        }
+
+        [Test]
+        public void V2_Serialize_WithInlinedReferences_MissingPropertyReference_Throws()
+        {
+            var input =
+                """
+                asyncapi: 2.6.0
+                info:
+                  title: test
+                  version: 1.0.0
+                channels:
+                  first:
+                    publish:
+                      message:
+                        payload:
+                          type: object
+                          properties:
+                            gone:
+                              $ref: '#/components/schemas/Missing'
+                """;
+
+            AssertMissingReferenceThrowsWhenInlined(AsyncApiVersion.AsyncApi2_0, input);
+        }
+
+        [Test]
+        public void V2_Serialize_WithInlinedReferences_MissingPayloadReference_Throws()
+        {
+            var input =
+                """
+                asyncapi: 2.6.0
+                info:
+                  title: test
+                  version: 1.0.0
+                channels:
+                  first:
+                    publish:
+                      message:
+                        payload:
+                          $ref: '#/components/schemas/Missing'
+                """;
+
+            AssertMissingReferenceThrowsWhenInlined(AsyncApiVersion.AsyncApi2_0, input);
+        }
+
+        [Test]
+        public void V3_Serialize_WithInlinedReferences_MissingPropertyReference_Throws()
+        {
+            var input =
+                """
+                asyncapi: 3.0.0
+                info:
+                  title: test
+                  version: 1.0.0
+                channels:
+                  first:
+                    messages:
+                      a:
+                        payload:
+                          type: object
+                          properties:
+                            gone:
+                              $ref: '#/components/schemas/Missing'
+                """;
+
+            AssertMissingReferenceThrowsWhenInlined(AsyncApiVersion.AsyncApi3_0, input);
+        }
+
+        [Test]
+        public void V3_Serialize_WithInlinedReferences_MissingPayloadReference_Throws()
+        {
+            var input =
+                """
+                asyncapi: 3.0.0
+                info:
+                  title: test
+                  version: 1.0.0
+                channels:
+                  first:
+                    messages:
+                      a:
+                        payload:
+                          $ref: '#/components/schemas/Missing'
+                """;
+
+            AssertMissingReferenceThrowsWhenInlined(AsyncApiVersion.AsyncApi3_0, input);
+        }
+
+        /// <summary>
+        /// A reference that can't be resolved can't be inlined, so inlining it throws naming the reference,
+        /// while writing it without inlining keeps the $ref as it was read.
+        /// </summary>
+        private static void AssertMissingReferenceThrowsWhenInlined(AsyncApiVersion version, string input)
+        {
+            var document = new AsyncApiStringReader().Read(input, out var diagnostic);
+            diagnostic.Errors.Should().NotBeEmpty();
+
+            foreach (var format in new[] { AsyncApiFormat.Yaml, AsyncApiFormat.Json })
+            {
+                var act = () => Serialize(document, version, format, ReferenceInlineSetting.InlineReferences);
+
+                act.Should().Throw<AsyncApiWriterException>()
+                    .WithMessage("Cannot inline '#/components/schemas/Missing': the reference could not be resolved.");
+                Serialize(document, version, format, ReferenceInlineSetting.DoNotInlineReferences)
+                    .Should().Contain("#/components/schemas/Missing");
+            }
+        }
+
+        /// <summary>
+        /// Reads each document, serializes it as both YAML and JSON,
+        /// and expects the same output every time, so the output is stable across round trips.
+        /// </summary>
+        private static void AssertRoundTrip(AsyncApiVersion version, ReferenceInlineSetting referenceInline, string input, string expectedYaml, string expectedJson)
+        {
+            foreach (var source in new[] { input, expectedYaml, expectedJson })
+            {
+                var document = new AsyncApiStringReader().Read(source, out var diagnostic);
+                diagnostic.Errors.Should().BeEmpty();
+
+                Serialize(document, version, AsyncApiFormat.Yaml, referenceInline).Should().BePlatformAgnosticEquivalentTo(expectedYaml);
+                Serialize(document, version, AsyncApiFormat.Json, referenceInline).Should().BePlatformAgnosticEquivalentTo(expectedJson);
+            }
+        }
+
+        private static string Serialize(AsyncApiDocument document, AsyncApiVersion version, AsyncApiFormat format, ReferenceInlineSetting referenceInline)
+        {
+            var outputString = new StringWriter();
+            var settings = new AsyncApiWriterSettings { ReferenceInline = referenceInline };
+            IAsyncApiWriter writer = format == AsyncApiFormat.Json
+                ? new AsyncApiJsonWriter(outputString, settings)
+                : new AsyncApiYamlWriter(outputString, settings);
+
+            if (version == AsyncApiVersion.AsyncApi2_0)
+            {
+                document.SerializeV2(writer);
+            }
+            else
+            {
+                document.SerializeV3(writer);
+            }
+
+            return outputString.ToString();
+        }
     }
 }

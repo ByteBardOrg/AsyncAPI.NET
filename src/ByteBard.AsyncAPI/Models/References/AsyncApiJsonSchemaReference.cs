@@ -347,15 +347,27 @@
             }
 
             this.Reference.Workspace = writer.Workspace;
-            // If Loop is detected then just Serialize as a reference.
-            if (!settings.LoopDetector.PushLoop(this))
+            if (this.Target is null)
+            {
+                throw new AsyncApiWriterException($"Cannot inline '{this.Reference.Reference}': the reference could not be resolved.");
+            }
+
+            // A schema that references itself can't be inlined, so it is written as a reference and rendered in components.
+            if (IsInReferenceCycle(this.Target, writer.Workspace) || !settings.LoopDetector.PushLoop(this))
             {
                 settings.LoopDetector.SaveLoop(this);
                 this.Reference.SerializeV2(writer);
                 return;
             }
 
-            this.Target.SerializeV2(writer);
+            try
+            {
+                this.Target.SerializeV2(writer);
+            }
+            finally
+            {
+                settings.LoopDetector.PopLoop<AsyncApiJsonSchemaReference>();
+            }
         }
 
         public override void SerializeV3(IAsyncApiWriter writer)
@@ -373,15 +385,121 @@
             }
 
             this.Reference.Workspace = writer.Workspace;
-            // If Loop is detected then just Serialize as a reference.
-            if (!settings.LoopDetector.PushLoop(this))
+            if (this.Target is null)
+            {
+                throw new AsyncApiWriterException($"Cannot inline '{this.Reference.Reference}': the reference could not be resolved.");
+            }
+
+            // A schema that references itself can't be inlined, so it is written as a reference and rendered in components.
+            if (IsInReferenceCycle(this.Target, writer.Workspace) || !settings.LoopDetector.PushLoop(this))
             {
                 settings.LoopDetector.SaveLoop(this);
                 this.Reference.SerializeV3(writer);
                 return;
             }
 
-            this.Target.SerializeV3(writer);
+            try
+            {
+                this.Target.SerializeV3(writer);
+            }
+            finally
+            {
+                settings.LoopDetector.PopLoop<AsyncApiJsonSchemaReference>();
+            }
+        }
+
+        /// <summary>
+        /// Determines whether the schema can reach itself through references.
+        /// </summary>
+        private static bool IsInReferenceCycle(AsyncApiJsonSchema schema, AsyncApiWorkspace workspace)
+        {
+            schema = Dereference(schema, workspace);
+            if (schema is null)
+            {
+                return false;
+            }
+
+            var visited = new HashSet<AsyncApiJsonSchema>();
+            var pending = new Stack<AsyncApiJsonSchema>();
+            PushChildren(schema, pending);
+
+            while (pending.Count > 0)
+            {
+                var current = Dereference(pending.Pop(), workspace);
+                if (current is null)
+                {
+                    continue;
+                }
+
+                if (ReferenceEquals(current, schema))
+                {
+                    return true;
+                }
+
+                if (visited.Add(current))
+                {
+                    PushChildren(current, pending);
+                }
+            }
+
+            return false;
+        }
+
+        private static AsyncApiJsonSchema Dereference(AsyncApiJsonSchema schema, AsyncApiWorkspace workspace)
+        {
+            var hops = 0;
+            while (schema is AsyncApiJsonSchemaReference reference)
+            {
+                // Guards against references that only point at each other.
+                if (++hops > 64)
+                {
+                    return null;
+                }
+
+                reference.Reference.Workspace ??= workspace;
+                schema = reference.Target;
+            }
+
+            return schema;
+        }
+
+        private static void PushChildren(AsyncApiJsonSchema schema, Stack<AsyncApiJsonSchema> pending)
+        {
+            void Push(AsyncApiJsonSchema child)
+            {
+                if (child is not null)
+                {
+                    pending.Push(child);
+                }
+            }
+
+            void PushAll(IEnumerable<AsyncApiJsonSchema> children)
+            {
+                if (children is null)
+                {
+                    return;
+                }
+
+                foreach (var child in children)
+                {
+                    Push(child);
+                }
+            }
+
+            PushAll(schema.AllOf);
+            PushAll(schema.OneOf);
+            PushAll(schema.AnyOf);
+            Push(schema.Not);
+            Push(schema.Contains);
+            Push(schema.If);
+            Push(schema.Then);
+            Push(schema.Else);
+            Push(schema.Items);
+            Push(schema.AdditionalItems);
+            PushAll(schema.Properties?.Values);
+            Push(schema.AdditionalProperties);
+            PushAll(schema.PatternProperties?.Values);
+            Push(schema.PropertyNames);
         }
     }
 }

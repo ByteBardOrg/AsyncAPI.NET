@@ -389,7 +389,7 @@ namespace ByteBard.AsyncAPI.Models
             {
                 var loops = writer.GetSettings().LoopDetector.Loops;
                 writer.WriteStartObject();
-                if (loops.TryGetValue(typeof(AsyncApiMultiFormatSchemaReference), out List<object> schemas))
+                if (loops.TryGetValue(typeof(AsyncApiJsonSchemaReference), out List<object> schemas))
                 {
                     writer.WriteOptionalMap(
                        AsyncApiConstants.Schemas,
