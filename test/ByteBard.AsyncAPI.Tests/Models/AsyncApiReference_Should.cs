@@ -5,6 +5,7 @@ namespace ByteBard.AsyncAPI.Tests
     using System.Linq;
     using System.Threading.Tasks;
     using ByteBard.AsyncAPI.Models;
+    using ByteBard.AsyncAPI.Models.Interfaces;
     using ByteBard.AsyncAPI.Readers;
     using ByteBard.AsyncAPI.Readers.Interface;
     using ByteBard.AsyncAPI.Readers.V2;
@@ -513,6 +514,110 @@ namespace ByteBard.AsyncAPI.Tests
             doc.SerializeAsYaml(AsyncApiVersion.AsyncApi2_0).Should()
                 .BePlatformAgnosticEquivalentTo(expected);
 
+        }
+
+        private static readonly TestCaseData[] UnresolvedReferences =
+        {
+            new TestCaseData(new AsyncApiChannelReference("#/components/channels/a"), new AsyncApiChannelReference("#/components/channels/a"), new AsyncApiChannelReference("#/components/channels/b")).SetArgDisplayNames("Channel"),
+            new TestCaseData(new AsyncApiCorrelationIdReference("#/components/correlationIds/a"), new AsyncApiCorrelationIdReference("#/components/correlationIds/a"), new AsyncApiCorrelationIdReference("#/components/correlationIds/b")).SetArgDisplayNames("CorrelationId"),
+            new TestCaseData(new AsyncApiExternalDocumentationReference("#/components/externalDocs/a"), new AsyncApiExternalDocumentationReference("#/components/externalDocs/a"), new AsyncApiExternalDocumentationReference("#/components/externalDocs/b")).SetArgDisplayNames("ExternalDocumentation"),
+            new TestCaseData(new AsyncApiJsonSchemaReference("#/components/schemas/a"), new AsyncApiJsonSchemaReference("#/components/schemas/a"), new AsyncApiJsonSchemaReference("#/components/schemas/b")).SetArgDisplayNames("JsonSchema"),
+            new TestCaseData(new AsyncApiMessageReference("#/components/messages/a"), new AsyncApiMessageReference("#/components/messages/a"), new AsyncApiMessageReference("#/components/messages/b")).SetArgDisplayNames("Message"),
+            new TestCaseData(new AsyncApiMessageTraitReference("#/components/messageTraits/a"), new AsyncApiMessageTraitReference("#/components/messageTraits/a"), new AsyncApiMessageTraitReference("#/components/messageTraits/b")).SetArgDisplayNames("MessageTrait"),
+            new TestCaseData(new AsyncApiOperationReference("#/components/operations/a"), new AsyncApiOperationReference("#/components/operations/a"), new AsyncApiOperationReference("#/components/operations/b")).SetArgDisplayNames("Operation"),
+            new TestCaseData(new AsyncApiOperationReplyAddressReference("#/components/replyAddresses/a"), new AsyncApiOperationReplyAddressReference("#/components/replyAddresses/a"), new AsyncApiOperationReplyAddressReference("#/components/replyAddresses/b")).SetArgDisplayNames("OperationReplyAddress"),
+            new TestCaseData(new AsyncApiOperationReplyReference("#/components/replies/a"), new AsyncApiOperationReplyReference("#/components/replies/a"), new AsyncApiOperationReplyReference("#/components/replies/b")).SetArgDisplayNames("OperationReply"),
+            new TestCaseData(new AsyncApiOperationTraitReference("#/components/operationTraits/a"), new AsyncApiOperationTraitReference("#/components/operationTraits/a"), new AsyncApiOperationTraitReference("#/components/operationTraits/b")).SetArgDisplayNames("OperationTrait"),
+            new TestCaseData(new AsyncApiParameterReference("#/components/parameters/a"), new AsyncApiParameterReference("#/components/parameters/a"), new AsyncApiParameterReference("#/components/parameters/b")).SetArgDisplayNames("Parameter"),
+            new TestCaseData(new AsyncApiServerReference("#/components/servers/a"), new AsyncApiServerReference("#/components/servers/a"), new AsyncApiServerReference("#/components/servers/b")).SetArgDisplayNames("Server"),
+            new TestCaseData(new AsyncApiServerVariableReference("#/components/serverVariables/a"), new AsyncApiServerVariableReference("#/components/serverVariables/a"), new AsyncApiServerVariableReference("#/components/serverVariables/b")).SetArgDisplayNames("ServerVariable"),
+            new TestCaseData(new AsyncApiTagReference("#/components/tags/a"), new AsyncApiTagReference("#/components/tags/a"), new AsyncApiTagReference("#/components/tags/b")).SetArgDisplayNames("Tag"),
+        };
+
+        private static readonly TestCaseData[] UnresolvedReferencesComparedToNull =
+        {
+            new TestCaseData((Func<bool>)(() => new AsyncApiChannelReference("#/components/channels/a").Equals((AsyncApiChannel)null))).SetArgDisplayNames("Channel"),
+            new TestCaseData((Func<bool>)(() => new AsyncApiCorrelationIdReference("#/components/correlationIds/a").Equals((AsyncApiCorrelationId)null))).SetArgDisplayNames("CorrelationId"),
+            new TestCaseData((Func<bool>)(() => new AsyncApiExternalDocumentationReference("#/components/externalDocs/a").Equals((AsyncApiExternalDocumentation)null))).SetArgDisplayNames("ExternalDocumentation"),
+            new TestCaseData((Func<bool>)(() => new AsyncApiJsonSchemaReference("#/components/schemas/a").Equals((AsyncApiJsonSchema)null))).SetArgDisplayNames("JsonSchema"),
+            new TestCaseData((Func<bool>)(() => new AsyncApiMessageReference("#/components/messages/a").Equals((AsyncApiMessage)null))).SetArgDisplayNames("Message"),
+            new TestCaseData((Func<bool>)(() => new AsyncApiMessageTraitReference("#/components/messageTraits/a").Equals((AsyncApiMessageTrait)null))).SetArgDisplayNames("MessageTrait"),
+            new TestCaseData((Func<bool>)(() => new AsyncApiOperationReference("#/components/operations/a").Equals((AsyncApiOperation)null))).SetArgDisplayNames("Operation"),
+            new TestCaseData((Func<bool>)(() => new AsyncApiOperationReplyAddressReference("#/components/replyAddresses/a").Equals((AsyncApiOperationReplyAddress)null))).SetArgDisplayNames("OperationReplyAddress"),
+            new TestCaseData((Func<bool>)(() => new AsyncApiOperationReplyReference("#/components/replies/a").Equals((AsyncApiOperationReply)null))).SetArgDisplayNames("OperationReply"),
+            new TestCaseData((Func<bool>)(() => new AsyncApiOperationTraitReference("#/components/operationTraits/a").Equals((AsyncApiOperationTrait)null))).SetArgDisplayNames("OperationTrait"),
+            new TestCaseData((Func<bool>)(() => new AsyncApiParameterReference("#/components/parameters/a").Equals((AsyncApiParameter)null))).SetArgDisplayNames("Parameter"),
+            new TestCaseData((Func<bool>)(() => new AsyncApiServerReference("#/components/servers/a").Equals((AsyncApiServer)null))).SetArgDisplayNames("Server"),
+            new TestCaseData((Func<bool>)(() => new AsyncApiServerVariableReference("#/components/serverVariables/a").Equals((AsyncApiServerVariable)null))).SetArgDisplayNames("ServerVariable"),
+            new TestCaseData((Func<bool>)(() => new AsyncApiTagReference("#/components/tags/a").Equals((AsyncApiTag)null))).SetArgDisplayNames("Tag"),
+        };
+
+        /// <summary>
+        /// Regression test.
+        /// Bug: Unresolved references compared their (null) targets, so every unresolved reference equalled every other.
+        /// </summary>
+        [TestCaseSource(nameof(UnresolvedReferences))]
+        public void UnresolvedReferences_AreEqualOnlyWhenTheyHaveTheSameReference(object reference, object sameReference, object otherReference)
+        {
+            reference.Equals(sameReference).Should().BeTrue();
+            reference.Equals(otherReference).Should().BeFalse();
+        }
+
+        /// <summary>
+        /// Regression test.
+        /// Bug: An unresolved reference compared its (null) target to the element, so it equalled null.
+        /// </summary>
+        [TestCaseSource(nameof(UnresolvedReferencesComparedToNull))]
+        public void UnresolvedReference_IsNotEqualToNull(Func<bool> equalsNull)
+        {
+            equalsNull().Should().BeFalse();
+        }
+
+        [Test]
+        public void ResolvedReferences_AreEqualWhenTheyPointAtTheSameComponent()
+        {
+            var workspace = new AsyncApiWorkspace();
+            var messageA = new AsyncApiMessage { Name = "a" };
+            workspace.RegisterComponent("#/components/messages/a", messageA);
+            workspace.RegisterComponent("#/components/messages/b", new AsyncApiMessage { Name = "b" });
+
+            var reference = new AsyncApiMessageReference("#/components/messages/a");
+            var sameReference = new AsyncApiMessageReference("#/components/messages/a");
+            var otherReference = new AsyncApiMessageReference("#/components/messages/b");
+            reference.Reference.Workspace = workspace;
+            sameReference.Reference.Workspace = workspace;
+            otherReference.Reference.Workspace = workspace;
+
+            (reference == sameReference).Should().BeTrue();
+            (reference == otherReference).Should().BeFalse();
+            reference.Equals(messageA).Should().BeTrue();
+        }
+
+        [Test]
+        public void AsyncApiReference_WithTheSameReference_HasTheSameHashCode()
+        {
+            var reference = new AsyncApiReference("#/components/schemas/a", ReferenceType.Schema);
+            var sameReference = new AsyncApiReference("#/components/schemas/a", ReferenceType.Schema);
+
+            reference.GetHashCode().Should().Be(sameReference.GetHashCode());
+            new[] { reference, sameReference }.Distinct().Should().ContainSingle();
+        }
+
+        /// <summary>
+        /// Regression test.
+        /// Bug: Extensions read the backing field, so it threw until another member had resolved the reference.
+        /// </summary>
+        [Test]
+        public void BindingsReference_ReadingExtensionsFirst_ResolvesTheReference()
+        {
+            var workspace = new AsyncApiWorkspace();
+            var bindings = new AsyncApiBindings<IChannelBinding>();
+            workspace.RegisterComponent("#/components/channelBindings/a", bindings);
+
+            var reference = new AsyncApiBindingsReference<IChannelBinding>("#/components/channelBindings/a");
+            reference.Reference.Workspace = workspace;
+
+            reference.Extensions.Should().BeSameAs(bindings.Extensions);
         }
     }
 
