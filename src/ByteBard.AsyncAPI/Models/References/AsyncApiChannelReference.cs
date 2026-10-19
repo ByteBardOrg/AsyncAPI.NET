@@ -98,6 +98,11 @@ namespace ByteBard.AsyncAPI.Models
                 return this.Equals(reference);
             }
 
+            if (this.Target is null && other.Target is null)
+            {
+                return this.Reference == other.Reference;
+            }
+
             return this.Target == other.Target;
         }
 
@@ -118,7 +123,7 @@ namespace ByteBard.AsyncAPI.Models
 
         public bool Equals(AsyncApiChannel other)
         {
-            return this.Target == other;
+            return other is not null && this.Target == other;
         }
     }
 }

@@ -34,7 +34,7 @@
 
         public override ICollection<TBinding> Values => this.Target.Values;
 
-        public override IDictionary<string, IAsyncApiExtension> Extensions => this.target.Extensions;
+        public override IDictionary<string, IAsyncApiExtension> Extensions => this.Target.Extensions;
 
         public override int Count => this.Target.Count;
 

@@ -75,6 +75,11 @@
                 return this.Equals(reference);
             }
 
+            if (this.Target is null && other.Target is null)
+            {
+                return this.Reference == other.Reference;
+            }
+
             return this.Target == other.Target;
         }
 
@@ -95,7 +100,7 @@
 
         public bool Equals(AsyncApiServer other)
         {
-            return this.Target == other;
+            return other is not null && this.Target == other;
         }
 
         public override void SerializeV2(IAsyncApiWriter writer)

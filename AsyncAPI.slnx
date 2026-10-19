@@ -1,0 +1,11 @@
+<Solution>
+  <Folder Name="/Solution Items/">
+    <File Path=".editorconfig" />
+    <File Path="Common.Build.props" />
+    <File Path="Directory.Packages.props" />
+  </Folder>
+  <Project Path="src/ByteBard.AsyncAPI.Bindings/ByteBard.AsyncAPI.Bindings.csproj" />
+  <Project Path="src/ByteBard.AsyncAPI.Readers/ByteBard.AsyncAPI.Readers.csproj" />
+  <Project Path="src/ByteBard.AsyncAPI/ByteBard.AsyncAPI.csproj" />
+  <Project Path="test/ByteBard.AsyncAPI.Tests/ByteBard.AsyncAPI.Tests.csproj" />
+</Solution>

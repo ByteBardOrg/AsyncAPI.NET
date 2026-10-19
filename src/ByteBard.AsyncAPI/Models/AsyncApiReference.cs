@@ -151,6 +151,11 @@
             return this.Equals(reference);
         }
 
+        public override int GetHashCode()
+        {
+            return this.Reference?.GetHashCode() ?? 0;
+        }
+
         /// <summary>
         /// Serialize <see cref="AsyncApiReference"/> to Async Api.
         /// </summary>
