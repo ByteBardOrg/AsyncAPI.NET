@@ -1,6 +1,6 @@
 namespace ByteBard.AsyncAPI.Readers.ParseNodes
 {
-    using System;
+    using System.Globalization;
     using System.Text.Json.Nodes;
 
     public static class JsonPointerExtensions
@@ -12,29 +12,29 @@ namespace ByteBard.AsyncAPI.Readers.ParseNodes
                 return baseJsonNode;
             }
 
-            try
+            var pointer = baseJsonNode;
+            foreach (var token in currentPointer.Tokens)
             {
-                var pointer = baseJsonNode;
-                foreach (var token in currentPointer.Tokens)
+                if (pointer is JsonArray sequence)
                 {
-                    var sequence = pointer as JsonArray;
-
-                    if (sequence != null && int.TryParse(token, out var tokenValue))
-                    {
-                        pointer = sequence[tokenValue];
-                    }
-                    else if (pointer is JsonObject map && !map.TryGetPropertyValue(token, out pointer))
+                    // RFC 6901 array indices are "0" or digits without a leading zero.
+                    if ((token.Length > 1 && token[0] == '0')
+                        || !int.TryParse(token, NumberStyles.None, CultureInfo.InvariantCulture, out var index)
+                        || index >= sequence.Count)
                     {
                         return null;
                     }
-                }
 
-                return pointer;
+                    pointer = sequence[index];
+                }
+                else if (pointer is not JsonObject map || !map.TryGetPropertyValue(token, out pointer))
+                {
+                    // The token walks into a scalar or a missing property.
+                    return null;
+                }
             }
-            catch (Exception)
-            {
-                return null;
-            }
+
+            return pointer;
         }
     }
 }
