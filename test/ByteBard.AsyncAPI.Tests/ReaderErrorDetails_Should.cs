@@ -25,6 +25,21 @@ namespace ByteBard.AsyncAPI.Tests
             error.Pointer.Should().Be("#/maxLength");
         }
 
+        [TestCase("uniqueItems")]
+        [TestCase("readOnly")]
+        [TestCase("writeOnly")]
+        [TestCase("deprecated")]
+        public void SchemaBooleanField_ReportsTheValueAndWhyItIsInvalid(string field)
+        {
+            var yaml = $"type: string\n{field}: 'yes please'";
+
+            new AsyncApiStringReader().ReadFragment<AsyncApiJsonSchema>(yaml, AsyncApiVersion.AsyncApi3_0, out var diagnostics);
+
+            var error = diagnostics.Errors.Should().ContainSingle().Subject;
+            error.Message.Should().Be("Value 'yes please' could not parse to bool. Expected true or false.");
+            error.Pointer.Should().Be($"#/{field}");
+        }
+
         [Test]
         public void MissingLocalReference_IsReportedOnce()
         {
@@ -54,6 +69,8 @@ namespace ByteBard.AsyncAPI.Tests
         [TestCase("/tags/-0")]
         [TestCase("/tags/+0")]
         [TestCase("/tags/ 0")]
+        [TestCase("/tags/00")]
+        [TestCase("/tags/01")]
         [TestCase("/missing")]
         public void Find_ReturnsNull_WhenThePointerDoesNotLeadToANode(string pointer)
         {

@@ -17,7 +17,10 @@ namespace ByteBard.AsyncAPI.Readers.ParseNodes
             {
                 if (pointer is JsonArray sequence)
                 {
-                    if (!int.TryParse(token, NumberStyles.None, CultureInfo.InvariantCulture, out var index) || index >= sequence.Count)
+                    // RFC 6901 array indices are "0" or digits without a leading zero.
+                    if ((token.Length > 1 && token[0] == '0')
+                        || !int.TryParse(token, NumberStyles.None, CultureInfo.InvariantCulture, out var index)
+                        || index >= sequence.Count)
                     {
                         return null;
                     }

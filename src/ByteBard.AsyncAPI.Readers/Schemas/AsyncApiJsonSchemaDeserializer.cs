@@ -95,7 +95,7 @@ namespace ByteBard.AsyncAPI.Readers
                 "minItems", (a, n) => { a.MinItems = n.GetIntegerValue(); }
             },
             {
-                "uniqueItems", (a, n) => { a.UniqueItems = bool.Parse(n.GetScalarValue()); }
+                "uniqueItems", (a, n) => { a.UniqueItems = n.GetBooleanValue(); }
             },
             {
                 "maxProperties",
@@ -124,10 +124,10 @@ namespace ByteBard.AsyncAPI.Readers
                 "else", (a, n) => { a.Else = LoadSchema(n); }
             },
             {
-                "readOnly", (a, n) => { a.ReadOnly = bool.Parse(n.GetScalarValue()); }
+                "readOnly", (a, n) => { a.ReadOnly = n.GetBooleanValue(); }
             },
             {
-                "writeOnly", (a, n) => { a.WriteOnly = bool.Parse(n.GetScalarValue()); }
+                "writeOnly", (a, n) => { a.WriteOnly = n.GetBooleanValue(); }
             },
             {
                 "properties", (a, n) => { a.Properties = n.CreateMap(LoadSchema); }
@@ -208,7 +208,7 @@ namespace ByteBard.AsyncAPI.Readers
                 "externalDocs", (a, n) => { a.ExternalDocs = AsyncApiV2Deserializer.LoadExternalDocs(n); }
             },
             {
-                "deprecated", (a, n) => { a.Deprecated = bool.Parse(n.GetScalarValue()); }
+                "deprecated", (a, n) => { a.Deprecated = n.GetBooleanValue(); }
             },
             {
                 "nullable", (a, n) => { a.Nullable = n.GetBooleanValue(); }
