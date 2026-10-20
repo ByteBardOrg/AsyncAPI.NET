@@ -11,7 +11,9 @@ namespace ByteBard.AsyncAPI.Tests
     {
         [TestCase("abc", "Value 'abc' could not parse to integer. Expected a whole number.")]
         [TestCase("1.5", "Value '1.5' could not parse to integer. Expected a whole number.")]
-        [TestCase("99999999999", "Value '99999999999' could not parse to integer. It must be between -2147483648 and 2147483647.")]
+        [TestCase("+-1", "Value '+-1' could not parse to integer. Expected a whole number.")]
+        [TestCase("--1", "Value '--1' could not parse to integer. Expected a whole number.")]
+        [TestCase("99999999999","Value '99999999999' could not parse to integer. It must be between -2147483648 and 2147483647.")]
         public void SchemaIntegerField_ReportsTheValueAndWhyItIsInvalid(string value, string expectedMessage)
         {
             var yaml = $"type: string\nmaxLength: '{value}'";
@@ -49,6 +51,9 @@ namespace ByteBard.AsyncAPI.Tests
         [TestCase("/info/title/nested")]
         [TestCase("/tags/5")]
         [TestCase("/tags/name")]
+        [TestCase("/tags/-0")]
+        [TestCase("/tags/+0")]
+        [TestCase("/tags/ 0")]
         [TestCase("/missing")]
         public void Find_ReturnsNull_WhenThePointerDoesNotLeadToANode(string pointer)
         {

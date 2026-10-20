@@ -119,7 +119,12 @@ namespace ByteBard.AsyncAPI.Readers.ParseNodes
         private string DescribeInvalidInteger(string typeName, long min, long max)
         {
             var value = this.GetScalarValue();
-            var digits = value?.Trim().TrimStart('+', '-');
+            var digits = value?.Trim();
+            if (digits?.Length > 0 && (digits[0] == '+' || digits[0] == '-'))
+            {
+                digits = digits.Substring(1);
+            }
+
             var isWholeNumber = !string.IsNullOrEmpty(digits) && digits.All(c => c >= '0' && c <= '9');
 
             return isWholeNumber

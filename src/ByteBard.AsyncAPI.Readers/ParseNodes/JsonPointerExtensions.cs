@@ -1,5 +1,6 @@
 namespace ByteBard.AsyncAPI.Readers.ParseNodes
 {
+    using System.Globalization;
     using System.Text.Json.Nodes;
 
     public static class JsonPointerExtensions
@@ -16,7 +17,7 @@ namespace ByteBard.AsyncAPI.Readers.ParseNodes
             {
                 if (pointer is JsonArray sequence)
                 {
-                    if (!int.TryParse(token, out var index) || index < 0 || index >= sequence.Count)
+                    if (!int.TryParse(token, NumberStyles.None, CultureInfo.InvariantCulture, out var index) || index >= sequence.Count)
                     {
                         return null;
                     }
