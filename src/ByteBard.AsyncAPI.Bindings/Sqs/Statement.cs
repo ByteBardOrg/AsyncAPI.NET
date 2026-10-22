@@ -45,8 +45,8 @@ namespace ByteBard.AsyncAPI.Bindings.Sqs
             writer.WriteStartObject();
             writer.WriteRequiredProperty("effect", this.Effect.GetDisplayName());
             writer.WriteRequiredObject("principal", this.Principal, (w, t) => t.Serialize(w));
-            writer.WriteRequiredObject("action", this.Action, (w, t) => t.Value.Write(w));
-            writer.WriteOptionalObject("resource", this.Resource, (w, t) => t?.Value.Write(w));
+            writer.WriteRequiredObject("action", this.Action, (w, t) => t.Write(w));
+            writer.WriteOptionalObject("resource", this.Resource, (w, t) => t?.Write(w));
             writer.WriteOptionalObject("condition", this.Condition, (w, t) => t.Serialize(w));
             writer.WriteExtensions(this.Extensions);
             writer.WriteEndObject();
