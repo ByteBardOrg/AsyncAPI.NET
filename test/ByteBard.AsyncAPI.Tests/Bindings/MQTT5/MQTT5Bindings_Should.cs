@@ -36,13 +36,13 @@ namespace ByteBard.AsyncAPI.Tests.Bindings.MQTT5
         {
             var schemaBinding = new MQTT5ServerBinding
             {
-                SessionExpiryInterval = new MQTTIntegerSchema(new AsyncApiJsonSchema { Type = SchemaType.Integer }),
+                SessionExpiryInterval = new AsyncApiJsonSchema { Type = SchemaType.Integer },
             };
             schemaBinding.SerializeAsYaml(version).Should().Contain("type: integer");
 
             var referenceBinding = new MQTT5ServerBinding
             {
-                SessionExpiryInterval = new MQTTIntegerSchema(new AsyncApiJsonSchemaReference("#/components/schemas/interval")),
+                SessionExpiryInterval = new AsyncApiJsonSchemaReference("#/components/schemas/interval"),
             };
             referenceBinding.SerializeAsYaml(version).Should().Contain("#/components/schemas/interval");
         }
