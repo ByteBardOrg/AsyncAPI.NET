@@ -1,0 +1,141 @@
+---
+id: json-schema
+title: JSON Schema
+sidebar_label: JSON Schema
+---
+
+# JSON Schema
+
+The built-in `AsyncApiJsonSchema` implements the AsyncAPI Schema Object model. Its reader and writer cover the properties below. Which keywords are meaningful depends on the AsyncAPI version and schema dialect selected for the document; the model preserves the values, but does not implement a general JSON Schema validator.
+
+## Build nested schemas
+
+Properties and nested constraints use more `AsyncApiJsonSchema` objects. `Default`, `Const`, `Enum`, and `Examples` use `AsyncApiAny` so their JSON values retain their types.
+
+```csharp
+using System;
+using System.Collections.Generic;
+using ByteBard.AsyncAPI.Models;
+
+var person = new AsyncApiJsonSchema
+{
+    Title = "Person",
+    Type = SchemaType.Object,
+    Required = new HashSet<string> { "name" },
+    Properties = new Dictionary<string, AsyncApiJsonSchema>
+    {
+        ["name"] = new AsyncApiJsonSchema
+        {
+            Type = SchemaType.String,
+            MinLength = 1,
+            MaxLength = 80,
+            Pattern = "^[A-Za-z ]+$",
+        },
+        ["age"] = new AsyncApiJsonSchema
+        {
+            Type = SchemaType.Integer,
+            Minimum = 0,
+            Maximum = 150,
+            Default = new AsyncApiAny(0),
+        },
+        ["aliases"] = new AsyncApiJsonSchema
+        {
+            Type = SchemaType.Array,
+            Items = new AsyncApiJsonSchema { Type = SchemaType.String },
+            MinItems = 1,
+            UniqueItems = true,
+        },
+    },
+    AdditionalProperties = new AsyncApiJsonSchema { Type = SchemaType.String },
+    ExternalDocs = new AsyncApiExternalDocumentation
+    {
+        Url = new Uri("https://example.com/person"),
+    },
+};
+```
+
+The model properties correspond to the following keyword groups:
+
+| Group | Properties |
+| --- | --- |
+| Core and annotations | `Title`, `Type`, `Format`, `Description`, `Default`, `Examples`, `Const`, `Deprecated`, `ExternalDocs`, `Extensions` |
+| Numeric validation | `MultipleOf`, `Maximum`, `ExclusiveMaximum`, `Minimum`, `ExclusiveMinimum` |
+| String validation | `MaxLength`, `MinLength`, `Pattern` |
+| Array validation | `Items`, `AdditionalItems`, `MaxItems`, `MinItems`, `UniqueItems`, `Contains` |
+| Object validation | `Properties`, `PatternProperties`, `PropertyNames`, `AdditionalProperties`, `Required`, `MaxProperties`, `MinProperties` |
+| Composition and conditionals | `AllOf`, `OneOf`, `AnyOf`, `Not`, `If`, `Then`, `Else` |
+| AsyncAPI schema metadata | `ReadOnly`, `WriteOnly`, `Nullable`, `Discriminator` |
+
+Composition properties (`AllOf`, `OneOf`, `AnyOf`) are lists of schemas; `Not`, `If`, `Then`, and `Else` are individual schemas. Nested `Properties`, item schemas, and composition entries can also be references.
+
+## Composition and references
+
+`AsyncApiJsonSchemaReference` derives from `AsyncApiJsonSchema`, so assign it directly wherever a schema is expected. Reading a `$ref` creates this reference subtype; distinguish it with a type check and inspect `Reference.Reference` for the pointer.
+
+```csharp
+using System;
+using System.Collections.Generic;
+using ByteBard.AsyncAPI.Models;
+
+var result = new AsyncApiJsonSchema
+{
+    Type = SchemaType.Object,
+    AllOf = new List<AsyncApiJsonSchema>
+    {
+        new AsyncApiJsonSchemaReference("#/components/schemas/Identity"),
+        new AsyncApiJsonSchema
+        {
+            Properties =
+            {
+                ["contact"] = new AsyncApiJsonSchema
+                {
+                    OneOf = new List<AsyncApiJsonSchema>
+                    {
+                        new AsyncApiJsonSchemaReference("#/components/schemas/Email"),
+                        new AsyncApiJsonSchema { Type = SchemaType.Null },
+                    },
+                },
+            },
+        },
+    },
+};
+
+if (result.AllOf[0] is AsyncApiJsonSchemaReference identityReference)
+{
+    Console.WriteLine(identityReference.Reference.Reference);
+}
+```
+
+References use AsyncAPI's schema-reference representation, not an inline schema object with a `$ref` property. When a writer is configured to inline references, the referenced component must be resolvable in its workspace; otherwise serialization may retain the reference or report that it cannot be resolved, depending on writer settings.
+
+## Multi-format payloads
+
+`AsyncApiJsonSchema` has an implicit conversion to `AsyncApiMultiFormatSchema`. For JSON Schema payloads, assign it directly or use the wrapper when you need to set `SchemaFormat` explicitly:
+
+```csharp
+using ByteBard.AsyncAPI.Models;
+
+var message = new AsyncApiMessage
+{
+    Payload = new AsyncApiJsonSchema { Type = SchemaType.String },
+};
+
+message.Payload.SchemaFormat = "application/vnd.aai.asyncapi+json;version=3.0.0";
+```
+
+The wrapper stores the selected format and schema together. AsyncAPI 2.x writes `schemaFormat` alongside `payload`; AsyncAPI 3.x writes a Multi Format Schema Object containing `schemaFormat` and `schema`. If JSON Schema is used without an explicit format, the reader chooses its JSON Schema parser by default. Built-in JSON Schema format identifiers include `application/vnd.aai.asyncapi`, its `+json` and `+yaml` variants, and draft-07 `application/schema+json` and `application/schema+yaml` identifiers.
+
+## Nullable and multiple types
+
+`SchemaType` is a flags enum. Combine values to write/read JSON Schema's array-valued `type`:
+
+```csharp
+using ByteBard.AsyncAPI.Models;
+
+var maybeName = new AsyncApiJsonSchema
+{
+    Type = SchemaType.String | SchemaType.Null,
+};
+```
+
+This is separate from the `Nullable` boolean, which models the AsyncAPI/OpenAPI `nullable` keyword. The writer preserves both forms; their interpretation depends on the schema dialect and AsyncAPI version. Do not assume `Nullable = true` is interchangeable with a null member in `Type`.

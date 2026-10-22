@@ -1,0 +1,55 @@
+---
+id: custom-extension-parsers
+title: Custom extension parsers
+sidebar_position: 3
+---
+
+# Custom extension parsers
+
+Use the library's normal extension support for ordinary `x-` fields. If reading requires converting one extension value—for example, validating or normalizing it—register a delegate in `AsyncApiReaderSettings.ExtensionParsers`. The dictionary key is the complete extension name, including `x-`; lookup is by that exact key. Each delegate receives the parsed value as `AsyncApiAny` and returns an `IAsyncApiExtension`.
+
+This parser transforms the string value of `x-someValue` into an integer while reading, then reads the converted value back from the model:
+
+```csharp
+using System;
+using System.Collections.Generic;
+using ByteBard.AsyncAPI.Models;
+using ByteBard.AsyncAPI.Models.Interfaces;
+using ByteBard.AsyncAPI.Readers;
+
+var settings = new AsyncApiReaderSettings
+{
+    ExtensionParsers = new Dictionary<string, Func<AsyncApiAny, IAsyncApiExtension>>
+    {
+        ["x-someValue"] = value =>
+        {
+            if (value.TryGetValue<string>(out var text) && text == "onetwothreefour")
+            {
+                return new AsyncApiAny(1234);
+            }
+
+            return new AsyncApiAny("No value provided");
+        },
+    },
+};
+
+var input = """
+    asyncapi: 2.6.0
+    info:
+      title: Extension parser example
+      version: 1.0.0
+    channels:
+      workspace:
+        x-someValue: onetwothreefour
+    """;
+var document = new AsyncApiStringReader(settings).Read(input, out var diagnostics);
+if (document.Channels["workspace"].Extensions["x-someValue"] is AsyncApiAny parsedValue &&
+    parsedValue.TryGetValue<int>(out var converted))
+{
+    Console.WriteLine(converted); // 1234
+}
+```
+
+The delegate's result replaces the raw extension value for that read. If no parser is registered for a name, the reader keeps the value as `AsyncApiAny`. An `AsyncApiException` thrown by a parser is recorded as a reader diagnostic and the original raw value is retained; other exception types are not caught by the extension loader, so handle expected invalid input deliberately.
+
+Parsers are reader settings, not global registrations, and only affect documents read with those settings. They do not transform extension values already present in an in-memory model. When writing, an `AsyncApiAny` serializes its stored value; if a custom extension object is returned instead, it must implement `IAsyncApiExtension.Write(IAsyncApiWriter)` so it can serialize. See [Use AsyncAPI extensions](./extensions) for ordinary extension read/write usage and [custom validation rules](./validation-rules) for document-level validation policies.

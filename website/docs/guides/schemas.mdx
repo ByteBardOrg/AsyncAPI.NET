@@ -1,0 +1,17 @@
+---
+id: schemas
+title: Message schemas
+sidebar_label: Overview
+---
+
+# Message schemas
+
+AsyncAPI.NET models payload schemas using `AsyncApiMultiFormatSchema`, which carries a schema format and an `IAsyncApiSchema` value. The built-in formats cover JSON Schema and Avro; applications can register parsers for additional formats.
+
+## Choose a schema format
+
+- [JSON Schema](./json-schema) — the built-in AsyncAPI Schema Object model, including nested keywords, composition, and references.
+- [Avro](./avro) — Avro record, field, named, primitive, and complex schemas.
+- [Custom schema parsers](./custom-schema-parsers) — add a reader for another schema format.
+
+`AsyncApiJsonSchema` implicitly converts to `AsyncApiMultiFormatSchema`, so it can be assigned directly to a message payload. Avro and custom schemas are attached through the wrapper with their `SchemaFormat` specified. The JSON Schema and Avro pages include format-specific construction, reading, and serialization examples.

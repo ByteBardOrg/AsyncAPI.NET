@@ -1,0 +1,100 @@
+---
+id: custom-schema-parsers
+title: Custom schema parsers
+sidebar_position: 8
+---
+
+# Custom schema parsers
+
+When a message payload uses a schema format not handled by the built-in JSON Schema or Avro parsers, implement `IAsyncApiSchemaParser` and register it on `AsyncApiReaderSettings.SchemaParserRegistry`. A parser provides `SupportedFormats` and `LoadSchema(ParseNode)`. A `schemaFormat` matches a registered format when it is exactly equal to that format or starts with it; for example, registering `application/vnd.example.schema` also matches `application/vnd.example.schema;version=2`. Choose a registered prefix that does not unintentionally match other formats.
+
+The registered type should implement `IAsyncApiSchema` so it can be held as a payload schema. `IAsyncApiSchema` also requires `SerializeV2` and `SerializeV3`: implement both to support writing in both document versions. For an intentionally read-only schema, keep the required methods but throw a clear `NotSupportedException`; the parser will still read, but document serialization containing that schema is not supported.
+
+```csharp
+using System;
+using System.Collections.Generic;
+using ByteBard.AsyncAPI.Attributes;
+using ByteBard.AsyncAPI.Extensions;
+using ByteBard.AsyncAPI.Models;
+using ByteBard.AsyncAPI.Models.Interfaces;
+using ByteBard.AsyncAPI.Readers;
+using ByteBard.AsyncAPI.Readers.ParseNodes;
+using ByteBard.AsyncAPI.Writers;
+
+public enum MySchemaType
+{
+    [Display("one")]
+    One,
+
+    [Display("two")]
+    Two,
+}
+
+public sealed class MySchema : IAsyncApiSchema
+{
+    public MySchemaType Type { get; set; }
+    public int Length { get; set; }
+    public string Description { get; set; }
+    public IEnumerable<MySchema> Children { get; set; }
+
+    public void SerializeV2(IAsyncApiWriter writer) =>
+        throw new NotSupportedException("MySchema is read-only.");
+
+    public void SerializeV3(IAsyncApiWriter writer) =>
+        throw new NotSupportedException("MySchema is read-only.");
+}
+
+public sealed class MySchemaParser : IAsyncApiSchemaParser
+{
+    private static readonly FixedFieldMap<MySchema> Fields = new()
+    {
+        { "type", (target, value) => target.Type = value.GetScalarValue().GetEnumFromDisplayName<MySchemaType>() },
+        { "length", (target, value) => target.Length = value.GetIntegerValue() },
+        { "description", (target, value) => target.Description = value.GetScalarValueOrDefault("No description") },
+        { "children", (target, value) => target.Children = value.CreateList(Parse) },
+    };
+
+    public IEnumerable<string> SupportedFormats => new[]
+    {
+        "application/vnd.example.schema+json",
+        "application/vnd.example.schema+yaml",
+    };
+
+    public IAsyncApiSchema LoadSchema(ParseNode node)
+    {
+        return Parse(node);
+    }
+
+    private static MySchema Parse(ParseNode node)
+    {
+        var map = node.CheckMapNode("schema object");
+        var schema = new MySchema();
+        foreach (var property in map)
+        {
+            property.ParseField(schema, Fields, null);
+        }
+
+        return schema;
+    }
+}
+```
+
+`FixedFieldMap<T>` maps serialized field names to actions that read from a `ParseNode` and assign to the model. The example maps scalar enum and integer fields, supplies a fallback description, and parses a list of nested child schemas recursively. Use the node's scalar, integer, boolean, list, or map helpers as appropriate. `CheckMapNode` enforces the expected object shape before iterating properties. The example intentionally ignores unknown fields; decide whether your format requires rejecting them, preserving them as metadata, or skipping them.
+
+`SupportedFormats` is the parser's format dispatch list. The reader matches an exact registered format or a longer `schemaFormat` that starts with a registered value. Register only prefixes that intentionally cover the format variants you support; for example, `application/vnd.example.schema` also matches `application/vnd.example.schema;version=2`.
+
+For writable formats, implement both serializers using the `IAsyncApiWriter` APIs to emit the fields represented by your model and preserve the format's wire shape. The read-only implementation above throws from both serializers by design. Parsing and writing are separate responsibilities: adding a parser does not provide an automatic serializer for the custom model.
+
+After declaring the model and parser above, register it before reading. This example takes the document input from a file:
+
+```csharp
+using System.IO;
+using ByteBard.AsyncAPI.Readers;
+
+var settings = new AsyncApiReaderSettings();
+settings.SchemaParserRegistry.RegisterParser(new MySchemaParser());
+var input = File.ReadAllText("asyncapi.yaml");
+var document = new AsyncApiStringReader(settings).Read(input, out var diagnostics);
+```
+
+The example demonstrates representative fields rather than a complete custom schema specification. Production parsers should validate expected node shapes and map all supported fields. Register before reading so the schema format can be dispatched to your parser. See the tested [custom schema parser example](https://github.com/ByteBardOrg/AsyncAPI.NET/blob/vnext/test/ByteBard.AsyncAPI.Tests/Models/CustomSchema_Should.cs) for a document-level read example.

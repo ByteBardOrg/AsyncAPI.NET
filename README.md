@@ -7,11 +7,14 @@ This is unfortunate, but after much back and not a lot of forth, I have decided 
 
 
 The AsyncAPI.NET SDK contains a useful object model for the AsyncAPI specification in .NET along with common serializers to extract raw AsyncAPI JSON and YAML documents from the model as well.
-Full support for both 2.6 and 3.0.
-2.6 are 'upgraded' to 3.0 during deserialization and can be written back as 2.6 (see writing examples).
+AsyncAPI.NET supports the current releases of the AsyncAPI 2.x and 3.x major versions. Today, serialization emits 2.6 or 3.1.0 respectively.
+V2 documents are upgraded to the V3 model during deserialization and can be written back as V2 (see writing examples). The V3 serialization selector is still named `AsyncApiVersion.AsyncApi3_0`.
   
 [CHANGELOG](https://github.com/ByteBardOrg/AsyncAPI.NET/blob/vnext/CHANGELOG.md)  
-[Wiki and getting started guide](https://github.com/ByteBardOrg/AsyncAPI.NET/wiki)
+[Getting started guide](https://bytebardorg.github.io/AsyncAPI.NET/docs/guides/getting-started)
+
+## Documentation
+The [documentation site](https://bytebardorg.github.io/AsyncAPI.NET/) is built with Docusaurus. See [website/README.md](website/README.md) for local development instructions. GitHub Pages must be configured to use GitHub Actions for deployment.
 
 ## Installation
 Generally you want to use Readers and Bindings.
@@ -42,7 +45,7 @@ Main classes to know:
 ```csharp
 var specification =
 """
-asyncapi: 3.0.0
+asyncapi: 3.1.0
 info:
   title: UsersAPI
   version: 1.0.0

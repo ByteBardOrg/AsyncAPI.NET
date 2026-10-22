@@ -1,0 +1,77 @@
+---
+id: validation-rules
+title: Custom validation rules
+sidebar_label: Validation rules
+sidebar_position: 9
+---
+
+# Custom validation rules
+
+Readers apply the default validation rule set and return validation errors and warnings in the `AsyncApiDiagnostic`. Add a `ValidationRule<T>` to `AsyncApiReaderSettings.RuleSet` to check a model element during reading. `T` must implement `IAsyncApiElement`.
+
+```csharp
+using System;
+using ByteBard.AsyncAPI.Models;
+using ByteBard.AsyncAPI.Readers;
+using ByteBard.AsyncAPI.Validations;
+
+var settings = new AsyncApiReaderSettings();
+settings.RuleSet.Add(new ValidationRule<AsyncApiLicense>((context, license) =>
+{
+    context.Enter("name");
+    try
+    {
+        if (license != null && license.Name != "MIT")
+        {
+            context.CreateError("LicenseName", "License name must be MIT.");
+        }
+    }
+    finally
+    {
+        context.Exit();
+    }
+}));
+```
+
+`CreateError` and `CreateWarning` attach the current validation path to the diagnostic. When checking a nested field, use the context's path navigation methods (such as `Enter`/`Exit`) around the check so the reported pointer identifies that field. Always balance path entry and exit, including conditional paths. The `RuleSet` defaults to the built-in rules; adding a rule extends that set. Use `ValidationRuleSet.GetEmptyRuleSet()` only if you deliberately want to replace the default rules with none and supply your own.
+
+After reading, inspect `diagnostics.Errors` and `diagnostics.Warnings`. Rules validate the typed in-memory model, so they do not replace parsing or schema-format handling. For extension-name validation, see [extensions](./extensions).
+
+For example, apply the rule above to this YAML document:
+
+```yaml
+asyncapi: 2.6.0
+info:
+  title: test
+  version: 1.0.0
+  license:
+    name: apache
+  contact:
+    name: API Support
+    url: https://www.example.com/support
+    email: support@example.com
+```
+
+Read the input with the configured reader and inspect the validation result:
+
+```csharp
+var input = """
+asyncapi: 2.6.0
+info:
+  title: test
+  version: 1.0.0
+  license:
+    name: apache
+  contact:
+    name: API Support
+    url: https://www.example.com/support
+    email: support@example.com
+""";
+var document = new AsyncApiStringReader(settings).Read(input, out var diagnostics);
+foreach (var error in diagnostics.Errors)
+{
+    Console.WriteLine($"{error.Pointer}: {error.Message}");
+}
+```
+
+The custom rule adds an error at `#/info/license/name` with the message `License name must be MIT.` (the reader may also report unrelated default-rule diagnostics). Entering the `name` path before calling `CreateError` is what makes the pointer identify the field rather than only the containing license object.

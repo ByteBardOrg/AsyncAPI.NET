@@ -1,0 +1,42 @@
+---
+id: extensions
+title: Use AsyncAPI extensions
+sidebar_position: 6
+sidebar_label: Extensions
+---
+
+# Use AsyncAPI extensions
+
+AsyncAPI defines `x-` extension fields for application-specific data. Use these directly with the library; ordinary extension values do not require a custom parser. The model stores them in an element's `Extensions` dictionary, keyed by the full extension name, and the reader preserves values as `AsyncApiAny` by default.
+
+## Write an extension
+
+Assign an `AsyncApiAny` value to the document or another extensible element. `AsyncApiAny` supports scalar, array, and object values:
+
+```csharp
+using ByteBard.AsyncAPI.Models;
+
+var document = new AsyncApiDocument();
+document.Extensions["x-enabled"] = new AsyncApiAny(true);
+document.Extensions["x-retries"] = new AsyncApiAny(3);
+document.Extensions["x-ratio"] = new AsyncApiAny(2.2m);
+document.Extensions["x-labels"] = new AsyncApiAny(new[] { "blue", "green" });
+document.Extensions["x-metadata"] = new AsyncApiAny(new { test = 123 });
+```
+
+The extension name must include its `x-` prefix. Extensions can be set on any model element that exposes an `Extensions` dictionary.
+
+## Read an extension
+
+Without a custom parser, use the extension as an `AsyncApiAny` and convert it to the expected value type:
+
+```csharp
+var document = new AsyncApiStringReader().Read(input, out var diagnostics);
+if (document.Extensions.TryGetValue("x-retries", out var extension) &&
+    extension is AsyncApiAny any && any.TryGetValue<int>(out var retries))
+{
+    Console.WriteLine(retries);
+}
+```
+
+The value stays generic; use the `AsyncApiAny` conversion methods appropriate to its shape. For custom parsing or conversion during reading, see [custom extension parsers](./custom-extension-parsers). The default validation rules check extension naming conventions; see [custom validation rules](./validation-rules) if your validation policy needs adjustment.

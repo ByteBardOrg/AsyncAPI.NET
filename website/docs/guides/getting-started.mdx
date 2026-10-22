@@ -1,0 +1,116 @@
+---
+id: getting-started
+title: Getting started
+sidebar_position: 1
+sidebar_label: Getting started
+---
+
+# Getting started
+
+AsyncAPI.NET supports the current releases of the AsyncAPI 2.x and 3.x major versions, with a V3-shaped .NET object model and JSON/YAML readers and writers. V2 documents are upgraded to that model when read and can be written back as V2. Today, serialization emits 2.6 or 3.1.0 respectively.
+
+## Install from NuGet
+
+- [ByteBard.AsyncAPI.NET](https://www.nuget.org/packages/ByteBard.AsyncAPI.NET/) — document model and serializers.
+- [ByteBard.AsyncAPI.NET.Readers](https://www.nuget.org/packages/ByteBard.AsyncAPI.NET.Readers/) — JSON/YAML readers.
+- [ByteBard.AsyncAPI.NET.Bindings](https://www.nuget.org/packages/ByteBard.AsyncAPI.NET.Bindings/) — protocol bindings; install when needed.
+
+```sh
+dotnet add package ByteBard.AsyncAPI.NET
+dotnet add package ByteBard.AsyncAPI.NET.Readers
+# Optional, for protocol bindings:
+dotnet add package ByteBard.AsyncAPI.NET.Bindings
+```
+
+The packages are separate so applications need not bring in unused readers or binding implementations. The examples below parse input, so install the first two packages.
+
+The simplest way to start is to parse a document and serialize it in the desired format/version:
+
+```csharp
+using ByteBard.AsyncAPI;
+using ByteBard.AsyncAPI.Readers;
+
+var source = """
+asyncapi: 3.1.0
+info:
+  title: Users API
+  version: 1.0.0
+channels:
+  UserSignup:
+    address: user/signedup
+    messages:
+      UserMessage:
+        payload:
+          type: object
+          properties:
+            displayName:
+              type: string
+              description: Name of the user
+operations:
+  ConsumeUserSignups:
+    action: receive
+    channel:
+      $ref: '#/channels/UserSignup'
+""";
+
+var document = new AsyncApiStringReader().Read(source, out var diagnostics);
+var yamlV2 = document.SerializeAsYaml(AsyncApiVersion.AsyncApi2_0);
+var jsonV3 = document.SerializeAsJson(AsyncApiVersion.AsyncApi3_0);
+```
+
+The `AsyncApi3_0` enum name selects V3 serialization; despite its name, the current writer emits `asyncapi: 3.1.0`.
+
+## Construct a document directly
+
+You can also build the DOM without first parsing a specification. Create model objects, connect related elements with typed references, then serialize the document to YAML or JSON:
+
+```csharp
+using System.Collections.Generic;
+using ByteBard.AsyncAPI;
+using ByteBard.AsyncAPI.Models;
+
+var myFirstAsyncApi = new AsyncApiDocument
+{
+    Info = new AsyncApiInfo { Title = "My first AsyncAPI", Version = "1.0.0" },
+    Channels = new Dictionary<string, AsyncApiChannel>
+    {
+        ["UserSignup"] = new AsyncApiChannel
+        {
+            Address = "user/signedUp",
+            Messages = new Dictionary<string, AsyncApiMessage>
+            {
+                ["UserMessage"] = new AsyncApiMessage
+                {
+                    Payload = new AsyncApiJsonSchema
+                    {
+                        Type = SchemaType.Object,
+                        Properties = new Dictionary<string, AsyncApiJsonSchema>
+                        {
+                            ["displayName"] = new AsyncApiJsonSchema
+                            {
+                                Type = SchemaType.String,
+                                Description = "Name of the user",
+                            },
+                        },
+                    },
+                },
+            },
+        },
+    },
+    Operations = new Dictionary<string, AsyncApiOperation>
+    {
+        ["ConsumerUserSignups"] = new AsyncApiOperation
+        {
+            Action = AsyncApiAction.Receive,
+            Channel = new AsyncApiChannelReference("#/channels/UserSignup"),
+        },
+    },
+};
+
+var yamlV2FromDom = myFirstAsyncApi.SerializeAsYaml(AsyncApiVersion.AsyncApi2_0);
+var yamlV3FromDom = myFirstAsyncApi.SerializeAsYaml(AsyncApiVersion.AsyncApi3_0);
+```
+
+The V2 output represents the channel as `user/signedUp` with a `publish` message (the V2 form of a receive operation). V3 retains the channel map and emits `ConsumerUserSignups` as an operation referring to `#/channels/UserSignup`. The document writer handles these version-specific shapes; use the matching `SerializeAsJson` method when JSON is needed.
+
+Inspect `diagnostics` after reading; parsing may return a document together with errors or warnings. For constructing the model directly, see [schemas](./schemas) and [version conversion](./version-conversion). The `SerializeAsJson` and `SerializeAsYaml` extension methods are provided by the core model package.

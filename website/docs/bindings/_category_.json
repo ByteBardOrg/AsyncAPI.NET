@@ -1,0 +1,8 @@
+{
+  "label": "Protocol bindings",
+  "position": 5,
+  "link": {
+    "type": "doc",
+    "id": "bindings/index"
+  }
+}

@@ -1,0 +1,175 @@
+---
+id: avro
+title: Avro schemas
+sidebar_label: Avro
+---
+
+# Avro schemas
+
+Avro payloads use the `AsyncApiAvroSchema` model family. It includes primitive schemas and the complex `AvroRecord`, `AvroField`, `AvroEnum`, `AvroArray`, `AvroMap`, `AvroFixed`, and `AvroUnion` types. Each Avro schema type has a `Metadata` dictionary of `AsyncApiAny` values for custom schema metadata.
+
+## Build a record
+
+This example uses fields with defaults, documentation, and sort order; nested records; enum, array, map, and fixed types; and a nullable union. A named record is defined before it is referenced by `AvroNamedType` in the later field.
+
+```csharp
+using System.Collections.Generic;
+using ByteBard.AsyncAPI.Models;
+
+var address = new AvroRecord
+{
+    Name = "Address",
+    Namespace = "com.example",
+    Fields = new List<AvroField>
+    {
+        new() { Name = "street", Type = AvroPrimitiveType.String },
+        new() { Name = "city", Type = AvroPrimitiveType.String },
+        new() { Name = "zipcode", Type = AvroPrimitiveType.String },
+    },
+};
+
+var user = new AvroRecord
+{
+    Name = "User",
+    Namespace = "com.example",
+    Fields = new List<AvroField>
+    {
+        new()
+        {
+            Name = "username",
+            Type = AvroPrimitiveType.String,
+            Doc = "The username of the user.",
+            Default = new AsyncApiAny("guest"),
+            Order = AvroFieldOrder.Ascending,
+        },
+        new()
+        {
+            Name = "status",
+            Type = new AvroEnum
+            {
+                Name = "Status",
+                Symbols = new List<string> { "ACTIVE", "INACTIVE", "BANNED" },
+                Default = "ACTIVE",
+            },
+        },
+        new()
+        {
+            Name = "emails",
+            Type = new AvroArray { Items = AvroPrimitiveType.String },
+        },
+        new()
+        {
+            Name = "metadata",
+            Type = new AvroMap { Values = AvroPrimitiveType.String },
+        },
+        new() { Name = "address", Type = address },
+        new()
+        {
+            Name = "priorAddresses",
+            Type = new AvroArray { Items = new AvroNamedType("Address", address) },
+        },
+        new()
+        {
+            Name = "profilePicture",
+            Type = new AvroFixed { Name = "ProfilePicture", Size = 256 },
+        },
+        new()
+        {
+            Name = "contact",
+            Doc = "Either null or a phone-number record.",
+            Type = new AvroUnion
+            {
+                Types = new List<AsyncApiAvroSchema>
+                {
+                    AvroPrimitiveType.Null,
+                    new AvroRecord
+                    {
+                        Name = "PhoneNumber",
+                        Fields = new List<AvroField>
+                        {
+                            new() { Name = "countryCode", Type = AvroPrimitiveType.Int },
+                            new() { Name = "number", Type = AvroPrimitiveType.String },
+                        },
+                    },
+                },
+            },
+        },
+    },
+};
+```
+
+`AvroField` provides `Name`, `Type`, `Doc`, `Default` (`AsyncApiAny`), `Order` (`AvroFieldOrder`), `Aliases`, and `Metadata`. Named record, enum, and fixed schemas support `Name`, `Namespace`, and aliases where defined; enums expose `Symbols` and an optional string `Default`, while fixed schemas require `Size`. `AvroArray.Items` and `AvroMap.Values` accept any `AsyncApiAvroSchema`, including named references, not only primitives.
+
+## Named types and unions
+
+Avro named references are distinct from AsyncAPI `$ref` references. `AvroNamedType` serializes as the Avro name string (for example, `"Address"`), not as a `$ref` object. When constructing a model by hand, pass the target schema to `AvroNamedType(name, target)` when you have it; for example, the array above targets the previously declared `address` record. When reading, the Avro parser resolves names according to Avro's name and namespace rules. Definitions must precede their use in depth-first, left-to-right traversal. Recursive references and named references inside arrays, maps, and unions are supported. An unresolved name is reported by the validator as an `AsyncApiValidatorWarning`, not a validation error.
+
+For a recursive record, bind its own instance as the target:
+
+```csharp
+using System.Collections.Generic;
+using ByteBard.AsyncAPI.Models;
+
+var longList = new AvroRecord { Name = "LongList" };
+longList.Fields = new List<AvroField>
+{
+    new() { Name = "value", Type = AvroPrimitiveType.Long },
+    new()
+    {
+        Name = "next",
+        Type = new AvroUnion
+        {
+            Types = new List<AsyncApiAvroSchema>
+            {
+                AvroPrimitiveType.Null,
+                new AvroNamedType("LongList", longList),
+            },
+        },
+    },
+};
+```
+
+The Avro schema API also provides `TryGetAs<T>(out T)`, `As<T>()`, and `Is<T>()` to inspect a schema's concrete model type. `TryGetAs<T>` is useful when the root payload or a nested field may be one of several Avro types.
+
+## Attach, write, and read a payload
+
+Avro schemas are set through `AsyncApiMultiFormatSchema`, with an Avro format identifier. The default reader registry includes the built-in Avro parser.
+
+Attach an Avro record to a message through the multi-format wrapper, then read it back through the built-in Avro parser:
+
+```csharp
+using System;
+using System.Collections.Generic;
+using ByteBard.AsyncAPI;
+using ByteBard.AsyncAPI.Models;
+using ByteBard.AsyncAPI.Readers;
+
+var user = new AvroRecord
+{
+    Name = "User",
+    Fields = new List<AvroField>
+    {
+        new() { Name = "username", Type = AvroPrimitiveType.String },
+    },
+};
+var message = new AsyncApiMessage
+{
+    Payload = new AsyncApiMultiFormatSchema
+    {
+        SchemaFormat = "application/vnd.apache.avro",
+        Schema = user,
+    },
+};
+
+var yaml = message.SerializeAsYaml(AsyncApiVersion.AsyncApi3_0);
+var settings = new AsyncApiReaderSettings();
+var parsed = new AsyncApiStringReader(settings).ReadFragment<AsyncApiMessage>(
+    yaml, AsyncApiVersion.AsyncApi3_0, out var diagnostics);
+
+if (parsed.Payload.Schema.TryGetAs<AvroRecord>(out var record))
+{
+    Console.WriteLine($"{record.Name}: {record.Fields.Count} fields");
+}
+```
+
+The built-in Avro parser recognizes `application/vnd.apache.avro`, its `+json` and `+yaml` variants, and their Avro 1.9.0 versioned forms. AsyncAPI 2.x writes the schema format alongside `payload`; AsyncAPI 3.x represents it in the Multi Format Schema Object. See the [schemas overview](./schemas) for JSON Schema and custom-format navigation.

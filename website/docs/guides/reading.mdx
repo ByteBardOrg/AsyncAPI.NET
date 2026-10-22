@@ -1,0 +1,67 @@
+---
+id: reading
+title: Reading documents
+sidebar_position: 2
+sidebar_label: Reading
+---
+
+# Reading documents
+
+The reader package provides three readers with the same `Read` pattern: `AsyncApiStringReader`, `AsyncApiTextReader`, and `AsyncApiStreamReader`. Each accepts JSON or YAML input and returns an `AsyncApiDocument` plus an `AsyncApiDiagnostic` through the `out` parameter.
+
+```csharp
+using ByteBard.AsyncAPI.Readers;
+
+var reader = new AsyncApiStringReader();
+var document = reader.Read(yamlOrJson, out var diagnostics);
+
+foreach (var error in diagnostics.Errors)
+{
+    Console.WriteLine($"{error.Pointer}: {error.Message}");
+}
+```
+
+Use `AsyncApiTextReader` when the input is already a `TextReader`; use `AsyncApiStreamReader` for a `Stream`. For example, to read a remote sample:
+
+```csharp
+using var client = new HttpClient();
+await using var stream = await client.GetStreamAsync(
+    "https://raw.githubusercontent.com/asyncapi/spec/master/examples/streetlights-kafka.yml");
+
+var document = new AsyncApiStreamReader().Read(stream, out var diagnostics);
+```
+
+For `AsyncApiStreamReader.Read(Stream)`, the underlying stream is closed by default. Set `LeaveStreamOpen = true` in `AsyncApiReaderSettings` when the caller must retain ownership. Note that `ReadFragment<T>(Stream)` closes its stream even when `LeaveStreamOpen` is true. Reader settings also control reference resolution, schema parsers, extensions, bindings, and validation rules; see [references](./references) and the extension guides.
+
+Diagnostics can report deserialization problems and validation errors or warnings. Check both errors and warnings where appropriate instead of assuming a returned document is fully valid. For the customization mechanisms, see [custom validation rules](./validation-rules).
+
+## Inspect parse diagnostics
+
+Malformed JSON or YAML is reported in `diagnostics.Errors` instead of being silently accepted. For example, this YAML has an invalid indentation:
+
+```csharp
+var malformedYaml = """
+asyncapi: 2.6.0
+info:
+  title: Broken document
+ version: 1.0.0
+""";
+var partial = new AsyncApiStringReader().Read(malformedYaml, out var diagnostics);
+foreach (var error in diagnostics.Errors)
+{
+    Console.WriteLine($"Pointer: {error.Pointer}; message: {error.Message}");
+}
+```
+
+JSON syntax errors are reported through the same diagnostic output:
+
+```csharp
+var malformedJson = """{"asyncapi": "2.6.0", "info": {"title": }}""";
+var partialJson = new AsyncApiStringReader().Read(malformedJson, out var jsonDiagnostics);
+foreach (var error in jsonDiagnostics.Errors)
+{
+    Console.WriteLine($"Pointer: {error.Pointer}; message: {error.Message}");
+}
+```
+
+When the reader can associate an error with a document location, `Pointer` contains a JSON Pointer such as `#/info/license/name`; low-level syntax errors may not have a useful document pointer. Validation diagnostics (for example, a custom rule rejecting a license name) can point to a precise property. See [custom validation rules](./validation-rules) for a rule and its resulting pointer.

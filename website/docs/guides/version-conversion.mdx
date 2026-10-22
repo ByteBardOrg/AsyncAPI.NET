@@ -1,0 +1,27 @@
+---
+id: version-conversion
+title: AsyncAPI version conversion
+sidebar_position: 5
+sidebar_label: Upgrading and downgrading
+---
+
+# AsyncAPI version conversion
+
+AsyncAPI.NET reads both AsyncAPI 2.x and 3.x descriptions into its V3-shaped object model. Reading either version uses the same reader API:
+
+```csharp
+var document = new AsyncApiStringReader().Read(input, out var diagnostics);
+```
+
+Choose the output version when serializing:
+
+```csharp
+var outputV2 = document.SerializeAsYaml(AsyncApiVersion.AsyncApi2_0);
+var outputV3 = document.SerializeAsJson(AsyncApiVersion.AsyncApi3_0);
+```
+
+`AsyncApi3_0` is the API's V3 selector; the current V3 writer emits `asyncapi: 3.1.0`.
+
+The serializer maps between the different version shapes, but a round trip is not guaranteed to preserve every representation detail. To bridge the versions, references may be moved, rewritten, or represented differently while keeping the specification's behavior as close as possible. V3-only model information cannot survive a downgrade when V2 has no corresponding field. In particular, channel keys may be normalized as addresses; generated operation keys can use `anonymous-operation-{int}` when no operation ID is available; operation IDs are not retained through a V2 downgrade; and when a V2 shape supports only one message in a location, only the first message is selected. References may also be reflowed or resolved during conversion.
+
+Review converted output when round-trip fidelity matters, especially around removed fields, operation identifiers, multiple messages, and references. See the [AsyncAPI migration guide](https://www.asyncapi.com/docs/migration/migrating-to-v3) for specification-level changes.

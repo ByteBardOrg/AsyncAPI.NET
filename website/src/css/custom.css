@@ -1,0 +1,155 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Inter:wght@400;500;600;700&family=Work+Sans:wght@600;700&display=swap');
+
+:root {
+  --ifm-color-primary: #461e96;
+  --ifm-color-primary-dark: #3c1984;
+  --ifm-color-primary-darker: #37177b;
+  --ifm-color-primary-darkest: #2b1261;
+  --ifm-color-primary-light: #5b30a7;
+  --ifm-color-primary-lighter: #6840b4;
+  --ifm-color-primary-lightest: #7b5ac1;
+  --ifm-font-family-base: 'Inter', sans-serif;
+  --ifm-font-family-monospace: 'DM Mono', monospace;
+  --ifm-heading-font-family: 'Work Sans', sans-serif;
+  --ifm-heading-font-weight: 600;
+  --ifm-heading-line-height: 1.125;
+  --ifm-heading-letter-spacing: -.03em;
+  --ifm-line-height-base: 1.625;
+  --ifm-font-size-base: 16px;
+  --ifm-code-font-size: 90%;
+  --ifm-background-color: #f7f9fa;
+  --ifm-background-surface-color: #fff;
+  --ifm-font-color-base: #242929;
+  --ifm-heading-color: #242929;
+  --ifm-navbar-background-color: #1b1130;
+  --ifm-footer-background-color: #1b1130;
+  --ifm-link-color: #461e96;
+  --ifm-navbar-shadow: none;
+}
+
+html[data-theme='dark'] {
+  --ifm-background-color: #1b1130;
+  --ifm-background-surface-color: #242929;
+  --ifm-font-color-base: #f7f9fa;
+  --ifm-heading-color: #fff;
+  --ifm-color-primary: #a87efc;
+  --ifm-color-primary-dark: #875ae2;
+  --ifm-color-primary-darker: #7b4fd5;
+  --ifm-color-primary-darkest: #6840b4;
+  --ifm-color-primary-light: #b995ff;
+  --ifm-color-primary-lighter: #c4a7ff;
+  --ifm-color-primary-lightest: #d6c4ff;
+  --ifm-link-color: #a87efc;
+  --ifm-navbar-background-color: #1b1130;
+  --ifm-footer-background-color: #1b1130;
+}
+
+.navbar {
+  border-bottom: 1px solid #364042;
+}
+.navbar__title {
+  font-family: 'Work Sans', sans-serif;
+  font-weight: 600;
+  letter-spacing: -.03em;
+}
+.navbar__logo img {width: 40px; height: 40px; max-height: none; object-fit: contain}
+.navbar__link {font-size: .88rem; font-weight: 500}
+.footer {padding: 3rem 0 2rem}
+.footer__title {font-family: 'Work Sans', sans-serif; font-size: 1.1rem; font-weight: 600}
+.footer__link-item {font-size: .9rem}
+
+body {
+  font-family: 'Inter', sans-serif;
+  font-size: 16px;
+  font-weight: 400;
+  letter-spacing: -.01em;
+  line-height: 1.625;
+}
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Work Sans', sans-serif;
+  font-weight: 600;
+  letter-spacing: -.03em;
+  line-height: 1.125;
+}
+
+/* The dark plum masthead stays distinct on both light and dark documentation pages. */
+html[data-theme='light'] .navbar,
+html:not([data-theme='dark']) .navbar {
+  --ifm-navbar-link-color: #fff;
+  --ifm-navbar-link-hover-color: #a87efc;
+  --ifm-navbar-background-color: #1b1130;
+  --ifm-navbar-shadow: 0 1px 0 rgba(27, 17, 48, .22);
+  color: #fff;
+  background: #1b1130;
+  border-bottom-color: #364042;
+}
+html[data-theme='dark'] .navbar {
+  --ifm-navbar-link-color: #fff;
+  --ifm-navbar-link-hover-color: #a87efc;
+  --ifm-navbar-background-color: #1b1130;
+  color: #fff;
+  background: #1b1130;
+  border-bottom-color: #364042;
+}
+html[data-theme='light'] .navbar__title,
+html:not([data-theme='dark']) .navbar__title,
+html[data-theme='dark'] .navbar__title {color: #fff}
+html[data-theme='light'] .navbar__link,
+html:not([data-theme='dark']) .navbar__link,
+html[data-theme='dark'] .navbar__link {
+  position: relative;
+  color: #fff;
+  font-weight: 600;
+  transition: color .16s ease, background-color .16s ease;
+}
+html[data-theme='light'] .navbar__link:hover,
+html:not([data-theme='dark']) .navbar__link:hover,
+html[data-theme='dark'] .navbar__link:hover {
+  color: #a87efc;
+  background: rgba(168, 126, 252, .13);
+}
+/* Avoid a misleading duplicated active state from the shared guides sidebar. */
+html[data-theme='light'] .navbar__link--active,
+html:not([data-theme='dark']) .navbar__link--active,
+html[data-theme='dark'] .navbar__link--active {color: #fff}
+html[data-theme='light'] .navbar__link--active::after,
+html:not([data-theme='dark']) .navbar__link--active::after,
+html[data-theme='dark'] .navbar__link--active::after {display: none}
+html[data-theme='light'] .navbar__toggle,
+html:not([data-theme='dark']) .navbar__toggle,
+html[data-theme='dark'] .navbar__toggle {color: #fff}
+html[data-theme='light'] .navbar__toggle:hover,
+html:not([data-theme='dark']) .navbar__toggle:hover,
+html[data-theme='dark'] .navbar__toggle:hover {color: #a87efc; background: rgba(168, 126, 252, .13)}
+html[data-theme='light'] .navbar__items--right .navbar__link,
+html:not([data-theme='dark']) .navbar__items--right .navbar__link,
+html[data-theme='dark'] .navbar__items--right .navbar__link {color: #fff}
+html[data-theme='light'] .navbar__items--right .navbar__link:hover,
+html:not([data-theme='dark']) .navbar__items--right .navbar__link:hover,
+html[data-theme='dark'] .navbar__items--right .navbar__link:hover {color: #a87efc}
+
+@media (max-width: 996px) {
+  html[data-theme='light'] .navbar-sidebar,
+  html:not([data-theme='dark']) .navbar-sidebar,
+  html[data-theme='dark'] .navbar-sidebar {
+    --ifm-navbar-link-color: #fff;
+    --ifm-navbar-background-color: #1b1130;
+    color: #fff;
+    background: #1b1130;
+  }
+  html[data-theme='light'] .navbar-sidebar__back,
+  html[data-theme='light'] .navbar-sidebar__close,
+  html:not([data-theme='dark']) .navbar-sidebar__back,
+  html:not([data-theme='dark']) .navbar-sidebar__close,
+  html[data-theme='dark'] .navbar-sidebar__back,
+  html[data-theme='dark'] .navbar-sidebar__close {color: #fff}
+  html[data-theme='light'] .navbar-sidebar .menu__link,
+  html:not([data-theme='dark']) .navbar-sidebar .menu__link,
+  html[data-theme='dark'] .navbar-sidebar .menu__link {color: #fff}
+  html[data-theme='light'] .navbar-sidebar .menu__link:hover,
+  html:not([data-theme='dark']) .navbar-sidebar .menu__link:hover,
+  html[data-theme='dark'] .navbar-sidebar .menu__link:hover {color: #a87efc; background: rgba(168, 126, 252, .13)}
+  html[data-theme='light'] .navbar-sidebar .menu__link--active,
+  html:not([data-theme='dark']) .navbar-sidebar .menu__link--active,
+  html[data-theme='dark'] .navbar-sidebar .menu__link--active {color: #a87efc}
+}

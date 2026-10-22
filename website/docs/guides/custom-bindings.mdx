@@ -1,0 +1,52 @@
+---
+id: custom-bindings
+title: Custom bindings
+sidebar_position: 7
+---
+
+# Custom bindings
+
+Protocol binding implementations are distributed separately in `ByteBard.AsyncAPI.NET.Bindings`. For supported protocols, add the binding package and register its parsers with the reader. For example, `BindingsCollection.All` registers all built-in parser implementations; protocol-specific coverage is documented in the [bindings section](/docs/bindings).
+
+To implement a binding that is not supplied, derive from the abstract generic binding class for its location: `ServerBinding<T>`, `ChannelBinding<T>`, `OperationBinding<T>`, or `MessageBinding<T>`. `T` is the concrete class itself and must implement the corresponding binding interface and have a parameterless constructor. A channel binding is sketched below:
+
+```csharp
+public sealed class FooBinding : ChannelBinding<FooBinding>
+{
+    public string Foo { get; set; }
+    public string Bar { get; set; }
+
+    public override string BindingKey => "foo";
+
+    protected override FixedFieldMap<FooBinding> FixedFieldMap => new()
+    {
+        { "bindingVersion", (binding, node) => { binding.BindingVersion = node.GetScalarValue(); } },
+        { "foo", (binding, node) => { binding.Foo = node.GetScalarValue(); } },
+        { "bar", (binding, node) => { binding.Bar = node.GetScalarValue(); } },
+    };
+
+    public override void SerializeV2(IAsyncApiWriter writer) => SerializeV3(writer);
+
+    public override void SerializeV3(IAsyncApiWriter writer) => SerializeProperties(writer);
+
+    public override void SerializeProperties(IAsyncApiWriter writer)
+    {
+        writer.WriteStartObject();
+        writer.WriteRequiredProperty("foo", Foo);
+        writer.WriteRequiredProperty("bar", Bar);
+        writer.WriteOptionalProperty(AsyncApiConstants.BindingVersion, BindingVersion);
+        writer.WriteExtensions(Extensions);
+        writer.WriteEndObject();
+    }
+}
+```
+
+Register the binding parser on the reader settings' `Bindings` collection to enable deserialization:
+
+```csharp
+var settings = new AsyncApiReaderSettings();
+settings.Bindings.Add(new FooBinding());
+var document = new AsyncApiStringReader(settings).Read(input, out var diagnostics);
+```
+
+The binding's key and serialized fields must follow the relevant AsyncAPI binding specification. Custom bindings are separate from protocol-specific binding support already covered under [bindings](/docs/bindings); this page only documents the extension point. Confirm the exact parser type and signatures against the referenced package version when implementing a binding.

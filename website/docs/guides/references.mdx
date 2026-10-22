@@ -1,0 +1,203 @@
+---
+id: references
+title: References and resolution
+sidebar_position: 3
+sidebar_label: References
+---
+
+# References and resolution
+
+When building the object model, create the reference type for the element being referenced and give it an AsyncAPI reference URI. For example, a server can refer to a reusable component server:
+
+```csharp
+using System.Collections.Generic;
+using ByteBard.AsyncAPI;
+using ByteBard.AsyncAPI.Models;
+
+var document = new AsyncApiDocument
+{
+    Info = new AsyncApiInfo { Title = "My document", Version = "1.0.0" },
+    Servers = new Dictionary<string, AsyncApiServer>
+    {
+        ["production"] = new AsyncApiServerReference("#/components/servers/shared"),
+    },
+    Components = new AsyncApiComponents
+    {
+        Servers = new Dictionary<string, AsyncApiServer>
+        {
+            ["shared"] = new AsyncApiServer
+            {
+                Host = "example.com",
+                Protocol = "https",
+            },
+        },
+    },
+};
+
+var yamlV2 = document.SerializeAsYaml(AsyncApiVersion.AsyncApi2_0);
+var yamlV3 = document.SerializeAsYaml(AsyncApiVersion.AsyncApi3_0);
+```
+
+The V2 writer emits the reference and its target component, for example:
+
+```yaml
+asyncapi: 2.6.0
+info:
+  title: My document
+  version: 1.0.0
+servers:
+  production:
+    $ref: '#/components/servers/shared'
+components:
+  servers:
+    shared:
+      url: example.com
+      protocol: https
+```
+
+The V2 server fields are `url` and `protocol`; the host is not serialized as `https://example.com`. Serialize to V3 by choosing `AsyncApiVersion.AsyncApi3_0` instead. References created in a model are reference objects, not eagerly replaced by their target. Resolution is performed when a serialized specification is read; serializing a model alone does not resolve it for later object-model access.
+
+## Read a resolved reference
+
+Internal references are resolved by default during document reading. This covers component references such as `#/components/servers/shared` and document locations outside components, such as `#/servers/production`. The reference object remains a typed proxy: its target properties can be read directly, while `Reference.Reference` retains the URI and `UnresolvedReference` reports whether the target was found.
+
+Reference resolution is part of reading a full document with `Read`; `ReadFragment<T>` parses a fragment but does not run the document reference-resolution pass. A missing or invalid internal target is reported in diagnostics and remains unresolved.
+
+```csharp
+using System;
+using ByteBard.AsyncAPI.Models;
+using ByteBard.AsyncAPI.Readers;
+
+var yamlV3 = """
+asyncapi: 3.0.0
+info:
+  title: My document
+  version: 1.0.0
+servers:
+  production:
+    $ref: '#/components/servers/shared'
+components:
+  servers:
+    shared:
+      host: example.com
+      protocol: https
+""";
+var parsed = new AsyncApiStringReader().Read(yamlV3, out var diagnostics);
+var production = parsed.Servers["production"];
+
+if (production is AsyncApiServerReference serverReference)
+{
+    // Host is proxied from the target server after successful internal resolution.
+    Console.WriteLine(serverReference.Host);                       // example.com
+    Console.WriteLine(serverReference.UnresolvedReference);       // False
+    Console.WriteLine(serverReference.Reference.Reference);       // #/components/servers/shared
+}
+```
+
+Consumers can often read a resolved proxy as the referenced type without first copying or replacing it. Keep the reference-type and resolution checks when your code requires a concrete target. For an unresolved reference, proxy getters can return `null`; avoid relying on target properties until `UnresolvedReference` is false. Reader errors and warnings are returned in `diagnostics`.
+
+## External references
+
+`AsyncApiReaderSettings.ReferenceResolution` defaults to `ReferenceResolutionSetting.ResolveInternalReferences`: local references are resolved and external references remain unresolved placeholders. Set `ResolveAllReferences` to load external references too. The built-in loader supports absolute `file://`, `http://`, and `https://` URIs. Relative external URIs require a `BaseUri`; the built-in loader resolves them relative to that URI as file paths. Other URI schemes require a custom loader.
+
+External resources are parsed as YAML or JSON and normalized through the reader's JSON representation before selecting any reference fragment. This does not support arbitrary serialization formats. For example, a loader can provide an in-memory YAML resource:
+
+```csharp
+using System;
+using System.IO;
+using System.Text;
+using System.Threading.Tasks;
+using ByteBard.AsyncAPI.Readers.Interface;
+
+public sealed class StringDocumentLoader : IStreamLoader
+{
+    private readonly string content;
+
+    public StringDocumentLoader(string content) => this.content = content;
+
+    public Stream Load(Uri baseUri, Uri uri) =>
+        new MemoryStream(Encoding.UTF8.GetBytes(this.content));
+
+    public Task<Stream> LoadAsync(Uri baseUri, Uri uri) =>
+        Task.FromResult(this.Load(baseUri, uri));
+}
+```
+
+Register it with the reader settings. The example URI uses a custom scheme because this loader handles the resource itself; the built-in loader does not support `memory://`.
+
+```csharp
+using System;
+using ByteBard.AsyncAPI.Models;
+using ByteBard.AsyncAPI.Readers;
+
+var externalYaml = """
+asyncapi: 2.6.0
+info:
+  title: Shared servers
+  version: 1.0.0
+servers:
+  shared:
+    url: broker.example
+    protocol: mqtt
+""";
+var input = """
+asyncapi: 2.6.0
+info:
+  title: Client
+  version: 1.0.0
+servers:
+  remote:
+    $ref: 'memory://reference.example/servers.yaml#/servers/shared'
+""";
+
+var settings = new AsyncApiReaderSettings
+{
+    ReferenceResolution = ReferenceResolutionSetting.ResolveAllReferences,
+    ExternalReferenceLoader = new StringDocumentLoader(externalYaml),
+};
+var parsed = new AsyncApiStringReader(settings).Read(input, out var diagnostics);
+if (parsed.Servers["remote"] is AsyncApiServerReference remote &&
+    !remote.UnresolvedReference)
+{
+    Console.WriteLine(remote.Host); // broker.example
+}
+```
+
+`IStreamLoader` has synchronous `Load(Uri baseUri, Uri uri)` and asynchronous `LoadAsync(Uri baseUri, Uri uri)` methods; implement both for the reader APIs and return a readable stream containing the resource. `BaseUri` is passed to the loader for relative references. If an external resource cannot be fetched or parsed, the reader records a diagnostic and the reference can remain unresolved. Check both diagnostics and `UnresolvedReference` before relying on an external target.
+
+## Disable resolution
+
+Set `DoNotResolveReferences` to leave both internal and external references as placeholder reference objects:
+
+```csharp
+using System;
+using ByteBard.AsyncAPI.Models;
+using ByteBard.AsyncAPI.Readers;
+
+var settings = new AsyncApiReaderSettings
+{
+    ReferenceResolution = ReferenceResolutionSetting.DoNotResolveReferences,
+};
+var unresolvedInput = """
+asyncapi: 2.6.0
+info:
+  title: Client
+  version: 1.0.0
+servers:
+  production:
+    $ref: '#/components/servers/shared'
+components:
+  servers:
+    shared:
+      url: broker.example
+      protocol: mqtt
+""";
+var parsed = new AsyncApiStringReader(settings).Read(unresolvedInput, out var diagnostics);
+if (parsed.Servers["production"] is AsyncApiServerReference serverReference)
+{
+    Console.WriteLine(serverReference.Reference.Reference);
+    Console.WriteLine(serverReference.UnresolvedReference); // True
+}
+```
+
+See [version conversion](./version-conversion) for how references may be reorganized when serializing between AsyncAPI versions.
