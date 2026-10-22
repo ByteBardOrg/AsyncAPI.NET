@@ -11,10 +11,10 @@ AsyncAPI.NET supports the current releases of the AsyncAPI 2.x and 3.x major ver
 V2 documents are upgraded to the V3 model during deserialization and can be written back as V2 (see writing examples). The V3 serialization selector is still named `AsyncApiVersion.AsyncApi3_0`.
   
 [CHANGELOG](https://github.com/ByteBardOrg/AsyncAPI.NET/blob/vnext/CHANGELOG.md)  
-[Getting started guide](https://bytebardorg.github.io/AsyncAPI.NET/docs/guides/getting-started)
+[Getting started guide](https://bytebard.org/AsyncAPI.NET/docs/guides/getting-started)
 
 ## Documentation
-The [documentation site](https://bytebardorg.github.io/AsyncAPI.NET/) is built with Docusaurus. See [website/README.md](website/README.md) for local development instructions. GitHub Pages must be configured to use GitHub Actions for deployment.
+The [documentation site](https://bytebard.org/AsyncAPI.NET/) is built with Docusaurus. See [website/README.md](website/README.md) for local development instructions. GitHub Pages must be configured to use GitHub Actions for deployment.
 
 ## Installation
 Generally you want to use Readers and Bindings.

@@ -4,7 +4,7 @@ const config = {
   title: 'AsyncAPI.NET',
   tagline: 'Build, read, and extend AsyncAPI documents in .NET.',
   favicon: 'img/dotnet-logo.svg',
-  url: 'https://bytebardorg.github.io',
+  url: 'https://bytebard.org',
   baseUrl: '/AsyncAPI.NET/',
   organizationName: 'ByteBardOrg',
   projectName: 'AsyncAPI.NET',
