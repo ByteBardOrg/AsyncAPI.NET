@@ -36,6 +36,7 @@
             [typeof(AsyncApiAvroSchema)] = AsyncApiAvroSchemaDeserializer.LoadSchema,
             [typeof(AsyncApiJsonSchema)] = AsyncApiV2Deserializer.LoadJsonSchemaPayload,
             [typeof(AsyncApiAvroSchema)] = AsyncApiV2Deserializer.LoadAvroPayload,
+            [typeof(AsyncApiMultiFormatSchema)] = AsyncApiV2Deserializer.LoadMultiFormatSchemaPayload,
             [typeof(AsyncApiSecurityScheme)] = AsyncApiV2Deserializer.LoadSecurityScheme,
             [typeof(AsyncApiServer)] = AsyncApiV2Deserializer.LoadServer,
             [typeof(AsyncApiServerVariable)] = AsyncApiV2Deserializer.LoadServerVariable,

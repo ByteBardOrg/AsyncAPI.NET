@@ -73,6 +73,14 @@ namespace ByteBard.AsyncAPI.Readers
             return LoadPayload(n, "application/vnd.apache.avro");
         }
 
+        /// <summary>
+        /// 2.x has no Multi Format Schema Object; the schema format lives on the message, so a payload read on its own is a JSON Schema.
+        /// </summary>
+        public static AsyncApiMultiFormatSchema LoadMultiFormatSchemaPayload(ParseNode n)
+        {
+            return new AsyncApiMultiFormatSchema { Schema = LoadJsonSchemaPayload(n) };
+        }
+
         private static IAsyncApiSchema LoadPayload(ParseNode n, string format)
         {
             if (n == null)

@@ -214,6 +214,55 @@ namespace ByteBard.AsyncAPI.Tests
             doc.Channels["workspace"].Messages["message"].Payload.Schema.As<AsyncApiJsonSchema>().Type.Should().Be(SchemaType.Boolean);
         }
 
+        // A local payload reference that is not a registered component is resolved by falling back to the whole document.
+        [TestCase("2.6.0")]
+        [TestCase("3.0.0")]
+        public void LocalPayloadReference_NotInWorkspace_ResolvesPayload(string version)
+        {
+            var yaml = version.StartsWith("2")
+                ? """
+                  asyncapi: 2.6.0
+                  info:
+                    title: test
+                    version: 1.0.0
+                  channels:
+                    workspace:
+                      publish:
+                        message:
+                          payload:
+                            $ref: '#/components/messages/shared/payload'
+                  components:
+                    messages:
+                      shared:
+                        payload:
+                          type: string
+                  """
+                : """
+                  asyncapi: 3.0.0
+                  info:
+                    title: test
+                    version: 1.0.0
+                  channels:
+                    workspace:
+                      messages:
+                        message:
+                          payload:
+                            $ref: '#/components/messages/shared/payload'
+                  components:
+                    messages:
+                      shared:
+                        payload:
+                          type: string
+                  """;
+
+            var doc = new AsyncApiStringReader().Read(yaml, out var diagnostic);
+
+            diagnostic.Errors.Should().BeEmpty();
+            var payload = doc.Channels["workspace"].Messages.Values.First().Payload;
+            payload.Should().BeOfType<AsyncApiMultiFormatSchemaReference>();
+            payload.Schema.As<AsyncApiJsonSchema>().Type.Should().Be(SchemaType.String);
+        }
+
         [Test]
         public void V2_ReferencePointers()
         {
