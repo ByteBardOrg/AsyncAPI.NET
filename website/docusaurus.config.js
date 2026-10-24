@@ -42,7 +42,9 @@ const config = {
       ],
       copyright: `Copyright © ${new Date().getFullYear()} ByteBardOrg.`,
     },
-    prism: {theme: prismThemes.github, darkTheme: prismThemes.dracula, additionalLanguages: ['csharp']},
+    // Code is highlighted with Shiki (src/theme/CodeBlock/Content); these Prism themes only color the code block
+    // around it, and match the background of Shiki's Visual Studio Code themes.
+    prism: {theme: prismThemes.vsLight, darkTheme: prismThemes.vsDark},
   },
 };
 

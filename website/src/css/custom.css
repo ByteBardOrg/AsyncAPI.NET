@@ -153,3 +153,18 @@ html[data-theme='dark'] .navbar__items--right .navbar__link:hover {color: #a87ef
   html:not([data-theme='dark']) .navbar-sidebar .menu__link--active,
   html[data-theme='dark'] .navbar-sidebar .menu__link--active {color: #a87efc}
 }
+
+/* Code tokens carry both color modes' styles as CSS variables (src/theme/CodeBlock/Content/shiki.js). */
+.shiki-token {
+  color: var(--shiki-light);
+  font-style: var(--shiki-light-font-style);
+  font-weight: var(--shiki-light-font-weight);
+  text-decoration: var(--shiki-light-text-decoration);
+}
+
+html[data-theme='dark'] .shiki-token {
+  color: var(--shiki-dark);
+  font-style: var(--shiki-dark-font-style);
+  font-weight: var(--shiki-dark-font-weight);
+  text-decoration: var(--shiki-dark-text-decoration);
+}
