@@ -29,6 +29,19 @@ namespace ByteBard.AsyncAPI.Tests
             }
             """;
 
+        private const string ExternalPayloads =
+            """
+            {
+              "schemas": {
+                "plain": { "type": "string" },
+                "multiFormat": {
+                  "schemaFormat": "application/vnd.aai.asyncapi+json;version=3.0.0",
+                  "schema": { "type": "integer" }
+                }
+              }
+            }
+            """;
+
         private static readonly TestCaseData[] ExternalFragmentCases =
         {
             new TestCaseData("/components/schemas/plain", SchemaType.String).SetArgDisplayNames("nested path"),
@@ -136,6 +149,69 @@ namespace ByteBard.AsyncAPI.Tests
             };
 
             return new AsyncApiStringReader(settings).Read(yaml, out diagnostic);
+        }
+
+        [TestCase("payloads.json#/schemas/plain", SchemaType.String)]
+        [TestCase("payloads.json#/schemas/multiFormat", SchemaType.Integer)]
+        public void V3_ExternalPayloadReference_ResolvesPayload(string reference, SchemaType expectedType)
+        {
+            var yaml =
+                $"""
+                asyncapi: 3.0.0
+                info:
+                  title: test
+                  version: 1.0.0
+                channels:
+                  workspace:
+                    messages:
+                      message:
+                        payload:
+                          $ref: '{reference}'
+                """;
+
+            var settings = new AsyncApiReaderSettings
+            {
+                ReferenceResolution = ReferenceResolutionSetting.ResolveAllReferences,
+                ExternalReferenceLoader = new MockStringLoader(ExternalPayloads),
+            };
+
+            var doc = new AsyncApiStringReader(settings).Read(yaml, out var diagnostic);
+
+            diagnostic.Errors.Should().BeEmpty();
+            var payload = doc.Channels["workspace"].Messages["message"].Payload;
+            payload.Should().BeOfType<AsyncApiMultiFormatSchemaReference>();
+            payload.As<AsyncApiMultiFormatSchemaReference>().UnresolvedReference.Should().BeFalse();
+            payload.Schema.As<AsyncApiJsonSchema>().Type.Should().Be(expectedType);
+            doc.SerializeAsYaml(AsyncApiVersion.AsyncApi3_0).Should().Contain($"$ref: {reference}");
+        }
+
+        [Test]
+        public void V3_ExternalPayloadReference_WithoutFragment_ResolvesPayload()
+        {
+            var yaml =
+                """
+                asyncapi: 3.0.0
+                info:
+                  title: test
+                  version: 1.0.0
+                channels:
+                  workspace:
+                    messages:
+                      message:
+                        payload:
+                          $ref: './payload.json'
+                """;
+
+            var settings = new AsyncApiReaderSettings
+            {
+                ReferenceResolution = ReferenceResolutionSetting.ResolveAllReferences,
+                ExternalReferenceLoader = new MockStringLoader("""{ "type": "boolean" }"""),
+            };
+
+            var doc = new AsyncApiStringReader(settings).Read(yaml, out var diagnostic);
+
+            diagnostic.Errors.Should().BeEmpty();
+            doc.Channels["workspace"].Messages["message"].Payload.Schema.As<AsyncApiJsonSchema>().Type.Should().Be(SchemaType.Boolean);
         }
 
         [Test]

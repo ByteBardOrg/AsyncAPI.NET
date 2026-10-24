@@ -410,6 +410,11 @@ namespace ByteBard.AsyncAPI.Readers
                         result = this.ReadFragment<AsyncApiAvroSchema>(json, diagnostic.SpecificationVersion, out fragmentDiagnostic);
                     }
 
+                    if (reference is AsyncApiMultiFormatSchemaReference)
+                    {
+                        result = this.ReadFragment<AsyncApiMultiFormatSchema>(json, diagnostic.SpecificationVersion, out fragmentDiagnostic);
+                    }
+
                     break;
 
                 case ReferenceType.Server:
