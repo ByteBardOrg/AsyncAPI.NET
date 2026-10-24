@@ -84,7 +84,7 @@
                 writer.WriteOptionalProperty(AsyncApiConstants.Description, this.Description);
 
                 // servers
-                writer.WriteOptionalCollection(AsyncApiConstants.Servers, this.Servers.Select(s => s.Reference.FragmentId).ToList(), (w, s) => w.WriteValue(s));
+                writer.WriteOptionalCollection(AsyncApiConstants.Servers, this.Servers.Select(GetV2ServerName).ToList(), (w, s) => w.WriteValue(s));
 
                 var operations = writer.Workspace.RootDocument?.Operations.Values.Where(operation => CheckOperationChannel(operation, writer)).ToList();
 
@@ -165,6 +165,21 @@
 
             operation.Channel.Reference.Workspace = writer.Workspace;
             return operation.Channel.Equals(this);
+        }
+
+        /// <summary>
+        /// AsyncAPI 2.x lists channel servers by name, so a "#/servers/{name}" pointer is written as "{name}".
+        /// </summary>
+        private static string GetV2ServerName(AsyncApiServerReference server)
+        {
+            var fragmentId = server.Reference.FragmentId;
+            if (fragmentId == null)
+            {
+                return server.Reference.Reference;
+            }
+
+            var tokens = new JsonPointer(fragmentId).Tokens;
+            return tokens.Length == 2 && tokens[0] == AsyncApiConstants.Servers ? tokens[1] : fragmentId;
         }
     }
 }
