@@ -120,6 +120,25 @@ namespace ByteBard.AsyncAPI
         }
 
         /// <summary>
+        /// Escapes a single reference token for a URI fragment identifier (RFC 6901 section 6), so "~" becomes "~0",
+        /// "/" becomes "~1", and the result is percent-encoded, e.g. "a b" becomes "a%20b" and "a%20b" becomes "a%2520b".
+        /// </summary>
+        /// <param name="token">The unescaped token.</param>
+        public static string EscapeUriFragmentToken(string token)
+        {
+            return Uri.EscapeDataString(EscapeToken(token));
+        }
+
+        /// <summary>
+        /// Gets the URI fragment identifier representation of this JSON pointer (RFC 6901 section 6), without the leading <c>#</c>.
+        /// This is the reverse of <see cref="FromUriFragment"/>.
+        /// </summary>
+        public string ToUriFragment()
+        {
+            return string.Concat(this.Tokens.Select(token => "/" + EscapeUriFragmentToken(token)));
+        }
+
+        /// <summary>
         /// Finds the node this pointer references.
         /// </summary>
         /// <param name="document">The document to evaluate the pointer against.</param>
