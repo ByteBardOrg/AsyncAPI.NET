@@ -21,7 +21,7 @@ namespace ByteBard.AsyncAPI.Readers
         private static string GetServerReferenceKey(ValueNode valueNode)
         {
             var stringValue = valueNode.GetScalarValue();
-            return stringValue.StartsWith("#/servers/") ? stringValue : "#/servers/" + JsonPointer.EscapeToken(stringValue);
+            return stringValue.StartsWith("#/servers/") ? stringValue : "#/servers/" + JsonPointer.EscapeUriFragmentToken(stringValue);
         }
 
         private static readonly PatternFieldMap<AsyncApiChannel> ChannelPatternFields =
@@ -101,7 +101,7 @@ namespace ByteBard.AsyncAPI.Readers
             var operation = LoadOperation(node);
             var operationKey = node.CheckMapNode("operation")?["operationId"]?.Value.GetScalarValue() ?? "anonymous-operation-" + Interlocked.Increment(ref node.Context.OperationCounter).ToString();
             operation.Action = action;
-            operation.Channel = new AsyncApiChannelReference("#/channels/" + NormalizeChannelKey(instance.Address));
+            operation.Channel = new AsyncApiChannelReference("#/channels/" + JsonPointer.EscapeUriFragmentToken(NormalizeChannelKey(instance.Address)));
 
             var globalOperations = node.Context.GetFromTempStorage<Dictionary<string, AsyncApiOperation>>(TempStorageKeys.Operations) ?? new Dictionary<string, AsyncApiOperation>();
 

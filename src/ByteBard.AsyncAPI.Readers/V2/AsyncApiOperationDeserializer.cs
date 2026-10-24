@@ -49,9 +49,7 @@ namespace ByteBard.AsyncAPI.Readers
             if (message is AsyncApiMessageReference reference)
             {
                 // Use the unescaped last pointer token, so the key matches the referenced component's key.
-                key = reference.Reference.IsFragment && JsonPointer.TryFromUriFragment(reference.Reference.FragmentId, out var pointer) && pointer.Tokens.Length > 0
-                    ? pointer.Tokens.Last()
-                    : reference.Reference.Reference.Split('/').Last();
+                key = GetLastReferenceToken(reference.Reference);
             }
             else if (messageNode["messageId"] != null)
             {
@@ -90,7 +88,7 @@ namespace ByteBard.AsyncAPI.Readers
             {
                 if (message.Value is not AsyncApiMessageReference messageReference)
                 {
-                    var componentReference = "#/components/messages/" + JsonPointer.EscapeToken(message.Key);
+                    var componentReference = "#/components/messages/" + JsonPointer.EscapeUriFragmentToken(message.Key);
                     componentMessages.Add(message.Key, message.Value);
                     componentMessageReferences.Add(message.Key, new AsyncApiMessageReference(componentReference));
                     continue;

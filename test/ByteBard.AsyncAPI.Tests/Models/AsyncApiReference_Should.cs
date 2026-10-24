@@ -214,6 +214,37 @@ namespace ByteBard.AsyncAPI.Tests
             doc.Channels["workspace"].Messages["message"].Payload.Schema.As<AsyncApiJsonSchema>().Type.Should().Be(SchemaType.Boolean);
         }
 
+        // Uri equality ignores the fragment of absolute URIs, so the workspace must not treat these as one reference.
+        [Test]
+        public void AbsoluteExternalReferences_ToTheSameResource_ResolveTheirOwnFragments()
+        {
+            var yaml =
+                """
+                asyncapi: 3.0.0
+                info:
+                  title: test
+                  version: 1.0.0
+                components:
+                  schemas:
+                    a:
+                      $ref: 'https://example.com/schemas.json#/A'
+                    b:
+                      $ref: 'https://example.com/schemas.json#/B'
+                """;
+
+            var settings = new AsyncApiReaderSettings
+            {
+                ReferenceResolution = ReferenceResolutionSetting.ResolveAllReferences,
+                ExternalReferenceLoader = new MockStringLoader("""{ "A": { "type": "string" }, "B": { "type": "integer" } }"""),
+            };
+
+            var doc = new AsyncApiStringReader(settings).Read(yaml, out var diagnostic);
+
+            diagnostic.Errors.Should().BeEmpty();
+            doc.Components.Schemas["a"].Schema.As<AsyncApiJsonSchema>().Type.Should().Be(SchemaType.String);
+            doc.Components.Schemas["b"].Schema.As<AsyncApiJsonSchema>().Type.Should().Be(SchemaType.Integer);
+        }
+
         // A local payload reference that is not a registered component is resolved by falling back to the whole document.
         [TestCase("2.6.0")]
         [TestCase("3.0.0")]
