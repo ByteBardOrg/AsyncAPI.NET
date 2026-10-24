@@ -182,8 +182,9 @@
                 this.RegisterComponent(location, item.Value);
             }
 
+            // Register references last, so one pointing at another root channel or server finds it registered.
             string channelBaseUri = "#/channels/";
-            foreach (var channel in document.Channels)
+            foreach (var channel in document.Channels.OrderBy(channel => channel.Value is IAsyncApiReferenceable))
             {
                 var registerableChannelValue = channel.Value;
                 if (channel.Value is IAsyncApiReferenceable reference)
@@ -196,6 +197,12 @@
                     registerableChannelValue = this.ResolveReference<AsyncApiChannel>(reference.Reference);
                 }
 
+                // A reference to a channel that is not registered (yet) is resolved by the reader later.
+                if (registerableChannelValue == null)
+                {
+                    continue;
+                }
+
                 location = channelBaseUri + JsonPointer.EscapeToken(channel.Key);
                 this.RegisterComponent(location, registerableChannelValue);
 
@@ -206,7 +213,7 @@
             }
 
             string serverBaseUri = "#/servers/";
-            foreach (var server in document.Servers)
+            foreach (var server in document.Servers.OrderBy(server => server.Value is IAsyncApiReferenceable))
             {
                 var registerableServerValue = server.Value;
                 if (server.Value is IAsyncApiReferenceable serverReference)
@@ -287,6 +294,30 @@
         public void SetRootDocument(AsyncApiDocument doc)
         {
             this.RootDocument = doc;
+            doc.SourceWorkspace = this;
+        }
+
+        /// <summary>
+        /// Prepares this workspace for writing the document: registers its components, then adds what the workspace
+        /// the document was read into resolved outside them, so references to those can still be written inline.
+        /// </summary>
+        internal void RegisterForWriting(AsyncApiDocument doc)
+        {
+            this.RootDocument = doc;
+            this.RegisterComponents(doc);
+
+            if (doc.SourceWorkspace == null || doc.SourceWorkspace == this)
+            {
+                return;
+            }
+
+            foreach (var resolved in doc.SourceWorkspace.resolvedReferenceRegistry)
+            {
+                if (!this.resolvedReferenceRegistry.ContainsKey(resolved.Key))
+                {
+                    this.resolvedReferenceRegistry[resolved.Key] = resolved.Value;
+                }
+            }
         }
     }
 }

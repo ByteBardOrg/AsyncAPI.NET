@@ -3,7 +3,6 @@ namespace ByteBard.AsyncAPI.Tests
     using System;
     using System.Text.Json.Nodes;
     using ByteBard.AsyncAPI.Exceptions;
-    using ByteBard.AsyncAPI.Readers.ParseNodes;
     using FluentAssertions;
     using NUnit.Framework;
 

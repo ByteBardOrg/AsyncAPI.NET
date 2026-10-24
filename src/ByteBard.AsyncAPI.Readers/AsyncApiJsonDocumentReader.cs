@@ -11,7 +11,6 @@ namespace ByteBard.AsyncAPI.Readers
     using ByteBard.AsyncAPI.Models;
     using ByteBard.AsyncAPI.Models.Interfaces;
     using ByteBard.AsyncAPI.Readers.Interface;
-    using ByteBard.AsyncAPI.Readers.ParseNodes;
     using ByteBard.AsyncAPI.Readers.Services;
     using ByteBard.AsyncAPI.Services;
     using ByteBard.AsyncAPI.Validations;
@@ -381,16 +380,16 @@ namespace ByteBard.AsyncAPI.Readers
                 }
 
                 var pointerResult = pointer.Find(json);
-                if (pointerResult != null)
-                {
-                    json = pointerResult;
-                }
-                else
+                if (pointerResult == null)
                 {
                     diagnostic.Errors.Add(new AsyncApiError(reference.Reference.Reference, "Could not resolve reference fragment."));
                     return null;
                 }
+
+                json = pointerResult;
             }
+
+            json = this.context.VersionService.PrepareReferenceFragment(json, reference, this.context);
 
             AsyncApiDiagnostic fragmentDiagnostic = new AsyncApiDiagnostic
             {
@@ -452,6 +451,21 @@ namespace ByteBard.AsyncAPI.Readers
                     break;
                 case ReferenceType.MessageBindings:
                     result = this.ReadFragment<AsyncApiBindings<IMessageBinding>>(json, diagnostic.SpecificationVersion, out fragmentDiagnostic);
+                    break;
+                case ReferenceType.ServerVariable:
+                    result = this.ReadFragment<AsyncApiServerVariable>(json, diagnostic.SpecificationVersion, out fragmentDiagnostic);
+                    break;
+                case ReferenceType.Tag:
+                    result = this.ReadFragment<AsyncApiTag>(json, diagnostic.SpecificationVersion, out fragmentDiagnostic);
+                    break;
+                case ReferenceType.ExternalDocs:
+                    result = this.ReadFragment<AsyncApiExternalDocumentation>(json, diagnostic.SpecificationVersion, out fragmentDiagnostic);
+                    break;
+                case ReferenceType.OperationReply when diagnostic.SpecificationVersion == AsyncApiVersion.AsyncApi3_0:
+                    result = this.ReadFragment<AsyncApiOperationReply>(json, diagnostic.SpecificationVersion, out fragmentDiagnostic);
+                    break;
+                case ReferenceType.OperationReplyAddress when diagnostic.SpecificationVersion == AsyncApiVersion.AsyncApi3_0:
+                    result = this.ReadFragment<AsyncApiOperationReplyAddress>(json, diagnostic.SpecificationVersion, out fragmentDiagnostic);
                     break;
                 default:
                     diagnostic.Errors.Add(new AsyncApiError(reference.Reference.Reference, "Could not resolve reference."));

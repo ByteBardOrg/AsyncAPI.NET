@@ -55,6 +55,16 @@ namespace ByteBard.AsyncAPI.Models
         {
             if (!writer.GetSettings().ShouldInlineReference(this.Reference))
             {
+                this.Reference.Workspace = writer.Workspace;
+                if (this.IsRootChannelReference() && this.Target?.Address != null)
+                {
+                    // 2.x keys root channels by address instead of by key.
+                    writer.WriteStartObject();
+                    writer.WriteOptionalProperty(AsyncApiConstants.DollarRef, "#/channels/" + JsonPointer.EscapeToken(this.Target.Address));
+                    writer.WriteEndObject();
+                    return;
+                }
+
                 this.Reference.SerializeV2(writer);
                 return;
             }
@@ -63,6 +73,14 @@ namespace ByteBard.AsyncAPI.Models
                 this.Reference.Workspace = writer.Workspace;
                 this.Target.SerializeV2(writer);
             }
+        }
+
+        internal bool IsRootChannelReference()
+        {
+            return !this.Reference.IsExternal
+                && JsonPointer.TryFromUriFragment(this.Reference.FragmentId, out var pointer)
+                && pointer.Tokens.Length == 2
+                && pointer.Tokens[0] == AsyncApiConstants.Channels;
         }
 
         public override void SerializeV3(IAsyncApiWriter writer)
