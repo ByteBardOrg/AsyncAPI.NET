@@ -3,6 +3,7 @@ namespace ByteBard.AsyncAPI.Models
     using System;
     using System.Collections.Generic;
     using System.Diagnostics;
+    using System.Linq;
     using ByteBard.AsyncAPI.Models.Interfaces;
     using ByteBard.AsyncAPI.Writers;
 
@@ -56,9 +57,12 @@ namespace ByteBard.AsyncAPI.Models
             if (!writer.GetSettings().ShouldInlineReference(this.Reference))
             {
                 this.Reference.Workspace = writer.Workspace;
-                if (this.IsRootChannelReference() && this.Target?.Address != null)
+                if (this.IsRootChannelReference()
+                    && this.Target?.Address != null
+                    && writer.Workspace.RootDocument?.Channels.Values.Any(channel => ReferenceEquals(channel, this.Target)) == true)
                 {
-                    // 2.x keys root channels by address instead of by key.
+                    // 2.x keys root channels by address instead of by key. A target the document does not write
+                    // keeps its own reference, so it can be found dangling and written inline.
                     writer.WriteStartObject();
                     writer.WriteOptionalProperty(AsyncApiConstants.DollarRef, "#/channels/" + JsonPointer.EscapeToken(this.Target.Address));
                     writer.WriteEndObject();

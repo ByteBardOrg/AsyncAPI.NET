@@ -591,6 +591,19 @@ namespace ByteBard.AsyncAPI.Tests
             this.AssertRoundTrip(name, AsyncApiVersion.AsyncApi2_0);
         }
 
+        [Test]
+        public void WriteAsV2_ChannelReference_ToARemovedChannel_IsInlined()
+        {
+            var document = Read(Cases["v2 channel by address"].Yaml);
+
+            // The reference still resolves to the channel it was read with, but the document no longer has it.
+            document.Channels.Remove("usersignedup");
+            var written = document.SerializeAsYaml(AsyncApiVersion.AsyncApi2_0);
+
+            References(document.SerializeAsJson(AsyncApiVersion.AsyncApi2_0)).Should().NotContain(r => r.StartsWith("#/channels/"), written);
+            Cases["v2 channel by address"].Inspect(Read(written)).Should().Be(Marker, written);
+        }
+
         [TestCaseSource(nameof(CaseNames))]
         public void WriteAsV3_ReadsBackTheSame(string name)
         {
