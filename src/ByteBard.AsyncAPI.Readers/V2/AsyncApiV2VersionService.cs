@@ -36,6 +36,8 @@
             [typeof(AsyncApiAvroSchema)] = AsyncApiAvroSchemaDeserializer.LoadSchema,
             [typeof(AsyncApiJsonSchema)] = AsyncApiV2Deserializer.LoadJsonSchemaPayload,
             [typeof(AsyncApiAvroSchema)] = AsyncApiV2Deserializer.LoadAvroPayload,
+            // 2.x has no Multi Format Schema Object. Only the local reference fallback asks for one, and it reads the document after the upgrade to 3.0.
+            [typeof(AsyncApiMultiFormatSchema)] = AsyncApiV3Deserializer.LoadMultiFormatSchema,
             [typeof(AsyncApiSecurityScheme)] = AsyncApiV2Deserializer.LoadSecurityScheme,
             [typeof(AsyncApiServer)] = AsyncApiV2Deserializer.LoadServer,
             [typeof(AsyncApiServerVariable)] = AsyncApiV2Deserializer.LoadServerVariable,
