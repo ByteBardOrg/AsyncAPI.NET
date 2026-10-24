@@ -88,6 +88,52 @@
         }
 
         [Test]
+        public void V2_AsyncApiMessageTrait_WithoutHeaders_Serializes()
+        {
+            var expected =
+                """
+                name: TraitName
+                """;
+
+            var trait = new AsyncApiMessageTrait { Name = "TraitName" };
+
+            var actual = trait.SerializeAsYaml(AsyncApiVersion.AsyncApi2_0);
+
+            actual.Should().BePlatformAgnosticEquivalentTo(expected);
+        }
+
+        [Test]
+        public void V2_AsyncApiMessageTrait_WithSchemaFormatBeforeHeaders_Deserializes()
+        {
+            var input =
+                """
+                schemaFormat: application/vnd.aai.asyncapi+json;version=2.6.0
+                headers:
+                  type: object
+                """;
+
+            var trait = new AsyncApiStringReader().ReadFragment<AsyncApiMessageTrait>(input, AsyncApiVersion.AsyncApi2_0, out var diagnostic);
+
+            diagnostic.Errors.Should().BeEmpty();
+            trait.Headers.SchemaFormat.Should().Be("application/vnd.aai.asyncapi+json;version=2.6.0");
+            trait.Headers.Schema.Should().BeOfType<AsyncApiJsonSchema>();
+        }
+
+        [Test]
+        public void V2_AsyncApiMessageTrait_WithSchemaFormatAndNoHeaders_Deserializes()
+        {
+            var input =
+                """
+                schemaFormat: application/vnd.aai.asyncapi+json;version=2.6.0
+                """;
+
+            var trait = new AsyncApiStringReader().ReadFragment<AsyncApiMessageTrait>(input, AsyncApiVersion.AsyncApi2_0, out var diagnostic);
+
+            diagnostic.Errors.Should().BeEmpty();
+            trait.SerializeAsYaml(AsyncApiVersion.AsyncApi2_0).Should().BePlatformAgnosticEquivalentTo(input);
+        }
+
+        [Test]
         public void V2_AsyncApiMessage_WithNoSchemaFormat_DoesNotSerializeSchemaFormat()
         {
             // Arrange

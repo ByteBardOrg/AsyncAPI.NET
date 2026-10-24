@@ -76,9 +76,9 @@
 
             writer.WriteStartObject();
             //writer.WriteOptionalProperty(AsyncApiConstants.MessageId, this.MessageId);
-            writer.WriteOptionalObject(AsyncApiConstants.Headers, this.Headers, (w, h) => h.Schema.SerializeV2(w));
+            writer.WriteOptionalObject(AsyncApiConstants.Headers, this.Headers?.Schema, (w, h) => h.SerializeV2(w));
             writer.WriteOptionalObject(AsyncApiConstants.CorrelationId, this.CorrelationId, (w, c) => c.SerializeV2(w));
-            writer.WriteOptionalProperty(AsyncApiConstants.SchemaFormat, this.Headers.SchemaFormat);
+            writer.WriteOptionalProperty(AsyncApiConstants.SchemaFormat, this.Headers?.SchemaFormat);
             writer.WriteOptionalProperty(AsyncApiConstants.ContentType, this.ContentType);
             writer.WriteOptionalProperty(AsyncApiConstants.Name, this.Name);
             writer.WriteOptionalProperty(AsyncApiConstants.Title, this.Title);
@@ -100,7 +100,7 @@
             }
 
             writer.WriteStartObject();
-            writer.WriteOptionalObject(AsyncApiConstants.Headers, this.Headers, (w, h) => h.SerializeV3(w));
+            writer.WriteOptionalObject(AsyncApiConstants.Headers, this.Headers?.Schema == null ? null : this.Headers, (w, h) => h.SerializeV3(w));
             writer.WriteOptionalObject(AsyncApiConstants.CorrelationId, this.CorrelationId, (w, c) => c.SerializeV3(w));
             writer.WriteOptionalProperty(AsyncApiConstants.ContentType, this.ContentType);
             writer.WriteOptionalProperty(AsyncApiConstants.Name, this.Name);
