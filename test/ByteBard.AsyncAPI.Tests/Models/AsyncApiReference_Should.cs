@@ -86,12 +86,16 @@ namespace ByteBard.AsyncAPI.Tests
             doc.Channels["workspace"].Messages["message"].Payload.Schema.As<AsyncApiJsonSchema>().Type.Should().Be(expectedType);
         }
 
-        [TestCase("2.6.0")]
-        [TestCase("3.0.0")]
-        public void ExternalReference_WithMissingFragment_ReportsError(string version)
+        [TestCase("2.6.0", "/components/schemas/missing", "Could not resolve reference fragment.")]
+        [TestCase("3.0.0", "/components/schemas/missing", "Could not resolve reference fragment.")]
+        [TestCase("2.6.0", "components/schemas/plain", "The JSON pointer 'components/schemas/plain' is malformed: it must be empty or start with '/'.")]
+        [TestCase("3.0.0", "components/schemas/plain", "The JSON pointer 'components/schemas/plain' is malformed: it must be empty or start with '/'.")]
+        [TestCase("2.6.0", "/components/schemas/a~2b", "The JSON pointer '/components/schemas/a~2b' is malformed: '~' must be followed by '0' or '1'.")]
+        [TestCase("3.0.0", "/components/schemas/a~2b", "The JSON pointer '/components/schemas/a~2b' is malformed: '~' must be followed by '0' or '1'.")]
+        public void ExternalReference_WithUnresolvableFragment_ReportsError(string version, string fragment, string expectedMessage)
         {
             var yaml = version.StartsWith("2")
-                ? """
+                ? $"""
                   asyncapi: 2.6.0
                   info:
                     title: test
@@ -101,9 +105,9 @@ namespace ByteBard.AsyncAPI.Tests
                       publish:
                         message:
                           payload:
-                            $ref: 'schemas.json#/components/schemas/missing'
+                            $ref: 'schemas.json#{fragment}'
                   """
-                : """
+                : $"""
                   asyncapi: 3.0.0
                   info:
                     title: test
@@ -115,12 +119,12 @@ namespace ByteBard.AsyncAPI.Tests
                           payload:
                             schemaFormat: application/vnd.aai.asyncapi+json;version=3.0.0
                             schema:
-                              $ref: 'schemas.json#/components/schemas/missing'
+                              $ref: 'schemas.json#{fragment}'
                   """;
 
             ReadWithExternalSchemas(yaml, out var diagnostic);
 
-            diagnostic.Errors.Should().ContainSingle(e => e.Message == "Could not resolve reference fragment.");
+            diagnostic.Errors.Should().ContainSingle(e => e.Message == expectedMessage);
         }
 
         private static AsyncApiDocument ReadWithExternalSchemas(string yaml, out AsyncApiDiagnostic diagnostic)

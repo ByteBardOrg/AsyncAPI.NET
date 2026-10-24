@@ -369,7 +369,18 @@ namespace ByteBard.AsyncAPI.Readers
 
             if (reference.Reference.IsFragment)
             {
-                var pointerResult = new JsonPointer(reference.Reference.FragmentId).Find(json);
+                JsonPointer pointer;
+                try
+                {
+                    pointer = JsonPointer.FromUriFragment(reference.Reference.FragmentId);
+                }
+                catch (AsyncApiException ex)
+                {
+                    diagnostic.Errors.Add(new AsyncApiError(reference.Reference.Reference, ex.Message));
+                    return null;
+                }
+
+                var pointerResult = pointer.Find(json);
                 if (pointerResult != null)
                 {
                     json = pointerResult;

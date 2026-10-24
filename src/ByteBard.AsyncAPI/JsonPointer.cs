@@ -2,21 +2,39 @@ namespace ByteBard.AsyncAPI
 {
     using System;
     using System.Linq;
+    using System.Text;
+    using ByteBard.AsyncAPI.Exceptions;
 
     /// <summary>
-    /// JSON pointer.
+    /// JSON pointer as defined by RFC 6901.
     /// </summary>
     public class JsonPointer
     {
         /// <summary>
         /// Initializes the <see cref="JsonPointer"/> class.
         /// </summary>
-        /// <param name="pointer">Pointer as string.</param>
+        /// <param name="pointer">Pointer in its JSON string representation (RFC 6901 section 5), e.g. <c>/components/schemas/a~1b</c>.
+        /// An empty string points to the whole document; <c>/</c> points to the member with an empty key.</param>
+        /// <exception cref="AsyncApiException">The pointer is malformed.</exception>
         public JsonPointer(string pointer)
         {
-            this.Tokens = string.IsNullOrEmpty(pointer) || pointer == "/"
-                ? new string[0]
-                : pointer.Split('/').Skip(1).Select(this.Decode).ToArray();
+            if (pointer == null)
+            {
+                throw new ArgumentNullException(nameof(pointer));
+            }
+
+            if (pointer.Length == 0)
+            {
+                this.Tokens = new string[0];
+                return;
+            }
+
+            if (pointer[0] != '/')
+            {
+                throw new AsyncApiException($"The JSON pointer '{pointer}' is malformed: it must be empty or start with '/'.");
+            }
+
+            this.Tokens = pointer.Substring(1).Split('/').Select(token => Unescape(token, pointer)).ToArray();
         }
 
         /// <summary>
@@ -50,19 +68,63 @@ namespace ByteBard.AsyncAPI
         }
 
         /// <summary>
-        /// Decode the string.
+        /// Creates a pointer from its URI fragment identifier representation (RFC 6901 section 6), e.g. the part after <c>#</c>
+        /// in <c>schemas.json#/components/schemas/with%20space</c>. The fragment is percent-decoded before it is parsed.
         /// </summary>
-        private string Decode(string token)
+        /// <param name="fragment">The fragment, without the leading <c>#</c>.</param>
+        /// <exception cref="AsyncApiException">The fragment is not a valid JSON pointer.</exception>
+        public static JsonPointer FromUriFragment(string fragment)
         {
-            return Uri.UnescapeDataString(token).Replace("~1", "/").Replace("~0", "~");
+            if (fragment == null)
+            {
+                throw new ArgumentNullException(nameof(fragment));
+            }
+
+            return new JsonPointer(Uri.UnescapeDataString(fragment));
         }
 
         /// <summary>
-        /// Gets the string representation of this JSON pointer.
+        /// Gets the JSON string representation of this JSON pointer.
         /// </summary>
         public override string ToString()
         {
-            return "/" + string.Join("/", this.Tokens);
+            return string.Concat(this.Tokens.Select(token => "/" + token.Replace("~", "~0").Replace("/", "~1")));
+        }
+
+        private static string Unescape(string token, string pointer)
+        {
+            if (token.IndexOf('~') < 0)
+            {
+                return token;
+            }
+
+            var builder = new StringBuilder(token.Length);
+            for (var i = 0; i < token.Length; i++)
+            {
+                if (token[i] != '~')
+                {
+                    builder.Append(token[i]);
+                    continue;
+                }
+
+                var next = i + 1 < token.Length ? token[i + 1] : '\0';
+                if (next == '0')
+                {
+                    builder.Append('~');
+                }
+                else if (next == '1')
+                {
+                    builder.Append('/');
+                }
+                else
+                {
+                    throw new AsyncApiException($"The JSON pointer '{pointer}' is malformed: '~' must be followed by '0' or '1'.");
+                }
+
+                i++;
+            }
+
+            return builder.ToString();
         }
     }
 }
