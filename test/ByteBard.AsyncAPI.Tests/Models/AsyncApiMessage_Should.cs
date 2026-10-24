@@ -158,7 +158,7 @@
                 name: TraitName
                 """;
 
-            // The 3.x reader fills in the default schema format, so the headers come back in the explicit multi-format form.
+            // By design, 3.x schemas are always read as multi-format schemas with the default schema format filled in, so the headers come back in the explicit multi-format form.
             var expected =
                 """
                 headers:
