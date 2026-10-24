@@ -21,7 +21,7 @@ namespace ByteBard.AsyncAPI.Readers
         private static string GetServerReferenceKey(ValueNode valueNode)
         {
             var stringValue = valueNode.GetScalarValue();
-            return stringValue.StartsWith("#/servers/") ? stringValue : "#/servers/" + stringValue;
+            return stringValue.StartsWith("#/servers/") ? stringValue : "#/servers/" + JsonPointer.EscapeToken(stringValue);
         }
 
         private static readonly PatternFieldMap<AsyncApiChannel> ChannelPatternFields =

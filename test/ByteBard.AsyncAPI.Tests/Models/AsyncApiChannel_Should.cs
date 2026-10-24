@@ -8,6 +8,7 @@
     using ByteBard.AsyncAPI.Models;
     using ByteBard.AsyncAPI.Models.Interfaces;
     using ByteBard.AsyncAPI.Readers;
+    using ByteBard.AsyncAPI.Validations;
     using NUnit.Framework;
 
     public class AsyncApiChannel_Should : TestBase
@@ -245,6 +246,68 @@
             var server = document.Channels.First().Value.Servers.Single();
             server.Reference.Reference.Should().Be("#/servers/production");
             server.Host.Should().Be("example.com");
+
+            var reserialized = document.SerializeAsYaml(AsyncApiVersion.AsyncApi3_0);
+
+            reserialized.Should().BePlatformAgnosticEquivalentTo(yaml);
+        }
+
+        [TestCase("a~1b", "#/servers/a~01b")]
+        [TestCase("a/b", "#/servers/a~1b")]
+        public void V2_AsyncApiChannel_WithServerNameNeedingEscape_Reserializes(string serverName, string expectedReference)
+        {
+            var yaml =
+                $"""
+                asyncapi: 2.6.0
+                info:
+                  title: test spec
+                  version: 1.0.0
+                servers:
+                  {serverName}:
+                    url: example.com
+                    protocol: kafka
+                channels:
+                  mychannel:
+                    servers:
+                      - {serverName}
+                """;
+
+            var document = new AsyncApiStringReader(new AsyncApiReaderSettings { RuleSet = ValidationRuleSet.GetEmptyRuleSet() }).Read(yaml, out var diag);
+
+            diag.Errors.Should().BeEmpty();
+            var server = document.Channels.First().Value.Servers.Single();
+            server.Reference.Reference.Should().Be(expectedReference);
+            server.Host.Should().Be("example.com");
+
+            var reserialized = document.SerializeAsYaml(AsyncApiVersion.AsyncApi2_0);
+
+            reserialized.Should().BePlatformAgnosticEquivalentTo(yaml);
+        }
+
+        [Test]
+        public void V3_AsyncApiChannel_WithEscapedServerReference_ResolvesServer()
+        {
+            var yaml =
+                """
+                asyncapi: 3.1.0
+                info:
+                  title: test spec
+                  version: 1.0.0
+                servers:
+                  a/b:
+                    host: example.com
+                    protocol: kafka
+                channels:
+                  mychannel:
+                    servers:
+                      - $ref: '#/servers/a~1b'
+                components: { }
+                """;
+
+            var document = new AsyncApiStringReader(new AsyncApiReaderSettings { RuleSet = ValidationRuleSet.GetEmptyRuleSet() }).Read(yaml, out var diag);
+
+            diag.Errors.Should().BeEmpty();
+            document.Channels.First().Value.Servers.Single().Host.Should().Be("example.com");
 
             var reserialized = document.SerializeAsYaml(AsyncApiVersion.AsyncApi3_0);
 
