@@ -64,7 +64,7 @@ namespace ByteBard.AsyncAPI.Models
                     // 2.x keys root channels by address instead of by key. A target the document does not write
                     // keeps its own reference, so it can be found dangling and written inline.
                     writer.WriteStartObject();
-                    writer.WriteOptionalProperty(AsyncApiConstants.DollarRef, "#/channels/" + JsonPointer.EscapeToken(this.Target.Address));
+                    writer.WriteOptionalProperty(AsyncApiConstants.DollarRef, "#/channels/" + JsonPointer.EscapeUriFragmentToken(this.Target.Address));
                     writer.WriteEndObject();
                     return;
                 }

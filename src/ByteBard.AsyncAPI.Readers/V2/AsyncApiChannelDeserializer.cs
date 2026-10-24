@@ -67,7 +67,7 @@ namespace ByteBard.AsyncAPI.Readers
                 return pointer;
             }
 
-            return channelsPrefix + JsonPointer.EscapeToken(NormalizeChannelKey(parsed.Tokens[1]));
+            return channelsPrefix + JsonPointer.EscapeUriFragmentToken(NormalizeChannelKey(parsed.Tokens[1]));
         }
 
         public static string NormalizeChannelKey(string channelKey, ParseNode node = null)

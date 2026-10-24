@@ -298,12 +298,36 @@ namespace ByteBard.AsyncAPI.Tests
             upgraded.Operations["op"].Messages.Single().Equals(upgraded.Channels["usersignedup"].Messages["signed up"]).Should().BeTrue();
         }
 
+        // 2.x keys channels by address, so a reference to a root channel is written with its encoded address.
+        [TestCase("a b", "a%20b")]
+        [TestCase("a%20b", "a%2520b")]
+        public void V2_ChannelReference_RoundTripsByEncodedAddress(string address, string encodedAddress)
+        {
+            var yaml =
+                $"""
+                asyncapi: 2.6.0
+                info:
+                  title: test
+                  version: 1.0.0
+                channels:
+                  {address}:
+                    description: target
+                  other:
+                    $ref: '#/channels/{encodedAddress}'
+                """;
+
+            var actual = Read(yaml).SerializeAsYaml(AsyncApiVersion.AsyncApi2_0);
+
+            actual.Should().BePlatformAgnosticEquivalentTo(yaml);
+            Read(actual).Channels["other"].Description.Should().Be("target");
+        }
+
         private static AsyncApiDocument Read(string yaml)
         {
             var doc = new AsyncApiStringReader().Read(yaml, out var diagnostic);
 
             // The keys fail the spec's key patterns; anything else means a reference did not resolve.
-            diagnostic.Errors.Should().OnlyContain(e => e.Message.Contains("MUST match the regular expression"));
+            diagnostic.Errors.Where(e => !e.Message.Contains("MUST match the regular expression")).Should().BeEmpty();
             return doc;
         }
     }
