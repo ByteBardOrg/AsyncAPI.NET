@@ -29,6 +29,19 @@ namespace ByteBard.AsyncAPI.Tests
             }
             """;
 
+        private const string ExternalPayloads =
+            """
+            {
+              "schemas": {
+                "plain": { "type": "string" },
+                "multiFormat": {
+                  "schemaFormat": "application/vnd.aai.asyncapi+json;version=3.0.0",
+                  "schema": { "type": "integer" }
+                }
+              }
+            }
+            """;
+
         private static readonly TestCaseData[] ExternalFragmentCases =
         {
             new TestCaseData("/components/schemas/plain", SchemaType.String).SetArgDisplayNames("nested path"),
@@ -136,6 +149,182 @@ namespace ByteBard.AsyncAPI.Tests
             };
 
             return new AsyncApiStringReader(settings).Read(yaml, out diagnostic);
+        }
+
+        [TestCase("payloads.json#/schemas/plain", SchemaType.String)]
+        [TestCase("payloads.json#/schemas/multiFormat", SchemaType.Integer)]
+        public void V3_ExternalPayloadReference_ResolvesPayload(string reference, SchemaType expectedType)
+        {
+            var yaml =
+                $"""
+                asyncapi: 3.0.0
+                info:
+                  title: test
+                  version: 1.0.0
+                channels:
+                  workspace:
+                    messages:
+                      message:
+                        payload:
+                          $ref: '{reference}'
+                """;
+
+            var settings = new AsyncApiReaderSettings
+            {
+                ReferenceResolution = ReferenceResolutionSetting.ResolveAllReferences,
+                ExternalReferenceLoader = new MockStringLoader(ExternalPayloads),
+            };
+
+            var doc = new AsyncApiStringReader(settings).Read(yaml, out var diagnostic);
+
+            diagnostic.Errors.Should().BeEmpty();
+            var payload = doc.Channels["workspace"].Messages["message"].Payload;
+            payload.Should().BeOfType<AsyncApiMultiFormatSchemaReference>();
+            payload.As<AsyncApiMultiFormatSchemaReference>().UnresolvedReference.Should().BeFalse();
+            payload.Schema.As<AsyncApiJsonSchema>().Type.Should().Be(expectedType);
+            doc.SerializeAsYaml(AsyncApiVersion.AsyncApi3_0).Should().Contain($"$ref: {reference}");
+        }
+
+        [Test]
+        public void V3_ExternalPayloadReference_WithoutFragment_ResolvesPayload()
+        {
+            var yaml =
+                """
+                asyncapi: 3.0.0
+                info:
+                  title: test
+                  version: 1.0.0
+                channels:
+                  workspace:
+                    messages:
+                      message:
+                        payload:
+                          $ref: './payload.json'
+                """;
+
+            var settings = new AsyncApiReaderSettings
+            {
+                ReferenceResolution = ReferenceResolutionSetting.ResolveAllReferences,
+                ExternalReferenceLoader = new MockStringLoader("""{ "type": "boolean" }"""),
+            };
+
+            var doc = new AsyncApiStringReader(settings).Read(yaml, out var diagnostic);
+
+            diagnostic.Errors.Should().BeEmpty();
+            doc.Channels["workspace"].Messages["message"].Payload.Schema.As<AsyncApiJsonSchema>().Type.Should().Be(SchemaType.Boolean);
+        }
+
+        // A local payload reference that is not a registered component is resolved by falling back to the whole document.
+        [TestCase("2.6.0")]
+        [TestCase("3.0.0")]
+        public void LocalPayloadReference_NotInWorkspace_ResolvesPayload(string version)
+        {
+            var yaml = version.StartsWith("2")
+                ? """
+                  asyncapi: 2.6.0
+                  info:
+                    title: test
+                    version: 1.0.0
+                  channels:
+                    workspace:
+                      publish:
+                        message:
+                          payload:
+                            $ref: '#/components/messages/shared/payload'
+                  components:
+                    messages:
+                      shared:
+                        payload:
+                          type: string
+                  """
+                : """
+                  asyncapi: 3.0.0
+                  info:
+                    title: test
+                    version: 1.0.0
+                  channels:
+                    workspace:
+                      messages:
+                        message:
+                          payload:
+                            $ref: '#/components/messages/shared/payload'
+                  components:
+                    messages:
+                      shared:
+                        payload:
+                          type: string
+                  """;
+
+            var doc = new AsyncApiStringReader().Read(yaml, out var diagnostic);
+
+            diagnostic.Errors.Should().BeEmpty();
+            var payload = doc.Channels["workspace"].Messages.Values.First().Payload;
+            payload.Should().BeOfType<AsyncApiMultiFormatSchemaReference>();
+            payload.Schema.As<AsyncApiJsonSchema>().Type.Should().Be(SchemaType.String);
+        }
+
+        // A local Avro payload reference that is not a registered component is resolved by falling back to the whole document.
+        [TestCase("2.6.0")]
+        [TestCase("3.0.0")]
+        public void LocalAvroPayloadReference_NotInWorkspace_ResolvesPayload(string version)
+        {
+            var yaml = version.StartsWith("2")
+                ? """
+                  asyncapi: 2.6.0
+                  info:
+                    title: test
+                    version: 1.0.0
+                  channels:
+                    workspace:
+                      publish:
+                        message:
+                          schemaFormat: application/vnd.apache.avro;version=1.9.0
+                          payload:
+                            $ref: '#/components/messages/shared/payload'
+                  components:
+                    messages:
+                      shared:
+                        schemaFormat: application/vnd.apache.avro;version=1.9.0
+                        payload:
+                          type: record
+                          name: User
+                          fields:
+                            - name: name
+                              type: string
+                  """
+                : """
+                  asyncapi: 3.0.0
+                  info:
+                    title: test
+                    version: 1.0.0
+                  channels:
+                    workspace:
+                      messages:
+                        message:
+                          payload:
+                            $ref: '#/components/messages/shared/payload'
+                  components:
+                    messages:
+                      shared:
+                        payload:
+                          schemaFormat: application/vnd.apache.avro;version=1.9.0
+                          schema:
+                            type: record
+                            name: User
+                            fields:
+                              - name: name
+                                type: string
+                  """;
+
+            var doc = new AsyncApiStringReader().Read(yaml, out var diagnostic);
+
+            diagnostic.Errors.Should().BeEmpty();
+            var payload = doc.Channels["workspace"].Messages.Values.First().Payload;
+            payload.Should().BeOfType<AsyncApiMultiFormatSchemaReference>();
+            payload.SchemaFormat.Should().StartWith("application/vnd.apache.avro");
+            var record = payload.Schema.As<AsyncApiAvroSchema>().As<AvroRecord>();
+            record.Name.Should().Be("User");
+            record.Fields.Should().ContainSingle().Which.Name.Should().Be("name");
         }
 
         [Test]
