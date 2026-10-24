@@ -6,12 +6,12 @@ namespace ByteBard.AsyncAPI.Readers
     using System.Text.Json.Nodes;
     using System.Threading;
     using System.Threading.Tasks;
-    using Json.Pointer;
     using ByteBard.AsyncAPI.Exceptions;
     using ByteBard.AsyncAPI.Extensions;
     using ByteBard.AsyncAPI.Models;
     using ByteBard.AsyncAPI.Models.Interfaces;
     using ByteBard.AsyncAPI.Readers.Interface;
+    using ByteBard.AsyncAPI.Readers.ParseNodes;
     using ByteBard.AsyncAPI.Readers.Services;
     using ByteBard.AsyncAPI.Services;
     using ByteBard.AsyncAPI.Validations;
@@ -369,8 +369,8 @@ namespace ByteBard.AsyncAPI.Readers
 
             if (reference.Reference.IsFragment)
             {
-                var pointer = JsonPointer.Parse(reference.Reference.FragmentId);
-                if (pointer.TryEvaluate(json, out var pointerResult))
+                var pointerResult = new JsonPointer(reference.Reference.FragmentId).Find(json);
+                if (pointerResult != null)
                 {
                     json = pointerResult;
                 }
