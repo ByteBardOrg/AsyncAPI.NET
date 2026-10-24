@@ -157,6 +157,53 @@
         }
 
         [Test]
+        public void V2_AsyncApiChannel_WithServers_SerializesServerNames()
+        {
+            var yaml =
+                """
+                asyncapi: 2.6.0
+                info:
+                  title: test spec
+                  version: 1.0.0
+                servers:
+                  production:
+                    url: example.com
+                    protocol: kafka
+                channels:
+                  mychannel:
+                    servers:
+                      - production
+                """;
+
+            var document = new AsyncApiStringReader().Read(yaml, out var diag);
+
+            document.Channels.First().Value.Servers.Single().Reference.Reference.Should().Be("#/servers/production");
+
+            var reserialized = document.SerializeAsYaml(AsyncApiVersion.AsyncApi2_0);
+
+            reserialized.Should().BePlatformAgnosticEquivalentTo(yaml);
+        }
+
+        [Test]
+        public void V2_AsyncApiChannel_WithServerReference_SerializesServerName()
+        {
+            var expected =
+                """
+                servers:
+                  - production
+                """;
+
+            var channel = new AsyncApiChannel
+            {
+                Servers = new List<AsyncApiServerReference> { new AsyncApiServerReference("#/servers/production") },
+            };
+
+            var actual = channel.SerializeAsYaml(AsyncApiVersion.AsyncApi2_0);
+
+            actual.Should().BePlatformAgnosticEquivalentTo(expected);
+        }
+
+        [Test]
         public void V2_AsyncApiChannel_reserializes()
         {
             var expected =
