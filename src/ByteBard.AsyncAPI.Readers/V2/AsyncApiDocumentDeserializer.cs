@@ -136,7 +136,7 @@ namespace ByteBard.AsyncAPI.Readers
                         var correctChannelReference = document.Channels.FirstOrDefault(channel => channel.Value is AsyncApiChannelReference reference && reference.Reference.Reference.EndsWith(operationChannelFragmentKey));
                         if (correctChannelReference.Key != null)
                         {
-                            operation.Value.Channel = new AsyncApiChannelReference("#/channels/" + correctChannelReference.Key);
+                            operation.Value.Channel = new AsyncApiChannelReference("#/channels/" + JsonPointer.EscapeToken(correctChannelReference.Key));
                             channel = correctChannelReference;
                         }
                         else
@@ -161,7 +161,7 @@ namespace ByteBard.AsyncAPI.Readers
                     foreach (var message in messages)
                     {
                         channel.Value.Messages.TryAdd(message.Key, message.Value);
-                        operation.Value.Messages.Add(new AsyncApiMessageReference($"#/channels/{channel.Key}/messages/{message.Key}"));
+                        operation.Value.Messages.Add(new AsyncApiMessageReference($"#/channels/{JsonPointer.EscapeToken(channel.Key)}/messages/{JsonPointer.EscapeToken(message.Key)}"));
                     }
                 }
             }

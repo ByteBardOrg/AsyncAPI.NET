@@ -38,7 +38,7 @@ namespace ByteBard.AsyncAPI.Readers
             ParsingContext context,
             string schemeName)
         {
-            var securitySchemeObject = new AsyncApiSecuritySchemeReference("#/components/securitySchemes/" + schemeName);
+            var securitySchemeObject = new AsyncApiSecuritySchemeReference("#/components/securitySchemes/" + JsonPointer.EscapeToken(schemeName));
 
             return securitySchemeObject;
         }

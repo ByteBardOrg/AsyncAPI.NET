@@ -84,11 +84,45 @@ namespace ByteBard.AsyncAPI
         }
 
         /// <summary>
+        /// Tries to create a pointer from its URI fragment identifier representation (RFC 6901 section 6).
+        /// </summary>
+        /// <param name="fragment">The fragment, without the leading <c>#</c>.</param>
+        /// <param name="pointer">The pointer, or <c>null</c> when the fragment is not a valid JSON pointer.</param>
+        /// <returns><c>true</c> when the fragment is a valid JSON pointer.</returns>
+        public static bool TryFromUriFragment(string fragment, out JsonPointer pointer)
+        {
+            pointer = null;
+            if (fragment == null)
+            {
+                return false;
+            }
+
+            try
+            {
+                pointer = FromUriFragment(fragment);
+                return true;
+            }
+            catch (AsyncApiException)
+            {
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// Escapes a single reference token, so "~" becomes "~0" and "/" becomes "~1".
+        /// </summary>
+        /// <param name="token">The unescaped token.</param>
+        public static string EscapeToken(string token)
+        {
+            return token.Replace("~", "~0").Replace("/", "~1");
+        }
+
+        /// <summary>
         /// Gets the JSON string representation of this JSON pointer.
         /// </summary>
         public override string ToString()
         {
-            return string.Concat(this.Tokens.Select(token => "/" + token.Replace("~", "~0").Replace("/", "~1")));
+            return string.Concat(this.Tokens.Select(token => "/" + EscapeToken(token)));
         }
 
         private static string Unescape(string token, string pointer)
