@@ -208,6 +208,9 @@
         [TestCase("#/servers/a~0b", "a~b")]
         [TestCase("other.yaml#/servers/production", "other.yaml#/servers/production")]
         [TestCase("#/components/servers/production", "'#/components/servers/production'")]
+        [TestCase("#/servers/production/url", "'#/servers/production/url'")]
+        [TestCase("#/servers/a~2b", "'#/servers/a~2b'")]
+        [TestCase("#/servers/a~", "'#/servers/a~'")]
         public void V2_AsyncApiChannel_WithServerReference_SerializesServerNameOnlyForLocalServer(string reference, string expectedServer)
         {
             var channel = new AsyncApiChannel

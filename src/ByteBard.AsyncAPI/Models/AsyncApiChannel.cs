@@ -3,6 +3,7 @@
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using ByteBard.AsyncAPI.Exceptions;
     using ByteBard.AsyncAPI.Extensions;
     using ByteBard.AsyncAPI.Models.Interfaces;
     using ByteBard.AsyncAPI.Writers;
@@ -173,15 +174,24 @@
         /// </summary>
         private static string GetV2ServerName(AsyncApiServerReference server)
         {
-            const string serversPrefix = "/" + AsyncApiConstants.Servers + "/";
             var reference = server.Reference;
-            if (reference.IsExternal || reference.FragmentId?.StartsWith(serversPrefix) != true)
+            if (reference.IsExternal || reference.FragmentId == null)
             {
                 return reference.Reference;
             }
 
-            // The 2.x reader keeps the name unescaped, while a 3.x pointer escapes it, so decode the whole remainder as one token.
-            return JsonPointer.UnescapeToken(reference.FragmentId.Substring(serversPrefix.Length));
+            string[] tokens;
+            try
+            {
+                tokens = new JsonPointer(reference.FragmentId).Tokens;
+            }
+            catch (AsyncApiException)
+            {
+                // A malformed pointer names no server, so it is kept as is like any other non-server reference.
+                return reference.Reference;
+            }
+
+            return tokens.Length == 2 && tokens[0] == AsyncApiConstants.Servers ? tokens[1] : reference.Reference;
         }
     }
 }
