@@ -129,13 +129,13 @@ All readers will write warnings and errors to the diagnostics.
 
 
 ## Reference Resolution
-Internal references are resolved by default. This includes component and non-component references e.g `#/components/messages/MyMessage` and `#/servers/0`.
+Internal references are resolved by default. This includes component and non-component references e.g `#/components/messages/MyMessage` and `#/servers/production`.
 External references can be resolved by setting `ReferenceResolution` to `ResolveAllReferences`.
 The default implementation will resolve anything prefixed with `file://`, `http://` & `https://`, however a custom implementation can be made, by inhereting from the `IStreamLoader` interface and setting the `ExternalReferenceLoader` in the `AsyncApiReaderSettings`.
 External references are always force converted to Json during resolution. This means that both yaml and json is supported - but not other serialization languages.
 
 ```csharp
-var settings = new AsyncApiReaderSettings { ReferenceResolution = ReferenceResolution.ResolveAllReferences };
+var settings = new AsyncApiReaderSettings { ReferenceResolution = ReferenceResolutionSetting.ResolveAllReferences };
 var document = new AsyncApiStringReader(settings).Read(json, out var diagnostics);
 ```
 
@@ -155,7 +155,6 @@ var asyncApiDocument = new AsyncApiStringReader(settings).Read(yaml, out var dia
 
 * [OpenAPI.Net](https://github.com/microsoft/OpenAPI.NET) - [MIT License](https://github.com/microsoft/OpenAPI.NET/blob/vnext/LICENSE)
 * [YamlDotNet](https://github.com/aaubry/YamlDotNet) - [MIT License](https://github.com/aaubry/YamlDotNet/blob/master/LICENSE.txt)
-* [JsonPointer.Net](https://github.com/json-everything/json-everything) - [MIT License](https://github.com/json-everything/json-everything/blob/master/LICENSE)
   
 ## Contribution
 

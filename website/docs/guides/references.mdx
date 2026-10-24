@@ -61,6 +61,10 @@ The V2 server fields are `url` and `protocol`; the host is not serialized as `ht
 
 Internal references are resolved by default during document reading. This covers component references such as `#/components/servers/shared` and document locations outside components, such as `#/servers/production`. The reference object remains a typed proxy: its target properties can be read directly, while `Reference.Reference` retains the URI and `UnresolvedReference` reports whether the target was found.
 
+A local reference is a JSON pointer ([RFC 6901](https://www.rfc-editor.org/rfc/rfc6901)) into the document, so it can point at any location, not only at components: for example `#/channels/userSignup/messages/signedUp` or `#/servers/production/variables/port`. A key that contains `/` or `~` must be escaped as `~1` or `~0`. A channel keyed `user/signedup` is referenced as `#/channels/user~1signedup`; the unescaped `#/channels/user/signedup` points at a `signedup` member inside a `user` channel instead, and does not resolve.
+
+Because a reference is a URI, its pointer is also percent-decoded before it is evaluated. `#/servers/a%20b` and `#/servers/a b` both refer to a server keyed `a b`, and resolve to the same server. A key that contains `%` itself must encode it as `%25`: a server keyed `a%20b` is referenced as `#/servers/a%2520b`. References the library writes for such keys, for example when converting between versions, are percent-encoded the same way.
+
 Reference resolution is part of reading a full document with `Read`; `ReadFragment<T>` parses a fragment but does not run the document reference-resolution pass. A missing or invalid internal target is reported in diagnostics and remains unresolved.
 
 ```csharp
@@ -95,6 +99,26 @@ if (production is AsyncApiServerReference serverReference)
 ```
 
 Consumers can often read a resolved proxy as the referenced type without first copying or replacing it. Keep the reference-type and resolution checks when your code requires a concrete target. For an unresolved reference, proxy getters can return `null`; avoid relying on target properties until `UnresolvedReference` is false. Reader errors and warnings are returned in `diagnostics`.
+
+## Write references
+
+References are written as references, including ones whose target could not be resolved, so they are not lost. To write local references as their target instead, set `ReferenceInline` on the writer settings. External references are always written as references. With `InlineReferences`, a local reference that cannot be resolved throws an `AsyncApiWriterException`.
+
+```csharp
+using System.IO;
+using ByteBard.AsyncAPI.Models;
+using ByteBard.AsyncAPI.Writers;
+
+var settings = new AsyncApiWriterSettings
+{
+    ReferenceInline = ReferenceInlineSetting.InlineReferences,
+};
+
+using var stream = new MemoryStream();
+document.SerializeAsYaml(stream, AsyncApiVersion.AsyncApi3_0, settings);
+```
+
+A reference to a location the written document does not contain is written inline, even without `InlineReferences`. This happens when converting between versions: a 2.x reference to `#/channels/userSignup/publish/message` has no equivalent location in 3.x, and a 3.x reference to `#/operations/sendUserSignup/traits/0` has none in 2.x. References that still resolve in the written document, such as references to components or servers, stay references. AsyncAPI 2.x cannot reference tags or external documentation, so those are written inline when writing 2.x. See [version conversion](./version-conversion) for the other differences.
 
 ## External references
 

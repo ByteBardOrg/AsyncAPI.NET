@@ -22,6 +22,19 @@ var outputV3 = document.SerializeAsJson(AsyncApiVersion.AsyncApi3_0);
 
 `AsyncApi3_0` is the API's V3 selector; the current V3 writer emits `asyncapi: 3.1.0`.
 
-The serializer maps between the different version shapes, but a round trip is not guaranteed to preserve every representation detail. To bridge the versions, references may be moved, rewritten, or represented differently while keeping the specification's behavior as close as possible. V3-only model information cannot survive a downgrade when V2 has no corresponding field. In particular, channel keys may be normalized as addresses; generated operation keys can use `anonymous-operation-{int}` when no operation ID is available; operation IDs are not retained through a V2 downgrade; and when a V2 shape supports only one message in a location, only the first message is selected. References may also be reflowed or resolved during conversion.
+The serializer maps between the different version shapes, but a round trip is not guaranteed to preserve every representation detail. To bridge the versions, references may be moved, rewritten, or represented differently while keeping the specification's behavior as close as possible. V3-only model information cannot survive a downgrade when V2 has no corresponding field. In particular, channel keys may be normalized as addresses; generated operation keys can use `anonymous-operation-{int}` when no operation ID is available; operation IDs are not retained through a V2 downgrade; and when a V2 shape supports only one message in a location, only the first message is selected. V2 has one `publish` and one `subscribe` operation per channel, so a downgrade drops further V3 operations with the same action on a channel. V2 messages only exist inside operations, so a V3 message that no operation uses is not written.
 
 Review converted output when round-trip fidelity matters, especially around removed fields, operation identifiers, multiple messages, and references. See the [AsyncAPI migration guide](https://www.asyncapi.com/docs/migration/migrating-to-v3) for specification-level changes.
+
+## References
+
+References that resolve in the written version stay references, such as references to components (`#/components/messages/userSignedUp`) or servers (`#/servers/production`). A reference to a location that does not exist in the written version is written inline instead:
+
+- V2 references into `publish` or `subscribe` operations, such as `#/channels/userSignup/publish/message`, have no V3 location.
+- V3 references into `#/operations/...` have no V2 location.
+- V3 writes component schemas as Multi Format Schema Objects, so a reference into a schema, such as `#/components/schemas/User/properties/id`, has no V3 location.
+- V2 writes message headers as their schema, and cannot reference tags or external documentation, so those are written inline in V2.
+
+V2 keys channels by address, and the reader normalizes the address into the V3 channel key. A V2 reference to another channel, such as `#/channels/user~1signedup`, is read as `#/channels/usersignedup`, and is written back by address in V2.
+
+See [references](./references#write-references) for how references are written in general.
