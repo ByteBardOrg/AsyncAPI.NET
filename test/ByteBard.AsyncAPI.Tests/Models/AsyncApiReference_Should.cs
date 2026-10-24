@@ -14,6 +14,126 @@ namespace ByteBard.AsyncAPI.Tests
 
     public class AsyncApiReference_Should : TestBase
     {
+        private const string ExternalSchemas =
+            """
+            {
+              "components": {
+                "schemas": {
+                  "plain": { "type": "string" },
+                  "a/b": { "type": "integer" },
+                  "a~b": { "type": "boolean" },
+                  "with space": { "type": "number" }
+                }
+              },
+              "list": [ { "type": "object" } ]
+            }
+            """;
+
+        private static readonly TestCaseData[] ExternalFragmentCases =
+        {
+            new TestCaseData("/components/schemas/plain", SchemaType.String).SetArgDisplayNames("nested path"),
+            new TestCaseData("/components/schemas/a~1b", SchemaType.Integer).SetArgDisplayNames("escaped slash"),
+            new TestCaseData("/components/schemas/a~0b", SchemaType.Boolean).SetArgDisplayNames("escaped tilde"),
+            new TestCaseData("/components/schemas/with%20space", SchemaType.Number).SetArgDisplayNames("percent-encoded"),
+            new TestCaseData("/list/0", SchemaType.Object).SetArgDisplayNames("array index"),
+        };
+
+        [TestCaseSource(nameof(ExternalFragmentCases))]
+        public void V2_ExternalReference_WithFragment_ResolvesFragment(string fragment, SchemaType expectedType)
+        {
+            var yaml =
+                $"""
+                asyncapi: 2.6.0
+                info:
+                  title: test
+                  version: 1.0.0
+                channels:
+                  workspace:
+                    publish:
+                      message:
+                        payload:
+                          $ref: 'schemas.json#{fragment}'
+                """;
+
+            var doc = ReadWithExternalSchemas(yaml, out var diagnostic);
+
+            diagnostic.Errors.Should().BeEmpty();
+            doc.Channels["workspace"].Messages.Values.First().Payload.Schema.As<AsyncApiJsonSchema>().Type.Should().Be(expectedType);
+        }
+
+        [TestCaseSource(nameof(ExternalFragmentCases))]
+        public void V3_ExternalReference_WithFragment_ResolvesFragment(string fragment, SchemaType expectedType)
+        {
+            var yaml =
+                $"""
+                asyncapi: 3.0.0
+                info:
+                  title: test
+                  version: 1.0.0
+                channels:
+                  workspace:
+                    messages:
+                      message:
+                        payload:
+                          schemaFormat: application/vnd.aai.asyncapi+json;version=3.0.0
+                          schema:
+                            $ref: 'schemas.json#{fragment}'
+                """;
+
+            var doc = ReadWithExternalSchemas(yaml, out var diagnostic);
+
+            diagnostic.Errors.Should().BeEmpty();
+            doc.Channels["workspace"].Messages["message"].Payload.Schema.As<AsyncApiJsonSchema>().Type.Should().Be(expectedType);
+        }
+
+        [TestCase("2.6.0")]
+        [TestCase("3.0.0")]
+        public void ExternalReference_WithMissingFragment_ReportsError(string version)
+        {
+            var yaml = version.StartsWith("2")
+                ? """
+                  asyncapi: 2.6.0
+                  info:
+                    title: test
+                    version: 1.0.0
+                  channels:
+                    workspace:
+                      publish:
+                        message:
+                          payload:
+                            $ref: 'schemas.json#/components/schemas/missing'
+                  """
+                : """
+                  asyncapi: 3.0.0
+                  info:
+                    title: test
+                    version: 1.0.0
+                  channels:
+                    workspace:
+                      messages:
+                        message:
+                          payload:
+                            schemaFormat: application/vnd.aai.asyncapi+json;version=3.0.0
+                            schema:
+                              $ref: 'schemas.json#/components/schemas/missing'
+                  """;
+
+            ReadWithExternalSchemas(yaml, out var diagnostic);
+
+            diagnostic.Errors.Should().ContainSingle(e => e.Message == "Could not resolve reference fragment.");
+        }
+
+        private static AsyncApiDocument ReadWithExternalSchemas(string yaml, out AsyncApiDiagnostic diagnostic)
+        {
+            var settings = new AsyncApiReaderSettings
+            {
+                ReferenceResolution = ReferenceResolutionSetting.ResolveAllReferences,
+                ExternalReferenceLoader = new MockStringLoader(ExternalSchemas),
+            };
+
+            return new AsyncApiStringReader(settings).Read(yaml, out diagnostic);
+        }
+
         [Test]
         public void V2_ReferencePointers()
         {
