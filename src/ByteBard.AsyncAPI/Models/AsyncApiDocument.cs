@@ -57,6 +57,11 @@
         /// <inheritdoc/>
         public IDictionary<string, IAsyncApiExtension> Extensions { get; set; } = new Dictionary<string, IAsyncApiExtension>();
 
+        /// <summary>
+        /// The workspace the document was read into.
+        /// </summary>
+        internal AsyncApiWorkspace SourceWorkspace { get; set; }
+
         public void SerializeV2(IAsyncApiWriter writer)
         {
             if (writer is null)
@@ -64,8 +69,45 @@
                 throw new ArgumentNullException(nameof(writer));
             }
 
-            writer.Workspace.SetRootDocument(this);
-            writer.Workspace.RegisterComponents(this);
+            this.Write(writer, this.WriteV2);
+        }
+
+        public void SerializeV3(IAsyncApiWriter writer)
+        {
+            if (writer is null)
+            {
+                throw new ArgumentNullException(nameof(writer));
+            }
+
+            this.Write(writer, this.WriteV3);
+        }
+
+        /// <summary>
+        /// Writes the document, inlining local references whose target the written document does not contain.
+        /// </summary>
+        private void Write(IAsyncApiWriter writer, Action<IAsyncApiWriter> write)
+        {
+            if (writer is not AsyncApiWriterBase writerBase)
+            {
+                write(writer);
+                return;
+            }
+
+            var settings = writerBase.Settings;
+            writerBase.Settings = DanglingReferences.Inline(settings, write);
+            try
+            {
+                write(writer);
+            }
+            finally
+            {
+                writerBase.Settings = settings;
+            }
+        }
+
+        private void WriteV2(IAsyncApiWriter writer)
+        {
+            writer.Workspace.RegisterForWriting(this);
 
             writer.WriteStartObject();
 
@@ -124,25 +166,27 @@
             writer.WriteEndObject();
         }
 
+        /// <summary>
+        /// 2.x keys channels by address. A reference to another root channel would take that channel's address,
+        /// so it keeps its own key instead (a null address falls back to the key).
+        /// </summary>
         private string GetChannelAddress(AsyncApiChannel channel, AsyncApiWorkspace workspace)
         {
             if (channel is AsyncApiChannelReference reference)
             {
                 reference.Reference.Workspace = workspace;
+                if (reference.IsRootChannelReference())
+                {
+                    return null;
+                }
             }
 
             return channel.Address;
         }
 
-        public void SerializeV3(IAsyncApiWriter writer)
+        private void WriteV3(IAsyncApiWriter writer)
         {
-            if (writer is null)
-            {
-                throw new ArgumentNullException(nameof(writer));
-            }
-
-            writer.Workspace.SetRootDocument(this);
-            writer.Workspace.RegisterComponents(this);
+            writer.Workspace.RegisterForWriting(this);
 
             writer.WriteStartObject();
 

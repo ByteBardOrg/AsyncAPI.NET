@@ -90,7 +90,7 @@ namespace ByteBard.AsyncAPI.Readers
 
                     this.Workspace.SetRootDocument(doc);
                     this.Workspace.RegisterComponents(doc);
-                    this.Workspace.RegisterComponent(string.Empty, this.ParseToStream(doc));
+                    this.Workspace.RegisterComponent(string.Empty, this.ParseToStream(jsonNode));
 
                     this.Diagnostic.SpecificationVersion = AsyncApiVersion.AsyncApi2_0;
                     break;

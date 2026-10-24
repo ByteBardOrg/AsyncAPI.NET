@@ -592,6 +592,12 @@ namespace ByteBard.AsyncAPI.Services
                 return;
             }
 
+            if (operation is AsyncApiOperationReference reference)
+            {
+                this.Walk(reference as IAsyncApiReferenceable);
+                return;
+            }
+
             this.visitor.Visit(operation);
 
             if (operation != null)
@@ -1139,6 +1145,12 @@ namespace ByteBard.AsyncAPI.Services
         {
             if (serverVariable == null)
             {
+                return;
+            }
+
+            if (serverVariable is AsyncApiServerVariableReference reference)
+            {
+                this.Walk(reference as IAsyncApiReferenceable);
                 return;
             }
 

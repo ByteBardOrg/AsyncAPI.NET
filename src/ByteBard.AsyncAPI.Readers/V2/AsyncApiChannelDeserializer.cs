@@ -36,7 +36,7 @@ namespace ByteBard.AsyncAPI.Readers
             var pointer = mapNode.GetReferencePointer();
             if (pointer != null)
             {
-                return new AsyncApiChannelReference(pointer);
+                return new AsyncApiChannelReference(NormalizeChannelPointer(pointer));
             }
 
             var channel = new AsyncApiChannel();
@@ -51,6 +51,23 @@ namespace ByteBard.AsyncAPI.Readers
             LoadV2Operation(mapNode["publish"]?.Value, channel, AsyncApiAction.Receive);
 
             return channel;
+        }
+
+        /// <summary>
+        /// 2.x keys channels by address, which is normalized into the channel's key, so a reference to a root channel
+        /// is pointed at that key.
+        /// </summary>
+        private static string NormalizeChannelPointer(string pointer)
+        {
+            const string channelsPrefix = "#/channels/";
+            if (!pointer.StartsWith(channelsPrefix)
+                || !JsonPointer.TryFromUriFragment(pointer.Substring(1), out var parsed)
+                || parsed.Tokens.Length != 2)
+            {
+                return pointer;
+            }
+
+            return channelsPrefix + JsonPointer.EscapeToken(NormalizeChannelKey(parsed.Tokens[1]));
         }
 
         public static string NormalizeChannelKey(string channelKey, ParseNode node = null)

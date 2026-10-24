@@ -1,7 +1,8 @@
-﻿namespace ByteBard.AsyncAPI.Readers.V2
+namespace ByteBard.AsyncAPI.Readers.V2
 {
     using System;
     using System.Collections.Generic;
+    using System.Text.Json.Nodes;
     using ByteBard.AsyncAPI.Exceptions;
     using ByteBard.AsyncAPI.Models;
     using ByteBard.AsyncAPI.Models.Interfaces;
@@ -32,12 +33,11 @@
             [typeof(AsyncApiOAuthFlows)] = AsyncApiV2Deserializer.LoadOAuthFlows,
             [typeof(AsyncApiOperation)] = AsyncApiV2Deserializer.LoadOperation,
             [typeof(AsyncApiParameter)] = AsyncApiV2Deserializer.LoadParameter,
-            [typeof(AsyncApiJsonSchema)] = AsyncApiJsonSchemaDeserializer.LoadSchema,
-            [typeof(AsyncApiAvroSchema)] = AsyncApiAvroSchemaDeserializer.LoadSchema,
             [typeof(AsyncApiJsonSchema)] = AsyncApiV2Deserializer.LoadJsonSchemaPayload,
             [typeof(AsyncApiAvroSchema)] = AsyncApiV2Deserializer.LoadAvroPayload,
-            // 2.x has no Multi Format Schema Object. Only the local reference fallback asks for one, and it reads the document after the upgrade to 3.0.
             [typeof(AsyncApiMultiFormatSchema)] = AsyncApiV3Deserializer.LoadMultiFormatSchema,
+            [typeof(AsyncApiCorrelationId)] = AsyncApiV2Deserializer.LoadCorrelationId,
+            [typeof(AsyncApiOperationTrait)] = AsyncApiV2Deserializer.LoadOperationTrait,
             [typeof(AsyncApiSecurityScheme)] = AsyncApiV2Deserializer.LoadSecurityScheme,
             [typeof(AsyncApiServer)] = AsyncApiV2Deserializer.LoadServer,
             [typeof(AsyncApiServerVariable)] = AsyncApiV2Deserializer.LoadServerVariable,
@@ -79,6 +79,25 @@
         public AsyncApiDocument LoadDocument(RootNode rootNode)
         {
             return AsyncApiV2Deserializer.LoadAsyncApi(rootNode);
+        }
+
+        /// <summary>
+        /// 2.x keeps a payload's schema format on its message, which the reader stored with the payload reference.
+        /// Wrap the payload with it as a Multi Format Schema Object, so it is read in that format.
+        /// </summary>
+        public JsonNode PrepareReferenceFragment(JsonNode fragment, IAsyncApiReferenceable reference, ParsingContext context)
+        {
+            if (reference is not AsyncApiMultiFormatSchemaReference
+                || context.GetFromTempStorage<string>(TempStorageKeys.PayloadSchemaFormat, reference) is not string schemaFormat)
+            {
+                return fragment;
+            }
+
+            return new JsonObject
+            {
+                ["schemaFormat"] = schemaFormat,
+                ["schema"] = fragment.DeepClone(),
+            };
         }
 
         public T LoadElement<T>(ParseNode node)
