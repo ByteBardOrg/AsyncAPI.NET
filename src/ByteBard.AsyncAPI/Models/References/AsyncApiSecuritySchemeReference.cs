@@ -88,7 +88,9 @@ namespace ByteBard.AsyncAPI.Models
             this.Reference.Workspace = writer.Workspace;
 
             writer.WriteStartObject();
-            writer.WritePropertyName(this.Reference.FragmentId.Split('/').Last());
+            // 2.x security requirements list schemes by name: the unescaped last pointer token, or the bare name.
+            var fragmentId = this.Reference.FragmentId;
+            writer.WritePropertyName(JsonPointer.TryFromUriFragment(fragmentId, out var pointer) && pointer.Tokens.Length > 0 ? pointer.Tokens.Last() : fragmentId);
             writer.WriteStartArray();
 
             if (this.Scopes.Any())

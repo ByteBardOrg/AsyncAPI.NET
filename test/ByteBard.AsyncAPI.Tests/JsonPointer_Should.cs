@@ -77,6 +77,16 @@ namespace ByteBard.AsyncAPI.Tests
             new JsonPointer("/a%20b").Find(json).Should().BeNull();
         }
 
+        [TestCase("plain", "plain")]
+        [TestCase("a/b", "a~1b")]
+        [TestCase("a~b", "a~0b")]
+        [TestCase("~1", "~01")]
+        public void EscapeToken_EscapesTildeBeforeSlash(string token, string expected)
+        {
+            JsonPointer.EscapeToken(token).Should().Be(expected);
+            new JsonPointer("/" + expected).Tokens.Should().Equal(token);
+        }
+
         [Test]
         public void Unescape_DecodesTilde1BeforeTilde0()
         {

@@ -44,56 +44,56 @@
             // Register Schema
             foreach (var item in document.Components.Schemas)
             {
-                location = componentsBaseUri + ReferenceType.Schema.GetDisplayName() + "/" + item.Key;
+                location = componentsBaseUri + ReferenceType.Schema.GetDisplayName() + "/" + JsonPointer.EscapeToken(item.Key);
                 this.RegisterComponent(location, item.Value);
             }
 
             // Register Parameters
             foreach (var item in document.Components.Parameters)
             {
-                location = componentsBaseUri + ReferenceType.Parameter.GetDisplayName() + "/" + item.Key;
+                location = componentsBaseUri + ReferenceType.Parameter.GetDisplayName() + "/" + JsonPointer.EscapeToken(item.Key);
                 this.RegisterComponent(location, item.Value);
             }
 
             // Register Channels
             foreach (var item in document.Components.Channels)
             {
-                location = componentsBaseUri + ReferenceType.Channel.GetDisplayName() + "/" + item.Key;
+                location = componentsBaseUri + ReferenceType.Channel.GetDisplayName() + "/" + JsonPointer.EscapeToken(item.Key);
                 this.RegisterComponent(location, item.Value);
             }
 
             // Register Operations
             foreach (var item in document.Components.Operations)
             {
-                location = componentsBaseUri + ReferenceType.Operation.GetDisplayName() + "/" + item.Key;
+                location = componentsBaseUri + ReferenceType.Operation.GetDisplayName() + "/" + JsonPointer.EscapeToken(item.Key);
                 this.RegisterComponent(location, item.Value);
             }
 
             // Register Servers
             foreach (var item in document.Components.Servers)
             {
-                location = componentsBaseUri + ReferenceType.Server.GetDisplayName() + "/" + item.Key;
+                location = componentsBaseUri + ReferenceType.Server.GetDisplayName() + "/" + JsonPointer.EscapeToken(item.Key);
                 this.RegisterComponent(location, item.Value);
             }
 
             // Register ServerVariables
             foreach (var item in document.Components.ServerVariables)
             {
-                location = componentsBaseUri + ReferenceType.ServerVariable.GetDisplayName() + "/" + item.Key;
+                location = componentsBaseUri + ReferenceType.ServerVariable.GetDisplayName() + "/" + JsonPointer.EscapeToken(item.Key);
                 this.RegisterComponent(location, item.Value);
             }
 
             // Register Messages
             foreach (var item in document.Components.Messages)
             {
-                location = componentsBaseUri + ReferenceType.Message.GetDisplayName() + "/" + item.Key;
+                location = componentsBaseUri + ReferenceType.Message.GetDisplayName() + "/" + JsonPointer.EscapeToken(item.Key);
                 this.RegisterComponent(location, item.Value);
             }
 
             // Register SecuritySchemes
             foreach (var item in document.Components.SecuritySchemes)
             {
-                location = componentsBaseUri + ReferenceType.SecurityScheme.GetDisplayName() + "/" + item.Key;
+                location = componentsBaseUri + ReferenceType.SecurityScheme.GetDisplayName() + "/" + JsonPointer.EscapeToken(item.Key);
                 this.RegisterComponent(location, item.Value);
                 this.RegisterComponent(item.Key, item.Value);
             }
@@ -101,84 +101,84 @@
             // Register Server Variables
             foreach (var item in document.Components.ServerVariables)
             {
-                location = componentsBaseUri + ReferenceType.ServerVariable.GetDisplayName() + "/" + item.Key;
+                location = componentsBaseUri + ReferenceType.ServerVariable.GetDisplayName() + "/" + JsonPointer.EscapeToken(item.Key);
                 this.RegisterComponent(location, item.Value);
             }
 
             // Register CorrelationIds
             foreach (var item in document.Components.CorrelationIds)
             {
-                location = componentsBaseUri + ReferenceType.CorrelationId.GetDisplayName() + "/" + item.Key;
+                location = componentsBaseUri + ReferenceType.CorrelationId.GetDisplayName() + "/" + JsonPointer.EscapeToken(item.Key);
                 this.RegisterComponent(location, item.Value);
             }
 
             // Register Replies
             foreach (var item in document.Components.Replies)
             {
-                location = componentsBaseUri + ReferenceType.OperationReply.GetDisplayName() + "/" + item.Key;
+                location = componentsBaseUri + ReferenceType.OperationReply.GetDisplayName() + "/" + JsonPointer.EscapeToken(item.Key);
                 this.RegisterComponent(location, item.Value);
             }
 
             // Register ReplyAddresses
             foreach (var item in document.Components.ReplyAddresses)
             {
-                location = componentsBaseUri + ReferenceType.OperationReplyAddress.GetDisplayName() + "/" + item.Key;
+                location = componentsBaseUri + ReferenceType.OperationReplyAddress.GetDisplayName() + "/" + JsonPointer.EscapeToken(item.Key);
                 this.RegisterComponent(location, item.Value);
             }
 
             // Register ExternalDocs
             foreach (var item in document.Components.ExternalDocs)
             {
-                location = componentsBaseUri + ReferenceType.ExternalDocs.GetDisplayName() + "/" + item.Key;
+                location = componentsBaseUri + ReferenceType.ExternalDocs.GetDisplayName() + "/" + JsonPointer.EscapeToken(item.Key);
                 this.RegisterComponent(location, item.Value);
             }
 
             // Register Tags
             foreach (var item in document.Components.Tags)
             {
-                location = componentsBaseUri + ReferenceType.Tag.GetDisplayName() + "/" + item.Key;
+                location = componentsBaseUri + ReferenceType.Tag.GetDisplayName() + "/" + JsonPointer.EscapeToken(item.Key);
                 this.RegisterComponent(location, item.Value);
             }
 
             // Register OperationTraits
             foreach (var item in document.Components.OperationTraits)
             {
-                location = componentsBaseUri + ReferenceType.OperationTrait.GetDisplayName() + "/" + item.Key;
+                location = componentsBaseUri + ReferenceType.OperationTrait.GetDisplayName() + "/" + JsonPointer.EscapeToken(item.Key);
                 this.RegisterComponent(location, item.Value);
             }
 
             // Register MessageTraits
             foreach (var item in document.Components.MessageTraits)
             {
-                location = componentsBaseUri + ReferenceType.MessageTrait.GetDisplayName() + "/" + item.Key;
+                location = componentsBaseUri + ReferenceType.MessageTrait.GetDisplayName() + "/" + JsonPointer.EscapeToken(item.Key);
                 this.RegisterComponent(location, item.Value);
             }
 
             // Register ServerBindings
             foreach (var item in document.Components.ServerBindings)
             {
-                location = componentsBaseUri + ReferenceType.ServerBindings.GetDisplayName() + "/" + item.Key;
+                location = componentsBaseUri + ReferenceType.ServerBindings.GetDisplayName() + "/" + JsonPointer.EscapeToken(item.Key);
                 this.RegisterComponent(location, item.Value);
             }
 
             // Register ChannelBindings
             foreach (var item in document.Components.ChannelBindings)
             {
-                location = componentsBaseUri + ReferenceType.ChannelBindings.GetDisplayName() + "/" + item.Key;
+                location = componentsBaseUri + ReferenceType.ChannelBindings.GetDisplayName() + "/" + JsonPointer.EscapeToken(item.Key);
                 this.RegisterComponent(location, item.Value);
             }
 
             // Register OperationBindings
             foreach (var item in document.Components.OperationBindings)
             {
-                location = componentsBaseUri + ReferenceType.OperationBindings.GetDisplayName() + "/" + item.Key;
+                location = componentsBaseUri + ReferenceType.OperationBindings.GetDisplayName() + "/" + JsonPointer.EscapeToken(item.Key);
                 this.RegisterComponent(location, item.Value);
             }
 
             // Register MessageBindings
             foreach (var item in document.Components.MessageBindings)
             {
-                location = componentsBaseUri + ReferenceType.MessageBindings.GetDisplayName() + "/" + item.Key;
+                location = componentsBaseUri + ReferenceType.MessageBindings.GetDisplayName() + "/" + JsonPointer.EscapeToken(item.Key);
                 this.RegisterComponent(location, item.Value);
             }
 
@@ -196,12 +196,12 @@
                     registerableChannelValue = this.ResolveReference<AsyncApiChannel>(reference.Reference);
                 }
 
-                location = channelBaseUri + channel.Key;
+                location = channelBaseUri + JsonPointer.EscapeToken(channel.Key);
                 this.RegisterComponent(location, registerableChannelValue);
 
                 foreach (var message in registerableChannelValue.Messages)
                 {
-                    this.RegisterComponent(location + "/messages/" + message.Key, message.Value);
+                    this.RegisterComponent(location + "/messages/" + JsonPointer.EscapeToken(message.Key), message.Value);
                 }
             }
 
@@ -219,7 +219,7 @@
                     registerableServerValue = this.ResolveReference<AsyncApiServer>(serverReference.Reference);
                 }
 
-                location = serverBaseUri + server.Key;
+                location = serverBaseUri + JsonPointer.EscapeToken(server.Key);
                 this.RegisterComponent(location, registerableServerValue);
             }
         }
