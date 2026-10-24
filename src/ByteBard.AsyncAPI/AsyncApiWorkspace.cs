@@ -219,7 +219,7 @@
                     registerableServerValue = this.ResolveReference<AsyncApiServer>(serverReference.Reference);
                 }
 
-                location = serverBaseUri + server.Key;
+                location = serverBaseUri + JsonPointer.EscapeToken(server.Key);
                 this.RegisterComponent(location, registerableServerValue);
             }
         }

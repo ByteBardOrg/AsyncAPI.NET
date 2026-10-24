@@ -84,7 +84,7 @@
                 writer.WriteOptionalProperty(AsyncApiConstants.Description, this.Description);
 
                 // servers
-                writer.WriteOptionalCollection(AsyncApiConstants.Servers, this.Servers.Select(s => s.Reference.FragmentId).ToList(), (w, s) => w.WriteValue(s));
+                writer.WriteOptionalCollection(AsyncApiConstants.Servers, this.Servers.Select(GetV2ServerName).ToList(), (w, s) => w.WriteValue(s));
 
                 var operations = writer.Workspace.RootDocument?.Operations.Values.Where(operation => CheckOperationChannel(operation, writer)).ToList();
 
@@ -165,6 +165,23 @@
 
             operation.Channel.Reference.Workspace = writer.Workspace;
             return operation.Channel.Equals(this);
+        }
+
+        /// <summary>
+        /// AsyncAPI 2.x lists channel servers by name, so a local "#/servers/{name}" pointer is written as "{name}".
+        /// Any other reference is written as is, since reducing it to a name would point it at a local server instead.
+        /// </summary>
+        private static string GetV2ServerName(AsyncApiServerReference server)
+        {
+            const string serversPrefix = "/" + AsyncApiConstants.Servers + "/";
+            var reference = server.Reference;
+            if (reference.IsExternal || reference.FragmentId?.StartsWith(serversPrefix) != true)
+            {
+                return reference.Reference;
+            }
+
+            // The 2.x reader keeps the name unescaped, while a 3.x pointer escapes it, so decode the whole remainder as one token.
+            return JsonPointer.UnescapeToken(reference.FragmentId.Substring(serversPrefix.Length));
         }
     }
 }

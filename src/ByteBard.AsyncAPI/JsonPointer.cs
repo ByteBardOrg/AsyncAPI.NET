@@ -50,11 +50,29 @@ namespace ByteBard.AsyncAPI
         }
 
         /// <summary>
+        /// Escapes a single reference token, so "~" becomes "~0" and "/" becomes "~1".
+        /// </summary>
+        /// <param name="token">The unescaped token.</param>
+        public static string EscapeToken(string token)
+        {
+            return token.Replace("~", "~0").Replace("/", "~1");
+        }
+
+        /// <summary>
+        /// Unescapes a single reference token, so "~1" becomes "/" and "~0" becomes "~".
+        /// </summary>
+        /// <param name="token">The escaped token.</param>
+        public static string UnescapeToken(string token)
+        {
+            return token.Replace("~1", "/").Replace("~0", "~");
+        }
+
+        /// <summary>
         /// Decode the string.
         /// </summary>
         private string Decode(string token)
         {
-            return Uri.UnescapeDataString(token).Replace("~1", "/").Replace("~0", "~");
+            return UnescapeToken(Uri.UnescapeDataString(token));
         }
 
         /// <summary>
