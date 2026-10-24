@@ -181,7 +181,7 @@
             }
 
             // The 2.x reader keeps the name unescaped, while a 3.x pointer escapes it, so decode the whole remainder as one token.
-            return reference.FragmentId.Substring(serversPrefix.Length).Replace("~1", "/").Replace("~0", "~");
+            return JsonPointer.UnescapeToken(reference.FragmentId.Substring(serversPrefix.Length));
         }
     }
 }

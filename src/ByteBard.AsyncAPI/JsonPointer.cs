@@ -84,11 +84,30 @@ namespace ByteBard.AsyncAPI
         }
 
         /// <summary>
+        /// Escapes a single reference token, so "~" becomes "~0" and "/" becomes "~1".
+        /// </summary>
+        /// <param name="token">The unescaped token.</param>
+        public static string EscapeToken(string token)
+        {
+            return token.Replace("~", "~0").Replace("/", "~1");
+        }
+
+        /// <summary>
+        /// Unescapes a single reference token, so "~1" becomes "/" and "~0" becomes "~".
+        /// Unlike parsing a pointer, this does not reject a "~" that is not part of an escape sequence.
+        /// </summary>
+        /// <param name="token">The escaped token.</param>
+        public static string UnescapeToken(string token)
+        {
+            return token.Replace("~1", "/").Replace("~0", "~");
+        }
+
+        /// <summary>
         /// Gets the JSON string representation of this JSON pointer.
         /// </summary>
         public override string ToString()
         {
-            return string.Concat(this.Tokens.Select(token => "/" + token.Replace("~", "~0").Replace("/", "~1")));
+            return string.Concat(this.Tokens.Select(token => "/" + EscapeToken(token)));
         }
 
         private static string Unescape(string token, string pointer)
