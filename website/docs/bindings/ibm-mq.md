@@ -90,6 +90,51 @@ if (parsedMessage.Bindings.TryGetValue<IBMMQMessageBinding>(out var ibmMqMessage
 }
 ```
 
-Server fields include `GroupId`, `CcdtQueueManagerName`, `CipherSpec`, nullable `MultiEndpointServer`, and nullable `HeartBeatInterval`. Channel fields are `DestinationType`, `Queue`, `Topic`, and nullable `MaxMsgLength`; set `Queue` for queue settings (`ObjectName`, nullable `IsPartitioned` and `Exclusive`) or `Topic` for topic settings (`StringValue`, `ObjectName`, nullable `DurablePermitted` and `LastMsgRetained`). These nullable boolean values preserve explicit `false` and are omitted when unset. Message `Headers` is a string, not a schema; other fields are `Type`, `Description`, and nullable `Expiry` (`long?`).
+## Object model
 
-The collection also supports channel (`IBMMQChannelBinding`) and message (`IBMMQMessageBinding`) bindings; attach them to the corresponding model element's `Bindings` dictionary. Binding values do not establish an IBM MQ connection or validate queue manager settings.
+Nullable properties are omitted when unset, and an explicit `false` is kept. The model does not connect to IBM MQ or validate queue manager settings.
+
+### `IBMMQServerBinding`
+
+| Property | YAML field | Type | Description |
+| --- | --- | --- | --- |
+| `GroupId` | `groupId` | `string` | Group of related servers sharing this binding. |
+| `CcdtQueueManagerName` | `ccdtQueueManagerName` | `string` | Queue manager name in the client channel definition table. |
+| `CipherSpec` | `cipherSpec` | `string` | TLS cipher specification. |
+| `MultiEndpointServer` | `multiEndpointServer` | `bool?` | Whether this server is one of several endpoints of the same service. |
+| `HeartBeatInterval` | `heartBeatInterval` | `int?` | Heartbeat interval, in seconds. |
+
+### `IBMMQChannelBinding`
+
+| Property | YAML field | Type | Description |
+| --- | --- | --- | --- |
+| `DestinationType` | `destinationType` | `string` | `topic` or `queue`. |
+| `Queue` | `queue` | `Queue` | Queue settings, for a queue destination. |
+| `Topic` | `topic` | `Topic` | Topic settings, for a topic destination. |
+| `MaxMsgLength` | `maxMsgLength` | `int?` | Maximum message length, in bytes. |
+
+### `IBMMQMessageBinding`
+
+| Property | YAML field | Type | Description |
+| --- | --- | --- | --- |
+| `Type` | `type` | `string` | Message type, such as `string`, `jms` or `binary`. |
+| `Headers` | `headers` | `string` | MQRFH2 header names. A string, not a schema. |
+| `Description` | `description` | `string` | Description of the message. |
+| `Expiry` | `expiry` | `long?` | Message lifetime. |
+
+### `Queue`
+
+| Property | YAML field | Type | Description |
+| --- | --- | --- | --- |
+| `ObjectName` | `objectName` | `string` | Name of the queue. |
+| `IsPartitioned` | `isPartitioned` | `bool?` | Whether the queue is a cluster queue. |
+| `Exclusive` | `exclusive` | `bool?` | Whether only one application can read from the queue. |
+
+### `Topic`
+
+| Property | YAML field | Type | Description |
+| --- | --- | --- | --- |
+| `StringValue` | `string` | `string` | Topic string. |
+| `ObjectName` | `objectName` | `string` | Name of the topic object. |
+| `DurablePermitted` | `durablePermitted` | `bool?` | Whether durable subscriptions are allowed. |
+| `LastMsgRetained` | `lastMsgRetained` | `bool?` | Whether the last message is retained. |

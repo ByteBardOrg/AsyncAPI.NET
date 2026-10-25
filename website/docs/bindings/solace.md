@@ -22,9 +22,7 @@ operation.Bindings.Add(new SolaceOperationBinding
 
 `Bindings.Add(binding)` stores the binding under its `BindingKey` (`solace`).
 
-Server fields are `MsgVpn` and `ClientName`. Operation fields include `Destinations` (`List<SolaceDestination>`), `TimeToLive` and `Priority` (`SolaceIntegerOrSchema`), and nullable `DmqEligible`. A destination has binding version, destination type, delivery mode, and either queue or topic detail; queue/topic classes expose topic subscriptions and other destination settings.
-
-`SolaceIntegerOrSchema` is an abstract base type with two concrete alternatives: `SolaceInteger` exposes the numeric `Value`, while `SolaceIntegerSchema` exposes its `Schema` (which can itself be an `AsyncApiJsonSchemaReference`). Construct either alternative explicitly when setting a field. The current API also provides implicit conversions from `long` and `AsyncApiJsonSchema`; the explicit constructors make the selected alternative clear.
+The properties, including the `SolaceIntegerOrSchema` union, are listed in the [object model](#object-model).
 
 ## Write
 
@@ -102,3 +100,56 @@ if (parsed.Operations["publishOrders"].Bindings.TryGetValue<SolaceOperationBindi
 `TryGetValue<TBinding>` looks up the binding under the supplied type's `BindingKey` and returns `false` if it is absent. The property matches then distinguish the integer and schema/reference union alternatives.
 
 The same collection supports `SolaceServerBinding` on a server. These examples target AsyncAPI 3.1.0; AsyncAPI 2.x output also transforms the document layout. The package does not verify VPN or destination configuration. See the [shared guide](index.md).
+
+## Object model
+
+### `SolaceServerBinding`
+
+| Property | YAML field | Type | Description |
+| --- | --- | --- | --- |
+| `MsgVpn` | `msgVpn` | `string` | Message VPN of the server. |
+| `ClientName` | `clientName` | `string` | Name of the client. |
+
+### `SolaceOperationBinding`
+
+| Property | YAML field | Type | Description |
+| --- | --- | --- | --- |
+| `Destinations` | `destinations` | `List<SolaceDestination>` | Destinations of the operation. |
+| `TimeToLive` | `timeToLive` | `SolaceIntegerOrSchema` | Message time-to-live, in milliseconds. |
+| `Priority` | `priority` | `SolaceIntegerOrSchema` | Message priority. |
+| `DmqEligible` | `dmqEligible` | `bool?` | Whether an expired message may go to the dead message queue. |
+
+### `SolaceDestination`
+
+| Property | YAML field | Type | Description |
+| --- | --- | --- | --- |
+| `DestinationType` | `destinationType` | `string` | `queue` or `topic`. |
+| `DeliveryMode` | `deliveryMode` | `string` | `direct` or `persistent`. |
+| `Queue` | `queue` | `SolaceQueue` | Queue settings, for a queue destination. |
+| `Topic` | `topic` | `SolaceTopic` | Topic settings, for a topic destination. |
+| `BindingVersion` | `bindingVersion` | `string` | Binding version of the destination. |
+
+### `SolaceQueue`
+
+| Property | YAML field | Type | Description |
+| --- | --- | --- | --- |
+| `Name` | `name` | `string` | Name of the queue. |
+| `TopicSubscriptions` | `topicSubscriptions` | `List<string>` | Topics the queue subscribes to. |
+| `AccessType` | `accessType` | `string` | `exclusive` or `nonexclusive`. |
+| `MaxMsgSpoolSize` | `maxMsgSpoolSize` | `string` | Maximum spool size of the queue. |
+| `MaxTtl` | `maxTtl` | `string` | Maximum time-to-live of messages on the queue. |
+
+### `SolaceTopic`
+
+| Property | YAML field | Type | Description |
+| --- | --- | --- | --- |
+| `TopicSubscriptions` | `topicSubscriptions` | `List<string>` | Topics to subscribe to. |
+
+### `SolaceIntegerOrSchema`
+
+A union of two alternatives. Pattern-match it before reading the value; both are written directly, without a wrapper object. A `long` or `AsyncApiJsonSchema` converts implicitly to the union, but constructing the alternative makes the choice explicit.
+
+| Alternative | Holds | Read from |
+| --- | --- | --- |
+| `SolaceInteger` | `Value` (`long`) | an integer |
+| `SolaceIntegerSchema` | `Schema` (`AsyncApiJsonSchema`) | a schema or a `$ref` |

@@ -6,7 +6,7 @@ sidebar_label: Avro
 
 # Avro schemas
 
-Avro payloads use the `AsyncApiAvroSchema` model family. It includes primitive schemas and the complex `AvroRecord`, `AvroField`, `AvroEnum`, `AvroArray`, `AvroMap`, `AvroFixed`, and `AvroUnion` types. Each Avro schema type has a `Metadata` dictionary of `AsyncApiAny` values for custom schema metadata.
+Avro payloads use the `AsyncApiAvroSchema` model family: one class per Avro type, listed in the [type reference](#type-reference).
 
 ## Build a record
 
@@ -98,11 +98,102 @@ var user = new AvroRecord
 };
 ```
 
-`AvroField` provides `Name`, `Type`, `Doc`, `Default` (`AsyncApiAny`), `Order` (`AvroFieldOrder`), `Aliases`, and `Metadata`. Named record, enum, and fixed schemas support `Name`, `Namespace`, and aliases where defined; enums expose `Symbols` and an optional string `Default`, while fixed schemas require `Size`. `AvroArray.Items` and `AvroMap.Values` accept any `AsyncApiAvroSchema`, including named references, not only primitives.
+## Type reference
+
+Every schema type derives from `AsyncApiAvroSchema` and has a `Metadata` dictionary (`IDictionary<string, AsyncApiAny>`) for custom schema attributes. An `AvroPrimitiveType` value converts implicitly to an `AsyncApiAvroSchema`, as in `Type = AvroPrimitiveType.Long`.
+
+| Class | Avro type |
+| --- | --- |
+| `AvroPrimitive` | `null`, `boolean`, `int`, `long`, `float`, `double`, `bytes`, `string` |
+| `AvroRecord` | `record` |
+| `AvroEnum` | `enum` |
+| `AvroFixed` | `fixed` |
+| `AvroArray` | `array` |
+| `AvroMap` | `map` |
+| `AvroUnion` | union |
+| `AvroNamedType` | a [named type](#named-types-and-unions), by name |
+| [Logical types](#logical-types) | `decimal`, `uuid`, `date`, times, timestamps, `duration` |
+
+`AvroPrimitive` is constructed from an `AvroPrimitiveType`. Schema-typed properties accept any Avro schema, including named types.
+
+### `AvroRecord`
+
+| Property | Type | Description |
+| --- | --- | --- |
+| `Name` | `string` | Name of the record. |
+| `Namespace` | `string` | Namespace that qualifies the name. |
+| `Doc` | `string` | Documentation. |
+| `Aliases` | `IList<string>` | Alternative names. |
+| `Fields` | `IList<AvroField>` | The fields. See [`AvroField`](#avrofield). |
+
+### `AvroEnum`
+
+| Property | Type | Description |
+| --- | --- | --- |
+| `Name` | `string` | Name of the enum. |
+| `Namespace` | `string` | Namespace that qualifies the name. |
+| `Doc` | `string` | Documentation. |
+| `Aliases` | `IList<string>` | Alternative names. |
+| `Symbols` | `IList<string>` | The symbols. |
+| `Default` | `string` | Symbol used when a reader does not know the written one. |
+
+### `AvroFixed`
+
+| Property | Type | Description |
+| --- | --- | --- |
+| `Name` | `string` | Name of the fixed type. |
+| `Namespace` | `string` | Namespace that qualifies the name. |
+| `Aliases` | `IList<string>` | Alternative names. |
+| `Size` | `int` | Number of bytes. Required. |
+
+### `AvroArray`, `AvroMap` and `AvroUnion`
+
+| Class | Property | Type |
+| --- | --- | --- |
+| `AvroArray` | `Items` | `AsyncApiAvroSchema` |
+| `AvroMap` | `Values` | `AsyncApiAvroSchema` |
+| `AvroUnion` | `Types` | `IList<AsyncApiAvroSchema>` |
+
+### `AvroNamedType`
+
+| Property | Type | Description |
+| --- | --- | --- |
+| `Name` | `string` | The name it refers to. |
+| `Target` | `AsyncApiAvroSchema` | The named schema, or `null` while unresolved. |
+
+### `AvroField`
+
+| Property | Type | Description |
+| --- | --- | --- |
+| `Name` | `string` | Field name. |
+| `Type` | `AsyncApiAvroSchema` | Field schema. |
+| `Doc` | `string` | Documentation. |
+| `Default` | `AsyncApiAny` | Default value. |
+| `Order` | `AvroFieldOrder` | Sort order. |
+| `Aliases` | `IList<string>` | Alternative field names. |
+| `Metadata` | `IDictionary<string, AsyncApiAny>` | Custom field attributes. |
+
+### Logical types
+
+| Class | `logicalType` | Underlying type | Properties |
+| --- | --- | --- | --- |
+| `AvroDecimal` | `decimal` | `bytes` | `Precision` (`int?`), `Scale` (`int?`) |
+| `AvroUUID` | `uuid` | `string` | |
+| `AvroDate` | `date` | `int` | |
+| `AvroTimeMillis` | `time-millis` | `int` | |
+| `AvroTimeMicros` | `time-micros` | `long` | |
+| `AvroTimestampMillis` | `timestamp-millis` | `long` | |
+| `AvroTimestampMicros` | `timestamp-micros` | `long` | |
+| `AvroDuration` | `duration` | `fixed`, size 12 | |
 
 ## Named types and unions
 
 Avro named references are distinct from AsyncAPI `$ref` references. `AvroNamedType` serializes as the Avro name string (for example, `"Address"`), not as a `$ref` object. When constructing a model by hand, pass the target schema to `AvroNamedType(name, target)` when you have it; for example, the array above targets the previously declared `address` record. When reading, the Avro parser resolves names according to Avro's name and namespace rules. Definitions must precede their use in depth-first, left-to-right traversal. Recursive references and named references inside arrays, maps, and unions are supported. An unresolved name is reported by the validator as an `AsyncApiValidatorWarning`, not a validation error.
+
+An `AvroNamedType` stands in for the schema it names, its `Target`:
+
+- `As<T>()`, `Is<T>()` and `TryGetAs<T>()` fall through to `Target`, so `TryGetAs<AvroRecord>` on a reference to a record returns the record.
+- `Metadata` reads and writes the target's metadata, so changing it changes the named schema. Only an unresolved reference has metadata of its own.
 
 For a recursive record, bind its own instance as the target:
 

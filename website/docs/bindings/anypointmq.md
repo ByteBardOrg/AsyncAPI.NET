@@ -76,8 +76,19 @@ if (parsedMessage.Bindings.TryGetValue<AnypointMQMessageBinding>(out var anypoin
 }
 ```
 
-Channel fields are `Destination` and `DestinationType` (strings). Message-level metadata is `Headers` (`AsyncApiJsonSchema`); attach it with `message.Bindings.Add(new AnypointMQMessageBinding { Headers = headers });`.
+## Object model
 
-`Headers` accepts an inline schema or a schema reference, for example `new AsyncApiJsonSchemaReference("#/components/schemas/messageHeaders")`; after reading, inspect the resulting `Headers` schema or reference on the typed message binding.
+The model does not contact Anypoint MQ or validate destination names.
 
-The same registration includes message bindings; attach `AnypointMQMessageBinding` to a message when writing. Schemas are represented as `AsyncApiJsonSchema`; this package models metadata and does not contact Anypoint MQ or validate destination names.
+### `AnypointMQChannelBinding`
+
+| Property | YAML field | Type | Description |
+| --- | --- | --- | --- |
+| `Destination` | `destination` | `string` | Name of the destination, if different from the channel address. |
+| `DestinationType` | `destinationType` | `string` | Kind of destination, such as `exchange`, `queue` or `fifo-queue`. |
+
+### `AnypointMQMessageBinding`
+
+| Property | YAML field | Type | Description |
+| --- | --- | --- | --- |
+| `Headers` | `headers` | `AsyncApiJsonSchema` | Message headers, as an inline schema or an `AsyncApiJsonSchemaReference`. |

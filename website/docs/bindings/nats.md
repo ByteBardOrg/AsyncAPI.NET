@@ -18,7 +18,7 @@ operation.Bindings.Add(new NATSOperationBinding { Queue = "workers" });
 
 `Bindings.Add(binding)` stores the instance under its `BindingKey` (`nats`); no key string is needed.
 
-The operation binding's `Queue` is a string. There are no NATS server, channel, or message parsers in this collection.
+There are no NATS server, channel, or message parsers in this collection.
 
 ## Write
 
@@ -74,3 +74,11 @@ if (parsed.Operations["consumeOrders"].Bindings.TryGetValue<NATSOperationBinding
 ```
 
 Typed lookup returns `false` if no NATS operation binding is present. These examples target AsyncAPI 3.1.0; if serializing as 2.x, the document's operation/channel layout is converted as well as the binding. Queue semantics are not checked against a running NATS server. See [shared setup](index.md).
+
+## Object model
+
+### `NATSOperationBinding`
+
+| Property | YAML field | Type | Description |
+| --- | --- | --- | --- |
+| `Queue` | `queue` | `string` | Queue group name. |

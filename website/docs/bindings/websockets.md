@@ -27,7 +27,7 @@ channel.Bindings.Add(new WebSocketsChannelBinding
 
 `Bindings.Add(binding)` uses the `WebSocketsChannelBinding`'s `BindingKey` (`ws`); the dictionary key is not supplied separately.
 
-Channel metadata includes `Method` (string), `Query` (`AsyncApiJsonSchema`), and `Headers` (`AsyncApiJsonSchema`). Both schema properties accept an inline schema or an `AsyncApiJsonSchemaReference` directly. There are no server, operation, or message parsers registered for this binding.
+There are no server, operation, or message parsers registered for this binding. The properties are listed in the [object model](#object-model).
 
 ## Write
 
@@ -93,3 +93,13 @@ if (parsed.Bindings.TryGetValue<WebSocketsChannelBinding>(out var webSockets))
 `TryGetValue<TBinding>` returns `false` when no binding with that type's `BindingKey` is present.
 
 The collection property is spelled `Websockets`; the binding key is `ws`. These examples target AsyncAPI 3.1.0; writing 2.x also converts the surrounding document layout. The model does not perform an HTTP upgrade or validate headers/query definitions. See the [shared guide](index.md).
+
+## Object model
+
+### `WebSocketsChannelBinding`
+
+| Property | YAML field | Type | Description |
+| --- | --- | --- | --- |
+| `Method` | `method` | `string` | HTTP method used to establish the connection: `GET` or `POST`. |
+| `Query` | `query` | `AsyncApiJsonSchema` | Schema of the query parameters, as an inline schema or an `AsyncApiJsonSchemaReference`. |
+| `Headers` | `headers` | `AsyncApiJsonSchema` | Schema of the HTTP headers used to establish the connection, as an inline schema or an `AsyncApiJsonSchemaReference`. |

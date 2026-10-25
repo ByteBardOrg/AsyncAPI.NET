@@ -7,7 +7,13 @@ sidebar_label: Reading
 
 # Reading documents
 
-The reader package provides three readers with the same `Read` pattern: `AsyncApiStringReader`, `AsyncApiTextReader`, and `AsyncApiStreamReader`. Each accepts JSON or YAML input and returns an `AsyncApiDocument` plus an `AsyncApiDiagnostic` through the `out` parameter.
+The reader package provides three readers. Each reads JSON or YAML and returns an `AsyncApiDocument`, with an `AsyncApiDiagnostic` through the `out` parameter.
+
+| Reader | Input | `Read` | `ReadAsync` | `ReadFragment<T>` |
+| --- | --- | --- | --- | --- |
+| `AsyncApiStringReader` | `string` | yes | | yes |
+| `AsyncApiTextReader` | `TextReader` | yes | yes | yes |
+| `AsyncApiStreamReader` | `Stream` | yes | yes | yes |
 
 ```csharp
 using ByteBard.AsyncAPI.Readers;

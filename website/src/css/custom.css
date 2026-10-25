@@ -30,8 +30,9 @@
 html[data-theme='dark'] {
   --ifm-background-color: #1b1130;
   --ifm-background-surface-color: #242929;
-  --ifm-font-color-base: #f7f9fa;
-  --ifm-heading-color: #fff;
+  /* Softened white: full white on the dark purple is harsh. Headings stay a step brighter than body text. */
+  --ifm-font-color-base: rgba(255, 255, 255, .8);
+  --ifm-heading-color: rgba(255, 255, 255, .9);
   --ifm-color-primary: #a87efc;
   --ifm-color-primary-dark: #875ae2;
   --ifm-color-primary-darker: #7b4fd5;
@@ -42,6 +43,15 @@ html[data-theme='dark'] {
   --ifm-link-color: #a87efc;
   --ifm-navbar-background-color: #1b1130;
   --ifm-footer-background-color: #1b1130;
+  /* Infima's dark table and inline code colors assume a grey background. Use neutral tints over the purple one. */
+  --ifm-table-border-color: rgba(255, 255, 255, .12);
+  --ifm-table-head-background: rgba(255, 255, 255, .05);
+  --ifm-table-stripe-background: rgba(255, 255, 255, .025);
+  --ifm-code-background: rgba(255, 255, 255, .08);
+}
+
+.markdown table th {
+  text-align: left;
 }
 
 .navbar {

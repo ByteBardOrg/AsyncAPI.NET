@@ -85,8 +85,63 @@ if (parsedOperation.Bindings.TryGetValue<AMQPOperationBinding>(out var amqpOpera
 }
 ```
 
-Channel fields: `Is` (`ChannelType`), `Exchange` (`Exchange`), and `Queue` (`Queue`). `Exchange` carries `Name`, `Type`, `Durable`, `AutoDelete`, and `Vhost`; `Queue` carries `Name`, `Durable`, `Exclusive`, `AutoDelete`, and `Vhost`. Both `Vhost` values default to `/`. The enum choices are defined by `ChannelType` and `ExchangeType`.
+## Object model
 
-Operation fields include `Expiration` (`uint`), `UserId`, `Cc`/`Bcc` lists, `Priority`, `DeliveryMode`, `Mandatory`, `Timestamp`, and `Ack`. Message fields are `ContentEncoding` and `MessageType`.
+The model does not enforce broker-side limits or combinations of values.
 
-At the other supported levels, attach `AMQPOperationBinding` to an operation and `AMQPMessageBinding` to a message. Numeric fields and flags are represented by CLR numeric/boolean types; the model does not enforce broker-side limits or semantic combinations.
+### `AMQPChannelBinding`
+
+| Property | YAML field | Type | Description |
+| --- | --- | --- | --- |
+| `Is` | `is` | `ChannelType` | Whether the channel is a queue or a routing key. |
+| `Exchange` | `exchange` | `Exchange` | The exchange, when `Is` is `RoutingKey`. |
+| `Queue` | `queue` | `Queue` | The queue, when `Is` is `Queue`. |
+
+### `AMQPOperationBinding`
+
+| Property | YAML field | Type | Description |
+| --- | --- | --- | --- |
+| `Expiration` | `expiration` | `uint` | Time-to-live of the message. |
+| `UserId` | `userId` | `string` | The user who sent the message. |
+| `Cc` | `cc` | `List<string>` | Routing keys the message is routed to when published. |
+| `Bcc` | `bcc` | `List<string>` | Like `Cc`, but consumers do not receive it. |
+| `Priority` | `priority` | `int` | Priority of the message. |
+| `DeliveryMode` | `deliveryMode` | `DeliveryMode` | Transient or persistent delivery. |
+| `Mandatory` | `mandatory` | `bool` | Whether the message is mandatory. |
+| `Timestamp` | `timestamp` | `bool` | Whether the message includes a timestamp. |
+| `Ack` | `ack` | `bool` | Whether the consumer should acknowledge the message. |
+
+### `AMQPMessageBinding`
+
+| Property | YAML field | Type | Description |
+| --- | --- | --- | --- |
+| `ContentEncoding` | `contentEncoding` | `string` | MIME encoding of the message content. |
+| `MessageType` | `messageType` | `string` | Application-specific message type. |
+
+### `Exchange`
+
+| Property | YAML field | Type | Description |
+| --- | --- | --- | --- |
+| `Name` | `name` | `string` | Name of the exchange, at most 255 characters. |
+| `Type` | `type` | `ExchangeType` | Type of the exchange. |
+| `Durable` | `durable` | `bool` | Whether the exchange survives broker restarts. |
+| `AutoDelete` | `autoDelete` | `bool` | Whether the exchange is deleted when its last queue is unbound. |
+| `Vhost` | `vhost` | `string` | Virtual host of the exchange. Defaults to `/`. |
+
+### `Queue`
+
+| Property | YAML field | Type | Description |
+| --- | --- | --- | --- |
+| `Name` | `name` | `string` | Name of the queue, at most 255 characters. |
+| `Durable` | `durable` | `bool` | Whether the queue survives broker restarts. |
+| `Exclusive` | `exclusive` | `bool` | Whether only one connection can use the queue. |
+| `AutoDelete` | `autoDelete` | `bool` | Whether the queue is deleted when its last consumer unsubscribes. |
+| `Vhost` | `vhost` | `string` | Virtual host of the queue. Defaults to `/`. |
+
+### Enums
+
+| Enum | Values (YAML) |
+| --- | --- |
+| `ChannelType` | `Queue` (`queue`), `RoutingKey` (`routingKey`) |
+| `ExchangeType` | `Default` (`default`), `Topic` (`topic`), `Direct` (`direct`), `Fanout` (`fanout`), `Headers` (`headers`) |
+| `DeliveryMode` | `Transient` (`1`), `Persistent` (`2`). Written as a number. |

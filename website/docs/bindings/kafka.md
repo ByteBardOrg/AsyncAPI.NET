@@ -109,6 +109,57 @@ if (parsedMessage.Bindings.TryGetValue<KafkaMessageBinding>(out var kafkaMessage
 }
 ```
 
-Server fields: `SchemaRegistryUrl`, `SchemaRegistryVendor`. Channel fields: `Topic`, nullable `Partitions`/`Replicas`, and typed `TopicConfigurationObject`. Its known cleanup/retention/message-size settings have typed properties; unrecognized settings are retained as `AdditionalProperties`, a dictionary of `AsyncApiAny` values. Operation fields: schema-valued `GroupId` and `ClientId`. Message fields: schema-valued `Key`, `SchemaIdLocation`, `SchemaIdPayloadEncoding`, and `SchemaLookupStrategy`.
+## Object model
 
-`GroupId`, `ClientId`, and message `Key` are `AsyncApiJsonSchema` values and accept either an inline schema or an `AsyncApiJsonSchemaReference` directly. The same collection supports `KafkaServerBinding`, `KafkaOperationBinding`, and `KafkaMessageBinding` on their matching model elements. Numeric settings are nullable where indicated; server-specific Kafka constraints are not checked here.
+Schema-valued properties (`AsyncApiJsonSchema`) accept an inline schema or an `AsyncApiJsonSchemaReference`. Kafka's own constraints on these values are not validated.
+
+### `KafkaServerBinding`
+
+| Property | YAML field | Type | Description |
+| --- | --- | --- | --- |
+| `SchemaRegistryUrl` | `schemaRegistryUrl` | `string` | API URL of the Schema Registry used when producing messages. |
+| `SchemaRegistryVendor` | `schemaRegistryVendor` | `string` | Schema Registry and serdes vendor, such as `apicurio`, `confluent`, `ibm` or `karapace`. |
+
+### `KafkaChannelBinding`
+
+| Property | YAML field | Type | Description |
+| --- | --- | --- | --- |
+| `Topic` | `topic` | `string` | Topic name, if different from the channel name. |
+| `Partitions` | `partitions` | `int?` | Number of partitions on the topic. |
+| `Replicas` | `replicas` | `int?` | Number of replicas of the topic. |
+| `TopicConfiguration` | `topicConfiguration` | `TopicConfigurationObject` | Topic configuration relevant to the API. See below. |
+
+### `TopicConfigurationObject`
+
+| Property | YAML field | Type |
+| --- | --- | --- |
+| `CleanupPolicy` | `cleanup.policy` | `List<string>` |
+| `RetentionMilliseconds` | `retention.ms` | `long?` |
+| `RetentionBytes` | `retention.bytes` | `long?` |
+| `DeleteRetentionMilliseconds` | `delete.retention.ms` | `long?` |
+| `MaxMessageBytes` | `max.message.bytes` | `int?` |
+| `ConfluentKeySchemaValidation` | `confluent.key.schema.validation` | `bool?` |
+| `ConfluentKeySubjectName` | `confluent.key.subject.name.strategy` | `string` |
+| `ConfluentValueSchemaValidation` | `confluent.value.schema.validation` | `bool?` |
+| `ConfluentValueSubjectName` | `confluent.value.subject.name.strategy` | `string` |
+| `AdditionalProperties` | any other setting | `Dictionary<string, AsyncApiAny>` |
+
+Settings without a typed property are read into `AdditionalProperties` and written back unchanged.
+
+### `KafkaOperationBinding`
+
+| Property | YAML field | Type | Description |
+| --- | --- | --- | --- |
+| `GroupId` | `groupId` | `AsyncApiJsonSchema` | Id of the consumer group. |
+| `ClientId` | `clientId` | `AsyncApiJsonSchema` | Id of the consumer inside the consumer group. |
+
+### `KafkaMessageBinding`
+
+| Property | YAML field | Type | Description |
+| --- | --- | --- | --- |
+| `Key` | `key` | `AsyncApiJsonSchema` | The message key. |
+| `SchemaIdLocation` | `schemaIdLocation` | `string` | Where a Schema Registry schema id is stored, such as `header` or `payload`. |
+| `SchemaIdPayloadEncoding` | `schemaIdPayloadEncoding` | `string` | How the schema id is encoded in the payload, such as `confluent`, `apicurio-legacy` or `apicurio-new`. |
+| `SchemaLookupStrategy` | `schemaLookupStrategy` | `string` | Naming strategy class for schema lookup. |
+
+Every binding also has `BindingVersion` (`bindingVersion`).

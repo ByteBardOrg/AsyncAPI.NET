@@ -98,6 +98,34 @@ if (parsedMessage.Bindings.TryGetValue<JMSMessageBinding>(out var jmsMessage)
 }
 ```
 
-Server metadata: `JmsConnectionFactory`, `ClientID`, and `Properties` (`IList<JMSProperty>`; each has `Name` and `AsyncApiAny Value`). Read JSON-typed property values with `Value.GetValue<T>()`. Channel metadata: `Destination` and `DestinationType` strings. Message metadata: `Headers` (`AsyncApiJsonSchema`), which accepts inline schemas or `AsyncApiJsonSchemaReference` values.
+## Object model
 
-The collection also supports server (`JMSServerBinding`) and message (`JMSMessageBinding`) bindings on their respective elements. Destination type and property values are not broker-validated by these models.
+Destination types and property values are not validated against a broker.
+
+### `JMSServerBinding`
+
+| Property | YAML field | Type | Description |
+| --- | --- | --- | --- |
+| `JmsConnectionFactory` | `jmsConnectionFactory` | `string` | Fully qualified class name of the connection factory. |
+| `Properties` | `properties` | `IList<JMSProperty>` | Additional properties of the connection factory. |
+| `ClientID` | `clientID` | `string` | Client identifier for durable subscriptions. |
+
+### `JMSChannelBinding`
+
+| Property | YAML field | Type | Description |
+| --- | --- | --- | --- |
+| `Destination` | `destination` | `string` | Name of the destination, if different from the channel address. |
+| `DestinationType` | `destinationType` | `string` | `queue` or `fifo-queue`. |
+
+### `JMSMessageBinding`
+
+| Property | YAML field | Type | Description |
+| --- | --- | --- | --- |
+| `Headers` | `headers` | `AsyncApiJsonSchema` | Schema of the JMS headers, as an inline schema or an `AsyncApiJsonSchemaReference`. |
+
+### `JMSProperty`
+
+| Property | YAML field | Type | Description |
+| --- | --- | --- | --- |
+| `Name` | `name` | `string` | Name of the property. |
+| `Value` | `value` | `AsyncApiAny` | Value of the property. Read it with `Value.GetValue<T>()`. |

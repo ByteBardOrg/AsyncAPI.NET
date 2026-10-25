@@ -122,7 +122,15 @@ A reference to a location the written document does not contain is written inlin
 
 ## External references
 
-`AsyncApiReaderSettings.ReferenceResolution` defaults to `ReferenceResolutionSetting.ResolveInternalReferences`: local references are resolved and external references remain unresolved placeholders. Set `ResolveAllReferences` to load external references too. The built-in loader supports absolute `file://`, `http://`, and `https://` URIs. Relative external URIs require a `BaseUri`; the built-in loader resolves them relative to that URI as file paths. Other URI schemes require a custom loader.
+`AsyncApiReaderSettings.ReferenceResolution` controls which references are resolved:
+
+| `ReferenceResolutionSetting` | Local references | External references |
+| --- | --- | --- |
+| `ResolveInternalReferences` (default) | resolved | unresolved placeholders |
+| `ResolveAllReferences` | resolved | loaded and resolved |
+| `DoNotResolveReferences` | unresolved placeholders | unresolved placeholders |
+
+The built-in loader supports absolute `file://`, `http://`, and `https://` URIs. Relative external URIs require a `BaseUri`; the built-in loader resolves them relative to that URI as file paths. Other URI schemes require a custom loader.
 
 External resources are parsed as YAML or JSON and normalized through the reader's JSON representation before selecting any reference fragment. This does not support arbitrary serialization formats. For example, a loader can provide an in-memory YAML resource:
 
