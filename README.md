@@ -1,165 +1,79 @@
 # AsyncAPI.NET
-This serves as the official future of AsyncAPI.NET.
-To be able to give the level of support I want, I have had to fork my original work from the The LEGO Group, and create my own.
-This is unfortunate, but after much back and not a lot of forth, I have decided that it was time.
 
 [![Build & Test](https://github.com/ByteBardOrg/AsyncAPI.NET/actions/workflows/ci.yml/badge.svg)](https://github.com/ByteBardOrg/AsyncAPI.NET/actions/workflows/ci.yml)
 
+AsyncAPI.NET provides a .NET object model for AsyncAPI documents, JSON/YAML readers and writers, and protocol bindings.
 
-The AsyncAPI.NET SDK contains a useful object model for the AsyncAPI specification in .NET along with common serializers to extract raw AsyncAPI JSON and YAML documents from the model as well.
-AsyncAPI.NET supports the current releases of the AsyncAPI 2.x and 3.x major versions. Today, serialization emits 2.6 or 3.1.0 respectively.
-V2 documents are upgraded to the V3 model during deserialization and can be written back as V2 (see writing examples). The V3 serialization selector is still named `AsyncApiVersion.AsyncApi3_0`.
-  
-[CHANGELOG](https://github.com/ByteBardOrg/AsyncAPI.NET/blob/vnext/CHANGELOG.md)  
-[Getting started guide](https://bytebard.org/AsyncAPI.NET/docs/guides/getting-started)
+It supports AsyncAPI 2.x and 3.x. V2 documents are upgraded to the V3-shaped model when read and can be written back as V2. Serialization currently emits **2.6** or **3.1.0**; the V3 selector is still named `AsyncApiVersion.AsyncApi3_0`.
 
-## Documentation
-The [documentation site](https://bytebard.org/AsyncAPI.NET/) is built with Docusaurus. See [website/README.md](website/README.md) for local development instructions. GitHub Pages must be configured to use GitHub Actions for deployment.
+See the **[documentation site](https://bytebard.org/AsyncAPI.NET/)** for guides and examples, or the [changelog](CHANGELOG.md) for release notes.
 
-## Installation
-Generally you want to use Readers and Bindings.
-They have however been split to allow for different scenarios without polluting with unnecesary packages.
+## Install
 
-Install the NuGet packages:
-### ByteBard.AsyncAPI.NET
-[![Nuget](https://img.shields.io/nuget/v/ByteBard.AsyncAPI.NET?label=ByteBard.AsyncAPI.NET&style=for-the-badge)](https://www.nuget.org/packages/ByteBard.AsyncAPI.NET/)  
-[![Nuget](https://img.shields.io/nuget/vpre/ByteBard.AsyncAPI.NET?label=ByteBard.AsyncAPI.NET-Preview&style=for-the-badge)](https://www.nuget.org/packages/ByteBard.AsyncAPI.NET/)  
+Install the core model and serializers, plus the readers for JSON/YAML input:
 
-### ByteBard.AsyncAPI.Readers
-[![Nuget](https://img.shields.io/nuget/v/ByteBard.AsyncAPI.NET.Readers?label=ByteBard.AsyncAPI.Readers&style=for-the-badge)](https://www.nuget.org/packages/ByteBard.AsyncAPI.NET.Readers/)  
-[![Nuget](https://img.shields.io/nuget/vpre/ByteBard.AsyncAPI.NET.Readers?label=ByteBard.AsyncAPI.Readers-Preview&style=for-the-badge)](https://www.nuget.org/packages/ByteBard.AsyncAPI.NET.Readers/)  
+```sh
+dotnet add package ByteBard.AsyncAPI.NET
+dotnet add package ByteBard.AsyncAPI.NET.Readers
+```
 
-### ByteBard.AsyncAPI.Bindings
-[![Nuget](https://img.shields.io/nuget/v/ByteBard.AsyncAPI.NET.Bindings?label=ByteBard.AsyncAPI.Bindings&style=for-the-badge)](https://www.nuget.org/packages/ByteBard.AsyncAPI.NET.Bindings/)  
-[![Nuget](https://img.shields.io/nuget/vpre/ByteBard.AsyncAPI.NET.Bindings?label=ByteBard.AsyncAPI.Bindings-Preview&style=for-the-badge)](https://www.nuget.org/packages/ByteBard.AsyncAPI.NET.Bindings/)  
+For protocol bindings, also install:
 
-# Example Usage
-Main classes to know:
+```sh
+dotnet add package ByteBard.AsyncAPI.NET.Bindings
+```
 
-* AsyncApiStringReader
-* AsyncApiStringWriter
-  * There is an extension on the AsyncApiDocument type which allows Serializing as well (`new AsyncApiDocument().SerializeAsJson()` or `new AsyncApiDocument().SerializeAsYaml()`
+Binding readers require explicit registration; see [protocol bindings](https://bytebard.org/AsyncAPI.NET/docs/bindings).
 
-## Writing
+## Quick start
+
+Parse YAML, check diagnostics, and write JSON (C# 11 or later):
 
 ```csharp
-var specification =
-"""
+using System;
+using ByteBard.AsyncAPI;
+using ByteBard.AsyncAPI.Models;
+using ByteBard.AsyncAPI.Readers;
+
+var source = """
 asyncapi: 3.1.0
 info:
-  title: UsersAPI
+  title: Example API
   version: 1.0.0
-  externalDocs:
-    description: Find more info here
-    url: https://www.asyncapi.com
-  tags:
-    - name: e-commerce
-servers:
-  production:
-    host: "rabbitmq.in.mycompany.com:5672"
-    pathname: "/production"
-    protocol: "amqp"
-channels:
-  UserSignup:
-    address: "user/signedup"
-    messages: 
-      UserMessage: 
-        payload:
-          type: object
-          properties:
-            displayName:
-              type: string
-              description: Name of the user
-operations:
-  ConsumeUserSignups:
-    action: receive
-    channel: 
-      $ref: "#/channels/UserSignup"
+channels: {}
 """;
-var reader = new AsyncApiStringReader();
-var document = reader.Read(specification, out var diagnostics);
-var v2Document = document.SerializeAsYaml(AsyncApiVersion.AsyncApi2_0);
-var v3Document = document.SerializeAsJson(AsyncApiVersion.AsyncApi3_0);
+
+var document = new AsyncApiStringReader().Read(source, out var diagnostics);
+
+foreach (var error in diagnostics.Errors)
+    Console.Error.WriteLine($"Error at {error.Pointer}: {error.Message}");
+foreach (var warning in diagnostics.Warnings)
+    Console.Error.WriteLine($"Warning at {warning.Pointer}: {warning.Message}");
+
+if (diagnostics.Errors.Count > 0)
+    return;
+
+Console.WriteLine(document.SerializeAsJson(AsyncApiVersion.AsyncApi3_0));
 ```
 
+## Documentation
 
-## Reading
+- [Getting started](https://bytebard.org/AsyncAPI.NET/docs/guides/getting-started)
+- [Reading documents and diagnostics](https://bytebard.org/AsyncAPI.NET/docs/guides/reading)
+- [Schemas](https://bytebard.org/AsyncAPI.NET/docs/guides/schemas): [JSON Schema](https://bytebard.org/AsyncAPI.NET/docs/guides/json-schema) and [Avro](https://bytebard.org/AsyncAPI.NET/docs/guides/avro)
+- [References and resolution](https://bytebard.org/AsyncAPI.NET/docs/guides/references)
+- [Protocol bindings](https://bytebard.org/AsyncAPI.NET/docs/bindings)
+- Extending: [extension parsers](https://bytebard.org/AsyncAPI.NET/docs/guides/custom-extension-parsers), [schema parsers](https://bytebard.org/AsyncAPI.NET/docs/guides/custom-schema-parsers), [bindings](https://bytebard.org/AsyncAPI.NET/docs/guides/custom-bindings), and [validation rules](https://bytebard.org/AsyncAPI.NET/docs/guides/validation-rules)
 
-There are 3 reader types
-1. AsyncApiStringReader
-2. AsyncApiTextReader
-3. AsyncApiStreamReader
+## Contributing
 
-All 3 supports both json and yaml.
-
-#### StreamReader
-```csharp
-var httpClient = new HttpClient
-{
-  BaseAddress = new Uri("https://raw.githubusercontent.com/asyncapi/spec/"),
-};
-
-var stream = await httpClient.GetStreamAsync("master/examples/streetlights-kafka.yml");
-var asyncApiDocument = new AsyncApiStreamReader().Read(stream, out var diagnostic);
-```
-
-#### StringReader
-```csharp
-var yaml =
-	"""
-	asyncapi: 2.6.0
-	  info:
-	    title: my first asyncapi
-	channels:
-	  users:
-	    subscribe:
-	      operationId: users
-	      description: my users channel
-	      message:
-	        $ref: '#/components/messages/MyMessage'
-	components:
-	  messages:
-	    MyMessage:
-	      name: Hello!
-	""";
-
-var asyncApiDocument = new AsyncApiStringReader().Read(yaml, out var diagnostic);
-```
-All readers will write warnings and errors to the diagnostics.
-
-
-## Reference Resolution
-Internal references are resolved by default. This includes component and non-component references e.g `#/components/messages/MyMessage` and `#/servers/production`.
-External references can be resolved by setting `ReferenceResolution` to `ResolveAllReferences`.
-The default implementation will resolve anything prefixed with `file://`, `http://` & `https://`, however a custom implementation can be made, by inhereting from the `IStreamLoader` interface and setting the `ExternalReferenceLoader` in the `AsyncApiReaderSettings`.
-External references are always force converted to Json during resolution. This means that both yaml and json is supported - but not other serialization languages.
-
-```csharp
-var settings = new AsyncApiReaderSettings { ReferenceResolution = ReferenceResolutionSetting.ResolveAllReferences };
-var document = new AsyncApiStringReader(settings).Read(json, out var diagnostics);
-```
-
-Reference resolution can be disabled by setting `ReferenceResolution` to `DoNotResolveReferences`. 
-
-## Bindings
-To add support for reading bindings, simply add the bindings you wish to support, to the `Bindings` collection of `AsyncApiReaderSettings`.
-There is a nifty helper to add different types of bindings, or like in the example `All` of them.
-
-```csharp
-var settings = new AsyncApiReaderSettings();
-settings.Bindings = BindingsCollection.All;
-var asyncApiDocument = new AsyncApiStringReader(settings).Read(yaml, out var diagnostic);
-```
+Contributions and suggestions are welcome. See [CONTRIBUTING.md](CONTRIBUTING.md) and the [documentation development instructions](website/README.md).
 
 ## Attribution
 
-* [OpenAPI.Net](https://github.com/microsoft/OpenAPI.NET) - [MIT License](https://github.com/microsoft/OpenAPI.NET/blob/vnext/LICENSE)
-* [YamlDotNet](https://github.com/aaubry/YamlDotNet) - [MIT License](https://github.com/aaubry/YamlDotNet/blob/master/LICENSE.txt)
-  
-## Contribution
-
-This project welcomes contributions and suggestions.
-Do you want to contribute to the project? Find out how [here](CONTRIBUTING.md).
+- [OpenAPI.NET](https://github.com/microsoft/OpenAPI.NET) — [MIT License](https://github.com/microsoft/OpenAPI.NET/blob/vnext/LICENSE)
+- [YamlDotNet](https://github.com/aaubry/YamlDotNet) — [MIT License](https://github.com/aaubry/YamlDotNet/blob/master/LICENSE.txt)
 
 ## License
-[Apache 2.0](https://github.com/ByteBardOrg/AsyncAPI.NET/blob/main/LICENSE.txt)
+
+[Apache 2.0](LICENSE.txt)
