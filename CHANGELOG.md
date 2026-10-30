@@ -1,6 +1,60 @@
 # Changelog
 
 Package versions follow this library's semantic versioning and do not correspond directly to AsyncAPI specification versions. For example, package 2.0.0 introduced the AsyncAPI 3.0 object model, while package 3.0.0 later moved V3 document output to AsyncAPI 3.1.0.
+ Changelog
+
+Package versions follow this library's semantic versioning and do not correspond directly to AsyncAPI specification versions. For example, package 2.0.0 introduced the AsyncAPI 3.0 object model, while package 3.0.0 later moved V3 document output to AsyncAPI 3.1.0.
+
+# [4.0.0](https://github.com/ByteBardOrg/AsyncAPI.NET/compare/v3.0.1...v4.0.0) (2026-10-30)
+### Bug Fixes
+
+* accept operations that reference an inline channel message ([6177244](https://github.com/ByteBardOrg/AsyncAPI.NET/commit/61772446d031ff6195a530402a59e64d797190ae))
+* always serialize SQS fifoQueue ([#42](https://github.com/ByteBardOrg/AsyncAPI.NET/issues/42)) ([84c9c96](https://github.com/ByteBardOrg/AsyncAPI.NET/commit/84c9c960d993d3ed67cf52a68b4525b23216cd71))
+* compare unresolved references by $ref and resolve bindings Extensions ([c689639](https://github.com/ByteBardOrg/AsyncAPI.NET/commit/c689639e28c5061442a4a5e3830ef62553bb46cf))
+* handle 2.x message traits without headers ([#58](https://github.com/ByteBardOrg/AsyncAPI.NET/issues/58)) ([4fcc2ad](https://github.com/ByteBardOrg/AsyncAPI.NET/commit/4fcc2ad997e6ff60e2b2529574ba1b9b569c1547))
+* inline every non-recursive schema reference and keep cyclic ones as $ref ([b0c91c5](https://github.com/ByteBardOrg/AsyncAPI.NET/commit/b0c91c5b9ea2a183e22378a8be9696a38ef50e0f))
+* parse integers with the reader culture instead of the current culture ([c57a8d6](https://github.com/ByteBardOrg/AsyncAPI.NET/commit/c57a8d6e9c635db520bc65f6a68e071b69d6a31d))
+* percent-encode keys in local reference pointers ([#62](https://github.com/ByteBardOrg/AsyncAPI.NET/issues/62)) ([9149a76](https://github.com/ByteBardOrg/AsyncAPI.NET/commit/9149a7638b7fd3dd3dc4947b0b617ab221bdc560)), closes [#61](https://github.com/ByteBardOrg/AsyncAPI.NET/issues/61)
+* report invalid MQTT and ROS2 binding scalars as errors ([a13c612](https://github.com/ByteBardOrg/AsyncAPI.NET/commit/a13c612a985ff45fd04f074d75e013eca1229279))
+* report invalid SQS/SNS policy values as diagnostics ([#46](https://github.com/ByteBardOrg/AsyncAPI.NET/issues/46)) ([da8a261](https://github.com/ByteBardOrg/AsyncAPI.NET/commit/da8a261da1e6635ff5258abd6c8714a78b75669c))
+* resolve external 3.x payload references ([#59](https://github.com/ByteBardOrg/AsyncAPI.NET/issues/59)) ([e816843](https://github.com/ByteBardOrg/AsyncAPI.NET/commit/e816843ebd4b78e753bc407c31f55253229f5604))
+* say which value failed to parse and why references could not be resolved ([#54](https://github.com/ByteBardOrg/AsyncAPI.NET/issues/54)) ([925a9ab](https://github.com/ByteBardOrg/AsyncAPI.NET/commit/925a9ab3c36da8bc1cadf39088bbc2e2d5384401))
+* serialize Kafka schemaIdLocation with correct casing ([#41](https://github.com/ByteBardOrg/AsyncAPI.NET/issues/41)) ([45e7fa2](https://github.com/ByteBardOrg/AsyncAPI.NET/commit/45e7fa23124bc965b36a0bd576a1f91fe59b8792))
+* stop adding topic and retain when writing an MQTT lastWill ([150d6d7](https://github.com/ByteBardOrg/AsyncAPI.NET/commit/150d6d7eb96acbf6849bd062ecdb3fb0e3d658f4))
+* stop flagging binding extensions as missing bindings ([#44](https://github.com/ByteBardOrg/AsyncAPI.NET/issues/44)) ([a3c572b](https://github.com/ByteBardOrg/AsyncAPI.NET/commit/a3c572bbe7fc979a3272d1a87e449e116f9b6279))
+* use 'ws' as the WebSockets binding key ([#43](https://github.com/ByteBardOrg/AsyncAPI.NET/issues/43)) ([7e53ce9](https://github.com/ByteBardOrg/AsyncAPI.NET/commit/7e53ce95d7dd8e1cdf038551e4aa07c658a9f680))
+
+
+* fix!: resolve local references outside the components, in both versions (#63) ([5a689cf](https://github.com/ByteBardOrg/AsyncAPI.NET/commit/5a689cf0e1f6ff4c8863ef7da08dc04cbbc10f93)), closes [#63](https://github.com/ByteBardOrg/AsyncAPI.NET/issues/63)
+* fix!: escape keys in local reference pointers (#60) ([ff96a92](https://github.com/ByteBardOrg/AsyncAPI.NET/commit/ff96a92da4f04b5dca86cc601bcb98aae93819b0)), closes [#60](https://github.com/ByteBardOrg/AsyncAPI.NET/issues/60)
+* fix!: drop the JsonPointer.Net dependency from the readers (#56) ([7ed7e04](https://github.com/ByteBardOrg/AsyncAPI.NET/commit/7ed7e041f4a496e0b8030d88523ba2161f54fdd1)), closes [#56](https://github.com/ByteBardOrg/AsyncAPI.NET/issues/56)
+* refactor!: model Solace values and StringOrStringList as type hierarchies (#55) ([c0c5ab2](https://github.com/ByteBardOrg/AsyncAPI.NET/commit/c0c5ab2914f101a64234fb55502fe94fa3a0103c)), closes [#55](https://github.com/ByteBardOrg/AsyncAPI.NET/issues/55)
+
+
+### Features
+
+* **bindings:** add additional bindings ([#45](https://github.com/ByteBardOrg/AsyncAPI.NET/issues/45)) ([2a590ee](https://github.com/ByteBardOrg/AsyncAPI.NET/commit/2a590eec99c7885dea14939ecd52d40cf0258792))
+
+
+### BREAKING CHANGES
+
+* JsonPointerExtensions is removed; use JsonPointer.Find.
+
+* fix: inline a 2.x channel reference whose target is not written
+
+A 2.x channel reference is written with its target's address, since 2.x
+keys channels by address. When the target is not one of the document's
+channels, for example because it was removed after reading, that address
+points nowhere and did not match the reference, so it was left dangling.
+Such a reference now keeps its own pointer, which is found dangling and
+written inline.
+* a local reference to a key containing "/" or "~" must
+escape it as "~1" or "~0" (RFC 6901). The unescaped form no longer resolves.
+* new JsonPointer("/") no longer points to the root, the
+constructor no longer percent-decodes, and malformed pointers throw.
+* the public constructor and the Value property are
+removed. Construct values through the implicit conversions or the
+SingleString/StringList constructors.
 
 ## [3.0.1](https://github.com/ByteBardOrg/AsyncAPI.NET/compare/v3.0.0...v3.0.1) (2026-08-02)
 
