@@ -96,6 +96,44 @@ if (parsedMessage.Bindings.TryGetValue<GooglePubSubMessageBinding>(out var pubSu
 }
 ```
 
-Channel fields: `Labels` (`Dictionary<string,string>`), `MessageRetentionDuration` (`string`), `MessageStoragePolicy` (`AllowedPersistenceRegions`, a sequence of strings), and `SchemaSettings` (`Encoding`, `FirstRevisionId`, `LastRevisionId`, and `Name`, all strings). Message fields: `Attributes` (`Dictionary<string,string>`), `OrderingKey`, and `Schema` (`MessageSchema`, whose `Name` is a string). This message `Schema` is Pub/Sub schema metadata, not an `AsyncApiJsonSchema` payload schema.
+## Object model
 
-For message-level writes, attach a `GooglePubSubMessageBinding` with `message.Bindings.Add(new GooglePubSubMessageBinding { ... });`; it provides `Attributes`, `OrderingKey`, and `Schema`. Duration text and nested schema/storage settings are retained as model data; the library does not verify them against a live topic.
+Values are kept as written; the library does not check them against a live topic.
+
+### `GooglePubSubChannelBinding`
+
+| Property | YAML field | Type | Description |
+| --- | --- | --- | --- |
+| `Labels` | `labels` | `Dictionary<string, string>` | Labels on the topic. |
+| `MessageRetentionDuration` | `messageRetentionDuration` | `string` | How long messages are retained, as a duration string such as `86400s`. |
+| `MessageStoragePolicy` | `messageStoragePolicy` | `MessageStoragePolicy` | Where messages may be stored. |
+| `SchemaSettings` | `schemaSettings` | `SchemaSettings` | The schema messages are validated against. |
+
+### `GooglePubSubMessageBinding`
+
+| Property | YAML field | Type | Description |
+| --- | --- | --- | --- |
+| `Attributes` | `attributes` | `Dictionary<string, string>` | Attributes of the message. |
+| `OrderingKey` | `orderingKey` | `string` | Key for ordered delivery. |
+| `Schema` | `schema` | `MessageSchema` | The Pub/Sub schema of the message. This is Pub/Sub metadata, not the payload schema. |
+
+### `MessageStoragePolicy`
+
+| Property | YAML field | Type | Description |
+| --- | --- | --- | --- |
+| `AllowedPersistenceRegions` | `allowedPersistenceRegions` | `IEnumerable<string>` | Regions where messages may be stored. |
+
+### `SchemaSettings`
+
+| Property | YAML field | Type | Description |
+| --- | --- | --- | --- |
+| `Name` | `name` | `string` | Name of the schema. |
+| `Encoding` | `encoding` | `string` | Encoding of the messages, such as `JSON` or `BINARY`. |
+| `FirstRevisionId` | `firstRevisionId` | `string` | Oldest schema revision messages are validated against. |
+| `LastRevisionId` | `lastRevisionId` | `string` | Newest schema revision messages are validated against. |
+
+### `MessageSchema`
+
+| Property | YAML field | Type | Description |
+| --- | --- | --- | --- |
+| `Name` | `name` | `string` | Name of the schema. |

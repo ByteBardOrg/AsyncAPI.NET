@@ -6,7 +6,14 @@ sidebar_position: 8
 
 # Custom schema parsers
 
-When a message payload uses a schema format not handled by the built-in JSON Schema or Avro parsers, implement `IAsyncApiSchemaParser` and register it on `AsyncApiReaderSettings.SchemaParserRegistry`. A parser provides `SupportedFormats` and `LoadSchema(ParseNode)`. A `schemaFormat` matches a registered format when it is exactly equal to that format or starts with it; for example, registering `application/vnd.example.schema` also matches `application/vnd.example.schema;version=2`. Choose a registered prefix that does not unintentionally match other formats.
+When a message payload uses a schema format not handled by the built-in JSON Schema or Avro parsers, implement `IAsyncApiSchemaParser` and register it on `AsyncApiReaderSettings.SchemaParserRegistry`.
+
+| Member | Type | Purpose |
+| --- | --- | --- |
+| `SupportedFormats` | `IEnumerable<string>` | The `schemaFormat` values the parser handles. |
+| `LoadSchema(ParseNode node)` | `IAsyncApiSchema` | Reads a payload schema. |
+
+A `schemaFormat` matches a registered format when it is exactly equal to that format or starts with it; for example, registering `application/vnd.example.schema` also matches `application/vnd.example.schema;version=2`. Choose a registered prefix that does not unintentionally match other formats.
 
 The registered type should implement `IAsyncApiSchema` so it can be held as a payload schema. `IAsyncApiSchema` also requires `SerializeV2` and `SerializeV3`: implement both to support writing in both document versions. For an intentionally read-only schema, keep the required methods but throw a clear `NotSupportedException`; the parser will still read, but document serialization containing that schema is not supported.
 

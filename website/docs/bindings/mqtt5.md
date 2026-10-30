@@ -88,3 +88,11 @@ if (referenceServer.Bindings.TryGetValue<MQTT5ServerBinding>(out var referenced)
 `TryGetValue<TBinding>` returns `false` if no binding with that type's `BindingKey` is present; the union pattern then distinguishes the scalar and schema values.
 
 The union is also used by MQTT's server and operation fields. MQTT 5's binding is deprecated, and `BindingsCollection.MQTT5` has no channel, operation, or message parser. AsyncAPI 2.x and 3.x serialization are supported; specify a target version when serializing. See the [shared guide](index.md).
+
+## Object model
+
+### `MQTT5ServerBinding`
+
+| Property | YAML field | Type | Description |
+| --- | --- | --- | --- |
+| `SessionExpiryInterval` | `sessionExpiryInterval` | `MQTTIntegerOrSchema` | Seconds the broker keeps the session of a disconnected client, as an integer or a schema. See [value unions](mqtt.md#value-unions). |

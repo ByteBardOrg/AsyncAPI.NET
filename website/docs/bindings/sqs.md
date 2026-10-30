@@ -21,9 +21,7 @@ channel.Bindings.Add(new SqsChannelBinding
 
 `Bindings.Add(binding)` uses the binding's `BindingKey` (`sqs`) rather than a manually supplied dictionary key.
 
-Channel fields are `Queue` and `DeadLetterQueue`. A queue includes name, FIFO/deduplication/throughput settings, delivery delay, visibility timeout, receive wait time, retention period, redrive policy, policy, and tags. Operation fields: `Queues` (`List<Queue>`). Policies contain statements with effect, principal, action, resource, and condition.
-
-`Statement.Action` is the abstract `StringOrStringList` type; nullable `Resource` uses the same type. Its concrete alternatives are `SingleString` (property `Value`) and `StringList` (property `Values`). Strings, `string[]`, and `List<string>` convert implicitly, preserving the scalar-versus-array wire shape without an `AsyncApiAny` wrapper. `StringList` copies its input and rejects null items. SNS uses the same hierarchy (see [SNS](sns.md)).
+The properties are listed in the [object model](#object-model). A policy statement's `Action` and `Resource` are [`StringOrStringList`](sns.md#stringorstringlist) values, shared with SNS, which keep whether the value was written as a single string or an array.
 
 Assign a string for a scalar value and a string array or list for an array value. For example, this uses a scalar `Action` and list-valued `Resource`:
 
@@ -129,3 +127,70 @@ if (parsed.Channels["orders"].Bindings.TryGetValue<SqsChannelBinding>(out var sq
 `TryGetValue<TBinding>` returns `false` if the binding described by `TBinding.BindingKey` is absent. For present policy values, pattern-match the parsed union alternative instead of assuming a scalar or list: use `.Value` for `SingleString` and `.Values` for `StringList`.
 
 The same collection supports `SqsOperationBinding` on operations. These examples target AsyncAPI 3.1.0; AsyncAPI.NET also converts document layout when writing 2.x. Queue and IAM policy validity is not checked against AWS. See [shared setup](index.md).
+
+## Object model
+
+### `SqsChannelBinding`
+
+| Property | YAML field | Type | Description |
+| --- | --- | --- | --- |
+| `Queue` | `queue` | `Queue` | The queue used as the channel. |
+| `DeadLetterQueue` | `deadLetterQueue` | `Queue` | The queue for messages that cannot be processed. |
+
+### `SqsOperationBinding`
+
+| Property | YAML field | Type | Description |
+| --- | --- | --- | --- |
+| `Queues` | `queues` | `List<Queue>` | Queues that are the endpoint of an SNS operation binding, or the dead-letter queue of this binding. |
+
+### `Queue`
+
+| Property | YAML field | Type | Description |
+| --- | --- | --- | --- |
+| `Name` | `name` | `string` | Name of the queue. An SNS operation binding refers to the queue by this name. |
+| `FifoQueue` | `fifoQueue` | `bool` | Whether this is a FIFO queue. |
+| `DeduplicationScope` | `deduplicationScope` | `DeduplicationScope?` | Whether deduplication applies per message group or per queue. |
+| `FifoThroughputLimit` | `fifoThroughputLimit` | `FifoThroughputLimit?` | Whether the FIFO throughput quota applies per queue or per message group. |
+| `DeliveryDelay` | `deliveryDelay` | `int?` | Seconds before a new message can be received. |
+| `VisibilityTimeout` | `visibilityTimeout` | `int?` | Seconds a received message is hidden from other consumers. |
+| `ReceiveMessageWaitTime` | `receiveMessageWaitTime` | `int?` | Seconds a receive waits for messages. `0` means short polling. |
+| `MessageRetentionPeriod` | `messageRetentionPeriod` | `int?` | Seconds a message is retained, unless deleted. |
+| `RedrivePolicy` | `redrivePolicy` | `RedrivePolicy` | Dead-letter queue for messages that cannot be processed. |
+| `Policy` | `policy` | `Policy` | Security policy of the queue. |
+| `Tags` | `tags` | `Dictionary<string, string>` | AWS tags on the queue. |
+
+### `RedrivePolicy`
+
+| Property | YAML field | Type | Description |
+| --- | --- | --- | --- |
+| `DeadLetterQueue` | `deadLetterQueue` | `Identifier` | The dead-letter queue. |
+| `MaxReceiveCount` | `maxReceiveCount` | `int?` | Deliveries to the source queue before a message is moved to the dead-letter queue. |
+
+### `Identifier`
+
+Identifies a queue; set the one property that applies.
+
+| Property | YAML field | Type |
+| --- | --- | --- |
+| `Arn` | `arn` | `string` |
+| `Name` | `name` | `string` |
+
+### `Policy` and `Statement`
+
+`Policy` has one property, `Statements` (`statements`, `List<Statement>`). `Principal`, `Condition` and `StringOrStringList` work as in the [SNS binding](sns.md#principal).
+
+| Property | YAML field | Type | Description |
+| --- | --- | --- | --- |
+| `Effect` | `effect` | `Effect` | Whether the statement allows or denies access. |
+| `Principal` | `principal` | `Principal` | Accounts or resources the statement applies to. |
+| `Action` | `action` | `StringOrStringList` | Permissions allowed or denied, such as `sqs:SendMessage`. |
+| `Resource` | `resource` | `StringOrStringList?` | Resources the statement applies to. |
+| `Condition` | `condition` | `Condition` | Conditions under which the statement applies. |
+
+### Enums
+
+| Enum | Values (YAML) |
+| --- | --- |
+| `DeduplicationScope` | `queue`, `messageGroup` |
+| `FifoThroughputLimit` | `perQueue`, `perMessageGroupId` |
+| `Effect` | `allow`, `deny` |

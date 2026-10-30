@@ -26,9 +26,7 @@ var server = new AsyncApiServer();
 server.Bindings.Add(new PulsarServerBinding { Tenant = "contoso" });
 ```
 
-`Bindings.Add(binding)` uses each instance's `BindingKey` (`pulsar`) for both channel and server bindings.
-
-Server binding fields: `Tenant`. Channel binding fields: `Namespace`, required `Persistence`, nullable `Compaction`, `GeoReplication`, `Retention`, nullable `TTL`, and nullable `Deduplication`. `RetentionDefinition` contains integer `Time` and `Size` (time in minutes; size in megabytes).
+`Bindings.Add(binding)` uses each instance's `BindingKey` (`pulsar`) for both channel and server bindings. The properties are listed in the [object model](#object-model).
 
 ## Write
 
@@ -93,3 +91,37 @@ if (parsedServer.Bindings.TryGetValue<PulsarServerBinding>(out var pulsarServer)
 Each typed lookup returns `false` when the corresponding server or channel binding is absent.
 
 The same collection supports `PulsarServerBinding` on a server. These examples target AsyncAPI 3.1.0; when writing 2.x, AsyncAPI.NET converts the surrounding document layout. The model does not enforce Pulsar's deployment-specific retention or namespace constraints. For reader setup see the [shared guide](index.md).
+
+## Object model
+
+### `PulsarServerBinding`
+
+| Property | YAML field | Type | Description |
+| --- | --- | --- | --- |
+| `Tenant` | `tenant` | `string` | Pulsar tenant. `public` is assumed when omitted. |
+
+### `PulsarChannelBinding`
+
+| Property | YAML field | Type | Description |
+| --- | --- | --- | --- |
+| `Namespace` | `namespace` | `string` | Namespace of the topic. |
+| `Persistence` | `persistence` | `Persistence` | Persistence of the topic. Always written; defaults to `Persistent`. |
+| `Compaction` | `compaction` | `int?` | Topic compaction threshold, in bytes. |
+| `GeoReplication` | `geo-replication` | `IEnumerable<string>` | Clusters the topic is replicated to. |
+| `Retention` | `retention` | `RetentionDefinition` | Retention policy of the topic. |
+| `TTL` | `ttl` | `int?` | Message time-to-live, in seconds. |
+| `Deduplication` | `deduplication` | `bool?` | Whether each message is persisted only once. |
+
+### `RetentionDefinition`
+
+| Property | YAML field | Type | Description |
+| --- | --- | --- | --- |
+| `Time` | `time` | `int` | Retention time, in minutes. `0` disables retention. |
+| `Size` | `size` | `int` | Retention size, in megabytes. `0` disables retention. |
+
+### `Persistence`
+
+| Value | YAML |
+| --- | --- |
+| `Persistent` | `persistent` |
+| `NonPersistent` | `non-persistent` |

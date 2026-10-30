@@ -117,8 +117,53 @@ if (schemaMessage.Bindings.TryGetValue<MQTTMessageBinding>(out var schemaMessage
 
 `TryGetValue<TBinding>` looks up the binding using `TBinding.BindingKey` and returns `false` when that binding is absent. The union pattern checks remain necessary because the binding property may hold a scalar or schema alternative.
 
-Server fields include `ClientId`, nullable `CleanSession`, `LastWill`, nullable `KeepAlive`, `SessionExpiryInterval`, and `MaximumPacketSize`. Operation has `MessageExpiryInterval`. Message fields include nullable `PayloadFormatIndicator`, schema-valued `CorrelationData`, `ContentType`, and `ResponseTopic`.
+## Object model
 
-`SessionExpiryInterval`, `MaximumPacketSize`, and `MessageExpiryInterval` use `MQTTIntegerOrSchema`; `ResponseTopic` uses `MQTTStringOrSchema`. On read, scalar integers/strings become `MQTTInteger`/`MQTTString`; schema objects and `$ref` objects become `MQTTIntegerSchema`/`MQTTStringSchema`. Both alternatives serialize directly without an extra wrapper, and schema serialization follows the enclosing AsyncAPI version. Invalid integer scalars fail integer parsing. MQTT field limits and topic syntax are not validated.
+MQTT field limits and topic syntax are not validated.
 
-The same collection supports `MQTTOperationBinding` and `MQTTMessageBinding` at operation and message level. These union fields may also contain schemas, so pattern-match the active alternative before using it; see the conversion notes above.
+### `MQTTServerBinding`
+
+| Property | YAML field | Type | Description |
+| --- | --- | --- | --- |
+| `ClientId` | `clientId` | `string` | Client identifier. |
+| `CleanSession` | `cleanSession` | `bool?` | Whether the connection is non-persistent. Called clean start in MQTT 5. |
+| `LastWill` | `lastWill` | `LastWill` | Last Will and Testament configuration. |
+| `KeepAlive` | `keepAlive` | `int?` | Longest time, in seconds, the broker and client can go without sending a message. |
+| `SessionExpiryInterval` | `sessionExpiryInterval` | `MQTTIntegerOrSchema` | Seconds the broker keeps the session of a disconnected client. |
+| `MaximumPacketSize` | `maximumPacketSize` | `MQTTIntegerOrSchema` | Largest packet, in bytes, the client accepts. |
+
+### `MQTTOperationBinding`
+
+| Property | YAML field | Type | Description |
+| --- | --- | --- | --- |
+| `MessageExpiryInterval` | `messageExpiryInterval` | `MQTTIntegerOrSchema` | Lifetime of the message, in seconds. |
+
+### `MQTTMessageBinding`
+
+| Property | YAML field | Type | Description |
+| --- | --- | --- | --- |
+| `PayloadFormatIndicator` | `payloadFormatIndicator` | `int?` | `0` for unspecified bytes, `1` for UTF-8 text. |
+| `CorrelationData` | `correlationData` | `AsyncApiJsonSchema` | Identifies the request a response is for. |
+| `ContentType` | `contentType` | `string` | Content type of the payload. |
+| `ResponseTopic` | `responseTopic` | `MQTTStringOrSchema` | Topic for the response message. |
+
+### `LastWill`
+
+| Property | YAML field | Type | Description |
+| --- | --- | --- | --- |
+| `Topic` | `topic` | `string` | Topic the Last Will message is sent to. |
+| `QoS` | `qos` | `uint?` | Delivery guarantee: `0`, `1` or `2`. |
+| `Message` | `message` | `string` | The Last Will message. |
+
+### Value unions
+
+A union property holds one of two alternatives. Pattern-match it before reading the value. Both are written directly, without a wrapper object, and a schema is written for the AsyncAPI version of the document.
+
+| Union | Alternative | Holds | Read from |
+| --- | --- | --- | --- |
+| `MQTTIntegerOrSchema` | `MQTTInteger` | `Value` (`long`) | an integer |
+| | `MQTTIntegerSchema` | `Schema` (`AsyncApiJsonSchema`) | a schema or a `$ref` |
+| `MQTTStringOrSchema` | `MQTTString` | `Value` (`string`) | a string |
+| | `MQTTStringSchema` | `Schema` (`AsyncApiJsonSchema`) | a schema or a `$ref` |
+
+A `long`, `string` or `AsyncApiJsonSchema` converts implicitly to the matching union. A non-integer where an integer is expected fails to read.

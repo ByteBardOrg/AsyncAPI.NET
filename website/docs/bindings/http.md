@@ -79,6 +79,23 @@ if (parsedOperation.Bindings.TryGetValue<HttpOperationBinding>(out var httpOpera
 }
 ```
 
-Operation metadata includes `Method` (string) and `Query` (`AsyncApiJsonSchema`, including schema references). Message metadata includes `Headers` (`AsyncApiJsonSchema`, including schema references) and nullable `StatusCode` (`int?`). Attach message metadata through the message's `Bindings` dictionary. `statusCode` is a V3 message-binding field; the V2 serializer omits it. The HTTP operation `type` is inferred from the operation action when serializing AsyncAPI V2 (`send` becomes `request`, `receive` becomes `response`); V3 omits `type`. The V2 reader uses that field to infer the operation action, so V3 operation input/readback needs no `type` field.
+## Object model
 
-`Method` is a string rather than an enum and HTTP method values are not validated. On reading, a message `statusCode` outside the inclusive range 100–599 produces a diagnostic, but the value is retained in the binding.
+### `HttpOperationBinding`
+
+| Property | YAML field | Type | Description |
+| --- | --- | --- | --- |
+| `Method` | `method` | `string` | HTTP method, such as `GET` or `POST`. Not validated. |
+| `Query` | `query` | `AsyncApiJsonSchema` | Schema of the query parameters, as an inline schema or an `AsyncApiJsonSchemaReference`. |
+
+### `HttpMessageBinding`
+
+| Property | YAML field | Type | Description |
+| --- | --- | --- | --- |
+| `Headers` | `headers` | `AsyncApiJsonSchema` | Schema of the HTTP headers, as an inline schema or an `AsyncApiJsonSchemaReference`. |
+| `StatusCode` | `statusCode` | `int?` | Response status code, for messages of an operation reply. Written in V3 only. |
+
+### Version differences
+
+- V2 operation bindings have a `type` field, `request` or `response`. It is not a property: writing V2 derives it from the operation's action (`Send` becomes `request`, `Receive` becomes `response`), and reading V2 uses it to set the action. V3 has no `type` field.
+- A `statusCode` outside 100–599 is reported in the diagnostics when reading, and kept in the binding.
