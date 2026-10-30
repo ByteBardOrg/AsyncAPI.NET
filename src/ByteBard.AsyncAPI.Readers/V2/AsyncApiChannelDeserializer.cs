@@ -21,7 +21,7 @@ namespace ByteBard.AsyncAPI.Readers
         private static string GetServerReferenceKey(ValueNode valueNode)
         {
             var stringValue = valueNode.GetScalarValue();
-            return stringValue.StartsWith("#/servers/") ? stringValue : "#/servers/" + JsonPointer.EscapeToken(stringValue);
+            return stringValue.StartsWith("#/servers/") ? stringValue : "#/servers/" + JsonPointer.EscapeUriFragmentToken(stringValue);
         }
 
         private static readonly PatternFieldMap<AsyncApiChannel> ChannelPatternFields =
@@ -36,7 +36,7 @@ namespace ByteBard.AsyncAPI.Readers
             var pointer = mapNode.GetReferencePointer();
             if (pointer != null)
             {
-                return new AsyncApiChannelReference(pointer);
+                return new AsyncApiChannelReference(NormalizeChannelPointer(pointer));
             }
 
             var channel = new AsyncApiChannel();
@@ -51,6 +51,23 @@ namespace ByteBard.AsyncAPI.Readers
             LoadV2Operation(mapNode["publish"]?.Value, channel, AsyncApiAction.Receive);
 
             return channel;
+        }
+
+        /// <summary>
+        /// 2.x keys channels by address, which is normalized into the channel's key, so a reference to a root channel
+        /// is pointed at that key.
+        /// </summary>
+        private static string NormalizeChannelPointer(string pointer)
+        {
+            const string channelsPrefix = "#/channels/";
+            if (!pointer.StartsWith(channelsPrefix)
+                || !JsonPointer.TryFromUriFragment(pointer.Substring(1), out var parsed)
+                || parsed.Tokens.Length != 2)
+            {
+                return pointer;
+            }
+
+            return channelsPrefix + JsonPointer.EscapeUriFragmentToken(NormalizeChannelKey(parsed.Tokens[1]));
         }
 
         public static string NormalizeChannelKey(string channelKey, ParseNode node = null)
@@ -84,7 +101,7 @@ namespace ByteBard.AsyncAPI.Readers
             var operation = LoadOperation(node);
             var operationKey = node.CheckMapNode("operation")?["operationId"]?.Value.GetScalarValue() ?? "anonymous-operation-" + Interlocked.Increment(ref node.Context.OperationCounter).ToString();
             operation.Action = action;
-            operation.Channel = new AsyncApiChannelReference("#/channels/" + NormalizeChannelKey(instance.Address));
+            operation.Channel = new AsyncApiChannelReference("#/channels/" + JsonPointer.EscapeUriFragmentToken(NormalizeChannelKey(instance.Address)));
 
             var globalOperations = node.Context.GetFromTempStorage<Dictionary<string, AsyncApiOperation>>(TempStorageKeys.Operations) ?? new Dictionary<string, AsyncApiOperation>();
 

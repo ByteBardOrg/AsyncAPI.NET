@@ -3,7 +3,6 @@ namespace ByteBard.AsyncAPI.Tests
     using System;
     using System.Text.Json.Nodes;
     using ByteBard.AsyncAPI.Exceptions;
-    using ByteBard.AsyncAPI.Readers.ParseNodes;
     using FluentAssertions;
     using NUnit.Framework;
 
@@ -85,6 +84,29 @@ namespace ByteBard.AsyncAPI.Tests
         {
             JsonPointer.EscapeToken(token).Should().Be(expected);
             new JsonPointer("/" + expected).Tokens.Should().Equal(token);
+        }
+
+        [TestCase("plain", "plain")]
+        [TestCase("a/b", "a~1b")]
+        [TestCase("a~b", "a~0b")]
+        [TestCase("a b", "a%20b")]
+        [TestCase("a%20b", "a%2520b")]
+        [TestCase("50%", "50%25")]
+        public void EscapeUriFragmentToken_EscapesAndPercentEncodes(string token, string expected)
+        {
+            JsonPointer.EscapeUriFragmentToken(token).Should().Be(expected);
+            JsonPointer.FromUriFragment("/" + expected).Tokens.Should().Equal(token);
+        }
+
+        [TestCase("/servers/a b", "/servers/a%20b")]
+        [TestCase("/servers/a%20b", "/servers/a%20b")]
+        [TestCase("/servers/a%2520b", "/servers/a%2520b")]
+        [TestCase("/channels/user~1signedup", "/channels/user~1signedup")]
+        [TestCase("/channels/user%7E1signedup", "/channels/user~1signedup")]
+        [TestCase("", "")]
+        public void ToUriFragment_IsTheReverseOfFromUriFragment(string fragment, string expected)
+        {
+            JsonPointer.FromUriFragment(fragment).ToUriFragment().Should().Be(expected);
         }
 
         [Test]

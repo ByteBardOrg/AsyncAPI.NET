@@ -88,21 +88,20 @@
         /// Serializes the v2.
         /// </summary>
         /// <remarks>
-        /// If <see cref="ReferenceInlineSetting.InlineReferences"/> serialization of the referenced tag will be skipped.
+        /// V2 cannot reference a tag, so the referenced tag is always written inline when it can be resolved.
         /// </remarks>
         /// <param name="writer">The writer.</param>
         public override void SerializeV2(IAsyncApiWriter writer)
         {
-            if (!writer.GetSettings().ShouldInlineReference(this.Reference))
+            this.Reference.Workspace = writer.Workspace;
+            if (this.Target == null)
             {
-                // We cannot serialize the Tag as a reference under V2.
+                // Keep the reference rather than drop the tag.
+                this.Reference.SerializeV2(writer);
                 return;
             }
-            else
-            {
-                this.Reference.Workspace = writer.Workspace;
-                this.Target.SerializeV2(writer);
-            }
+
+            this.Target.SerializeV2(writer);
         }
 
         public override void SerializeV3(IAsyncApiWriter writer)

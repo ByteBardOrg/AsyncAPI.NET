@@ -8,5 +8,6 @@
         public const string ComponentMessages = "ComponentMessages";
         public const string ChannelAddresses = "ChannelAddresses";
         public const string ParameterSchemaReferences = "ParameterSchemaReferences";
+        public const string PayloadSchemaFormat = "PayloadSchemaFormat";
     }
 }

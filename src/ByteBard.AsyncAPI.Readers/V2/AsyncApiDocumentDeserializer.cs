@@ -127,16 +127,16 @@ namespace ByteBard.AsyncAPI.Readers
                 if (operation.Value.Channel != null)
                 {
                     var messages = context.GetFromTempStorage<Dictionary<string, AsyncApiMessageReference>>(TempStorageKeys.OperationMessageReferences, operation.Value);
-                    var operationChannelFragmentKey = operation.Value.Channel.Reference.Reference.Split('/').Last();
+                    var operationChannelFragmentKey = GetLastReferenceToken(operation.Value.Channel.Reference);
                     var channel = document.Channels.FirstOrDefault(channel => channel.Key == operationChannelFragmentKey);
                     if (channel.Value == null)
                     {
                         // it most likely came from a components channel, so the reference will be wrong.
                         // Find the channel that references this operations channel, and move the reference.
-                        var correctChannelReference = document.Channels.FirstOrDefault(channel => channel.Value is AsyncApiChannelReference reference && reference.Reference.Reference.EndsWith(operationChannelFragmentKey));
+                        var correctChannelReference = document.Channels.FirstOrDefault(channel => channel.Value is AsyncApiChannelReference reference && GetLastReferenceToken(reference.Reference) == operationChannelFragmentKey);
                         if (correctChannelReference.Key != null)
                         {
-                            operation.Value.Channel = new AsyncApiChannelReference("#/channels/" + JsonPointer.EscapeToken(correctChannelReference.Key));
+                            operation.Value.Channel = new AsyncApiChannelReference("#/channels/" + JsonPointer.EscapeUriFragmentToken(correctChannelReference.Key));
                             channel = correctChannelReference;
                         }
                         else
@@ -161,10 +161,20 @@ namespace ByteBard.AsyncAPI.Readers
                     foreach (var message in messages)
                     {
                         channel.Value.Messages.TryAdd(message.Key, message.Value);
-                        operation.Value.Messages.Add(new AsyncApiMessageReference($"#/channels/{JsonPointer.EscapeToken(channel.Key)}/messages/{JsonPointer.EscapeToken(message.Key)}"));
+                        operation.Value.Messages.Add(new AsyncApiMessageReference($"#/channels/{JsonPointer.EscapeUriFragmentToken(channel.Key)}/messages/{JsonPointer.EscapeUriFragmentToken(message.Key)}"));
                     }
                 }
             }
+        }
+
+        /// <summary>
+        /// Gets the unescaped last pointer token of a reference, so it can be compared with a map key.
+        /// </summary>
+        private static string GetLastReferenceToken(AsyncApiReference reference)
+        {
+            return reference.IsFragment && JsonPointer.TryFromUriFragment(reference.FragmentId, out var pointer) && pointer.Tokens.Length > 0
+                ? pointer.Tokens.Last()
+                : reference.Reference.Split('/').Last();
         }
     }
 }

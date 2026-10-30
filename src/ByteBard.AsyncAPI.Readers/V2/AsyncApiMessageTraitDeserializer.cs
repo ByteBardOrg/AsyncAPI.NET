@@ -8,9 +8,9 @@ namespace ByteBard.AsyncAPI.Readers
     {
         private static FixedFieldMap<AsyncApiMessageTrait> messageTraitFixedFields = new()
         {
-            { "headers", (a, n) => { a.Headers = new AsyncApiMultiFormatSchema { Schema = AsyncApiJsonSchemaDeserializer.LoadSchema(n) }; } },
+            { "headers", (a, n) => { (a.Headers ??= new AsyncApiMultiFormatSchema()).Schema = AsyncApiJsonSchemaDeserializer.LoadSchema(n); } },
             { "correlationId", (a, n) => { a.CorrelationId = LoadCorrelationId(n); } },
-            { "schemaFormat", (a, n) => { a.Headers.SchemaFormat = n.GetScalarValue(); } },
+            { "schemaFormat", (a, n) => { (a.Headers ??= new AsyncApiMultiFormatSchema()).SchemaFormat = n.GetScalarValue(); } },
             { "contentType", (a, n) => { a.ContentType = n.GetScalarValue(); } },
             { "name", (a, n) => { a.Name = n.GetScalarValue(); } },
             { "title", (a, n) => { a.Title = n.GetScalarValue(); } },

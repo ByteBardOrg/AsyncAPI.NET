@@ -1,5 +1,6 @@
 ﻿namespace ByteBard.AsyncAPI.Writers
 {
+    using System.Collections.Generic;
     using ByteBard.AsyncAPI.Models;
 
     /// <summary>
@@ -64,6 +65,24 @@
         internal LoopDetector LoopDetector { get; }
 
         /// <summary>
+        /// Local references to write inline because their target does not exist in the written document,
+        /// for example a 2.x "#/channels/a/publish/message" written as 3.x.
+        /// </summary>
+        internal ISet<string> DanglingReferences { get; private set; } = new HashSet<string>();
+
+        /// <summary>
+        /// Creates a copy of these settings that also inlines the given references.
+        /// </summary>
+        internal AsyncApiWriterSettings WithDanglingReferences(ISet<string> danglingReferences)
+        {
+            return new AsyncApiWriterSettings
+            {
+                ReferenceInline = this.ReferenceInline,
+                DanglingReferences = danglingReferences,
+            };
+        }
+
+        /// <summary>
         /// Returns back if the refernece should be inlined or not.
         /// </summary>
         /// <param name="reference">The reference.</param>
@@ -75,7 +94,7 @@
                 return false;
             }
 
-            return this.InlineLocalReferences;
+            return this.InlineLocalReferences || this.DanglingReferences.Contains(reference.Reference);
         }
     }
 }

@@ -1,8 +1,10 @@
 namespace ByteBard.AsyncAPI
 {
     using System;
+    using System.Globalization;
     using System.Linq;
     using System.Text;
+    using System.Text.Json.Nodes;
     using ByteBard.AsyncAPI.Exceptions;
 
     /// <summary>
@@ -115,6 +117,57 @@ namespace ByteBard.AsyncAPI
         public static string EscapeToken(string token)
         {
             return token.Replace("~", "~0").Replace("/", "~1");
+        }
+
+        /// <summary>
+        /// Escapes a single reference token for a URI fragment identifier (RFC 6901 section 6), so "~" becomes "~0",
+        /// "/" becomes "~1", and the result is percent-encoded, e.g. "a b" becomes "a%20b" and "a%20b" becomes "a%2520b".
+        /// </summary>
+        /// <param name="token">The unescaped token.</param>
+        public static string EscapeUriFragmentToken(string token)
+        {
+            return Uri.EscapeDataString(EscapeToken(token));
+        }
+
+        /// <summary>
+        /// Gets the URI fragment identifier representation of this JSON pointer (RFC 6901 section 6), without the leading <c>#</c>.
+        /// This is the reverse of <see cref="FromUriFragment"/>.
+        /// </summary>
+        public string ToUriFragment()
+        {
+            return string.Concat(this.Tokens.Select(token => "/" + EscapeUriFragmentToken(token)));
+        }
+
+        /// <summary>
+        /// Finds the node this pointer references.
+        /// </summary>
+        /// <param name="document">The document to evaluate the pointer against.</param>
+        /// <returns>The referenced node, or <c>null</c> when it does not exist.</returns>
+        public JsonNode Find(JsonNode document)
+        {
+            var node = document;
+            foreach (var token in this.Tokens)
+            {
+                if (node is JsonArray sequence)
+                {
+                    // RFC 6901 array indices are "0" or digits without a leading zero.
+                    if ((token.Length > 1 && token[0] == '0')
+                        || !int.TryParse(token, NumberStyles.None, CultureInfo.InvariantCulture, out var index)
+                        || index >= sequence.Count)
+                    {
+                        return null;
+                    }
+
+                    node = sequence[index];
+                }
+                else if (node is not JsonObject map || !map.TryGetPropertyValue(token, out node))
+                {
+                    // The token walks into a scalar or a missing property.
+                    return null;
+                }
+            }
+
+            return node;
         }
 
         /// <summary>

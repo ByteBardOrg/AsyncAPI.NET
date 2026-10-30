@@ -118,14 +118,6 @@ namespace ByteBard.AsyncAPI.Models
                     return;
                 }
 
-                if (this.Reference.Reference.StartsWith("#/channels"))
-                {
-                    // Try force inline anyway.
-                    this.Reference.Workspace = writer.Workspace;
-                    this.Target?.SerializeV2(writer);
-                    return;
-                }
-
                 this.Reference.SerializeV2(writer);
                 return;
             }

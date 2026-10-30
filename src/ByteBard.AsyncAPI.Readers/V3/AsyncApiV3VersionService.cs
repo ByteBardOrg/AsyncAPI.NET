@@ -2,6 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Text.Json.Nodes;
     using ByteBard.AsyncAPI.Exceptions;
     using ByteBard.AsyncAPI.Models;
     using ByteBard.AsyncAPI.Models.Interfaces;
@@ -38,6 +39,8 @@
             [typeof(AsyncApiAvroSchema)] = AsyncApiAvroSchemaDeserializer.LoadSchema,
             [typeof(AsyncApiSecurityScheme)] = AsyncApiV3Deserializer.LoadSecurityScheme,
             [typeof(AsyncApiMultiFormatSchema)] = AsyncApiV3Deserializer.LoadMultiFormatSchema,
+            [typeof(AsyncApiCorrelationId)] = AsyncApiV3Deserializer.LoadCorrelationId,
+            [typeof(AsyncApiOperationTrait)] = AsyncApiV3Deserializer.LoadOperationTrait,
             [typeof(AsyncApiServer)] = AsyncApiV3Deserializer.LoadServer,
             [typeof(AsyncApiServerVariable)] = AsyncApiV3Deserializer.LoadServerVariable,
             [typeof(AsyncApiTag)] = AsyncApiV3Deserializer.LoadTag,
@@ -78,6 +81,11 @@
         public AsyncApiDocument LoadDocument(RootNode rootNode)
         {
             return AsyncApiV3Deserializer.LoadAsyncApi(rootNode);
+        }
+
+        public JsonNode PrepareReferenceFragment(JsonNode fragment, IAsyncApiReferenceable reference, ParsingContext context)
+        {
+            return fragment;
         }
 
         public T LoadElement<T>(ParseNode node)

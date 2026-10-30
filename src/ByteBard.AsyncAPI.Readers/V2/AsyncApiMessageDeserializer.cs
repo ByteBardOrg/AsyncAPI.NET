@@ -152,7 +152,14 @@ namespace ByteBard.AsyncAPI.Readers
                 var payload = LoadPayload(mapNode["payload"].Value, schema);
                 if (payload is IAsyncApiReferenceable reference && !reference.Reference.IsExternal)
                 {
-                    message.Payload = new AsyncApiMultiFormatSchemaReference(reference.Reference.Reference);
+                    var payloadReference = new AsyncApiMultiFormatSchemaReference(reference.Reference.Reference);
+                    message.Payload = payloadReference;
+
+                    // 2.x keeps the schema format on the message, so keep it for when the reference is resolved.
+                    if (schema != null)
+                    {
+                        node.Context.SetTempStorage(TempStorageKeys.PayloadSchemaFormat, schema, payloadReference);
+                    }
                 }
                 else
                 {
