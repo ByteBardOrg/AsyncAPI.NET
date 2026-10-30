@@ -14,7 +14,7 @@ V2 documents are upgraded to the V3 model during deserialization and can be writ
 [Getting started guide](https://bytebard.org/AsyncAPI.NET/docs/guides/getting-started)
 
 ## Documentation
-The [documentation site](https://bytebard.org/AsyncAPI.NET/) is built with Docusaurus. See [website/README.md](website/README.md) for local development instructions. GitHub Pages must be configured to use GitHub Actions for deployment.
+The [documentation site](https://bytebard.org/AsyncAPI.NET/) is built with Docusaurus. See [website/README.md](website/README.md) for local development instructions.
 
 ## Installation
 Generally you want to use Readers and Bindings.
