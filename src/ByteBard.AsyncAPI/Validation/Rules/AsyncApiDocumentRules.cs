@@ -16,7 +16,7 @@ namespace ByteBard.AsyncAPI.Validation.Rules
         /// </summary>
         private static Regex keyRegex = new Regex(@"^[a-zA-Z0-9\.\-_]+$", RegexOptions.None, RegexTimeout);
 
-        private static Regex serverKeyRegex = new Regex(@"^[a-zA-Z0-9_\-]+$", RegexOptions.None, RegexTimeout);
+        private static Regex serverKeyRegex = new Regex(@"^[a-zA-Z0-9_\-]+\z", RegexOptions.None, RegexTimeout);
 
         public static ValidationRule<AsyncApiDocument> DocumentRequiredFields =>
             new ValidationRule<AsyncApiDocument>(

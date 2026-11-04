@@ -36,7 +36,7 @@ public class KeyRegexTests
                 yield return new TestCaseData(version, key, true);
             }
 
-            foreach (var key in new[] { "server.one", "sérver", "server/name", "server name", "" })
+            foreach (var key in new[] { "server.one", "sérver", "server/name", "server name", "", "server\n", "server\r\n", "server\nother" })
             {
                 yield return new TestCaseData(version, key, false);
             }
@@ -63,6 +63,7 @@ public class KeyRegexTests
     public void ServerKey_UsesSpecificationPattern(string version, string key, bool valid)
     {
         var addressField = version == "2.6.0" ? "url" : "host";
+        var yamlKey = key.Replace("\r", "\\r").Replace("\n", "\\n");
         var input = $$"""
             asyncapi: {{version}}
             info:
@@ -71,7 +72,7 @@ public class KeyRegexTests
             channels:
               chat: {}
             servers:
-              '{{key}}':
+              "{{yamlKey}}":
                 {{addressField}}: localhost
                 protocol: kafka
             """;
