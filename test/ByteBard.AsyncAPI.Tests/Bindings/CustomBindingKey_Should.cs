@@ -65,6 +65,52 @@
         }
 
         [Test]
+        public void V3_CustomBindingClashingWithExtension_Throws()
+        {
+            // Arrange
+            var channel = new AsyncApiChannel();
+            channel.Bindings.Add(new MyBinding { Custom = "someValue" });
+            channel.Bindings.Extensions.Add("x-my", new AsyncApiAny("extensionValue"));
+
+            // Act
+            var act = () => channel.SerializeAsYaml(AsyncApiVersion.AsyncApi3_0);
+
+            // Assert
+            act.Should().Throw<AsyncApiWriterException>().WithMessage("*'my'*'x-my'*extension 'x-my'*");
+        }
+
+        [Test]
+        public void V3_CustomBindingClashingWithPrefixedBinding_Throws()
+        {
+            // Arrange
+            var channel = new AsyncApiChannel();
+            channel.Bindings.Add(new MyBinding { Custom = "someValue" });
+            channel.Bindings.Add("x-my", new MyBinding { Custom = "otherValue" });
+
+            // Act
+            var act = () => channel.SerializeAsYaml(AsyncApiVersion.AsyncApi3_0);
+
+            // Assert
+            act.Should().Throw<AsyncApiWriterException>().WithMessage("*clashes with binding*");
+        }
+
+        [Test]
+        public void V2_CustomBindingAndSameNamedExtension_SerializesBoth()
+        {
+            // Arrange
+            var channel = new AsyncApiChannel();
+            channel.Bindings.Add(new MyBinding { Custom = "someValue" });
+            channel.Bindings.Extensions.Add("x-my", new AsyncApiAny("extensionValue"));
+
+            // Act
+            var actual = channel.SerializeAsYaml(AsyncApiVersion.AsyncApi2_0);
+
+            // Assert
+            actual.Should().Contain("  my:");
+            actual.Should().Contain("x-my: extensionValue");
+        }
+
+        [Test]
         public void V3_CustomBindingUnderExtensionKey_ReadsAsBindingWithoutDiagnostics()
         {
             // Arrange
