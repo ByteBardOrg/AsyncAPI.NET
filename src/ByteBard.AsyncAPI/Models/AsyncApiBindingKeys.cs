@@ -15,11 +15,12 @@
     /// </remarks>
     public static class AsyncApiBindingKeys
     {
-        // Every binding named by a bindings object in the AsyncAPI 3.0 and 3.1 JSON schemas.
+        // Every binding the AsyncAPI 3.0 and 3.1 specifications name in a bindings object. The prose is normative; the
+        // JSON schemas omit mqtt5 and mercure, but the specification text lists them as fixed fields.
         private static readonly HashSet<string> SpecificationKeys = new HashSet<string>(StringComparer.Ordinal)
         {
-            "amqp", "amqp1", "anypointmq", "googlepubsub", "http", "ibmmq", "jms", "kafka", "mqtt", "nats", "pulsar",
-            "redis", "ros2", "sns", "solace", "sqs", "stomp", "ws",
+            "amqp", "amqp1", "anypointmq", "googlepubsub", "http", "ibmmq", "jms", "kafka", "mercure", "mqtt", "mqtt5",
+            "nats", "pulsar", "redis", "ros2", "sns", "solace", "sqs", "stomp", "ws",
         };
 
         /// <summary>

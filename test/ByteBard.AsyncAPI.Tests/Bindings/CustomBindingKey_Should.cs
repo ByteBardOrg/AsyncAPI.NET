@@ -174,7 +174,8 @@
         [TestCase("kafka", true)]
         [TestCase("ws", true)]
         [TestCase("ros2", true)]
-        [TestCase("mqtt5", false)]
+        [TestCase("mqtt5", true)]
+        [TestCase("mercure", true)]
         [TestCase("signalr", false)]
         [TestCase("x-signalr", false)]
         public void IsSpecificationKey_ReturnsWhetherAsyncApi3DefinesTheBinding(string key, bool expected)
@@ -185,7 +186,7 @@
         [TestCase("kafka", "kafka")]
         [TestCase("signalr", "x-signalr")]
         [TestCase("x-signalr", "x-signalr")]
-        [TestCase("mqtt5", "x-mqtt5")]
+        [TestCase("mqtt5", "mqtt5")]
         public void ToV3Key_PrefixesKeysAsyncApi3DoesNotDefine(string key, string expected)
         {
             AsyncApiBindingKeys.ToV3Key(key).Should().Be(expected);

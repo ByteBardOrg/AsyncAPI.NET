@@ -87,7 +87,7 @@ if (referenceServer.Bindings.TryGetValue<MQTT5ServerBinding>(out var referenced)
 
 `TryGetValue<TBinding>` returns `false` if no binding with that type's `BindingKey` is present; the union pattern then distinguishes the scalar and schema values.
 
-The union is also used by MQTT's server and operation fields. MQTT 5's binding is deprecated, and `BindingsCollection.MQTT5` has no channel, operation, or message parser. AsyncAPI 2.x and 3.x serialization are supported; specify a target version when serializing. AsyncAPI 3 has no `mqtt5` binding, so a 3.x document carries it as `x-mqtt5` (see [custom bindings](/docs/guides/custom-bindings)). See the [shared guide](index.md).
+The union is also used by MQTT's server and operation fields. MQTT 5's binding is deprecated, and `BindingsCollection.MQTT5` has no channel, operation, or message parser. AsyncAPI 2.x and 3.x serialization are supported; specify a target version when serializing. See the [shared guide](index.md).
 
 ## Object model
 
