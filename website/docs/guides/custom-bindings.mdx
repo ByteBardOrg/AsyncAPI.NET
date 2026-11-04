@@ -51,7 +51,7 @@ var document = new AsyncApiStringReader(settings).Read(input, out var diagnostic
 
 ## Binding keys in AsyncAPI 3
 
-AsyncAPI 3 bindings objects only allow the binding names the specification lists (`amqp`, `http`, `kafka`, `ws` and so on) and `x-` extensions. When a document is serialized as AsyncAPI 3, a binding whose `BindingKey` is not one of those names is written as an extension: `FooBinding` above appears as `x-foo`. The key in the object model stays `foo`, so `channel.Bindings["foo"]` and `TryGetValue<FooBinding>` work as before. `AsyncApiBindingKeys.ToV3Key` returns the name a key is written under. AsyncAPI 2 allows any key, so AsyncAPI 2 documents keep `foo`.
+AsyncAPI 3 bindings objects only allow the binding names the specification lists (`amqp`, `http`, `kafka`, `ws` and so on) and `x-` extensions. When a document is serialized as AsyncAPI 3, a binding whose `BindingKey` is not one of those names is written as an extension: `FooBinding` above appears as `x-foo`. The key in the object model stays `foo`, so `channel.Bindings["foo"]` and `TryGetValue<FooBinding>` work as before. `AsyncApiBindingKeys.ToV3Key` returns the name a key is written under. AsyncAPI 2 allows any key, so AsyncAPI 2 documents keep `foo`. A binding whose `BindingKey` already starts with `x-` is written and read under that key in both versions.
 
 When reading an AsyncAPI 3 document, `x-foo` is read as the binding if a parser for `foo` is registered; otherwise it stays an extension. A registered custom binding under its bare key (`foo`) is still read, but the reader reports an error, since the document does not conform to the specification.
 

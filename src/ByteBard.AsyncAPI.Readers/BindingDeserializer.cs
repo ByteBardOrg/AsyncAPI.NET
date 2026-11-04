@@ -38,16 +38,20 @@ namespace ByteBard.AsyncAPI.Readers
             var bindingType = typeof(TBinding).Name.Substring(1);
             foreach (var property in mapNode)
             {
+                // A registered key is read as that binding, even when it carries the x- prefix itself.
                 var key = property.Name;
-                if (version == AsyncApiVersion.AsyncApi3_0 && TryGetCustomBindingKey(property.Name, parsers, out var customKey))
+                if (!parsers.ContainsKey(key))
                 {
-                    // AsyncAPI 3 writes a custom binding as an extension (x-<key>); read it back as the binding.
-                    key = customKey;
-                }
-                else if (patternFields.Keys.Any(isMatch => isMatch(property.Name)))
-                {
-                    property.ParseField(bindings, patternFields);
-                    continue;
+                    if (version == AsyncApiVersion.AsyncApi3_0 && TryGetCustomBindingKey(key, parsers, out var customKey))
+                    {
+                        // AsyncAPI 3 writes a custom binding as an extension (x-<key>); read it back as the binding.
+                        key = customKey;
+                    }
+                    else if (patternFields.Keys.Any(isMatch => isMatch(key)))
+                    {
+                        property.ParseField(bindings, patternFields);
+                        continue;
+                    }
                 }
 
                 if (!parsers.TryGetValue(key, out var parser))
@@ -58,7 +62,7 @@ namespace ByteBard.AsyncAPI.Readers
                     continue;
                 }
 
-                if (version == AsyncApiVersion.AsyncApi3_0 && key == property.Name && !AsyncApiBindingKeys.IsSpecificationKey(key))
+                if (version == AsyncApiVersion.AsyncApi3_0 && AsyncApiBindingKeys.ToV3Key(key) != property.Name)
                 {
                     // AsyncAPI 3 bindings objects only allow the specification's binding names and extensions. The binding
                     // is still read, and written back as x-<key>.

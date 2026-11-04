@@ -7,6 +7,8 @@
     using ByteBard.AsyncAPI.Models.Interfaces;
     using ByteBard.AsyncAPI.Readers;
     using ByteBard.AsyncAPI.Readers.Interface;
+    using ByteBard.AsyncAPI.Readers.ParseNodes;
+    using ByteBard.AsyncAPI.Writers;
     using FluentAssertions;
     using NUnit.Framework;
 
@@ -147,6 +149,28 @@
             channel.Bindings.Extensions.Keys.Should().BeEquivalentTo("x-other");
         }
 
+        [TestCase(AsyncApiVersion.AsyncApi2_0)]
+        [TestCase(AsyncApiVersion.AsyncApi3_0)]
+        public void BindingKeyWithExtensionPrefix_ReadsAndWritesAsBinding(AsyncApiVersion version)
+        {
+            // Arrange
+            var input =
+                """
+                bindings:
+                  x-prefixed:
+                    custom: someValue
+                """;
+
+            // Act
+            var channel = ReadChannel(input, version, out var diagnostic);
+
+            // Assert
+            diagnostic.Errors.Should().BeEmpty();
+            channel.Bindings.Extensions.Should().BeEmpty();
+            ((PrefixedBinding)channel.Bindings["x-prefixed"]).Custom.Should().Be("someValue");
+            channel.SerializeAsYaml(version).Should().BePlatformAgnosticEquivalentTo(input);
+        }
+
         [TestCase("kafka", true)]
         [TestCase("ws", true)]
         [TestCase("ros2", true)]
@@ -172,7 +196,39 @@
             var settings = new AsyncApiReaderSettings();
             settings.Bindings = BindingsCollection.Kafka;
             settings.Bindings.Add(new MyBinding());
+            settings.Bindings.Add(new PrefixedBinding());
             return new AsyncApiStringReader(settings).ReadFragment<AsyncApiChannel>(input, version, out diagnostic);
+        }
+    }
+
+    /// <summary>A custom binding whose key already carries the extension prefix.</summary>
+    public class PrefixedBinding : ChannelBinding<PrefixedBinding>
+    {
+        public string Custom { get; set; }
+
+        public override string BindingKey => "x-prefixed";
+
+        protected override FixedFieldMap<PrefixedBinding> FixedFieldMap => new FixedFieldMap<PrefixedBinding>()
+        {
+            { "custom", (a, n) => { a.Custom = n.GetScalarValue(); } },
+        };
+
+        public override void SerializeV2(IAsyncApiWriter writer)
+        {
+            this.SerializeProperties(writer);
+        }
+
+        public override void SerializeV3(IAsyncApiWriter writer)
+        {
+            this.SerializeProperties(writer);
+        }
+
+        public override void SerializeProperties(IAsyncApiWriter writer)
+        {
+            writer.WriteStartObject();
+            writer.WriteRequiredProperty("custom", this.Custom);
+            writer.WriteExtensions(this.Extensions);
+            writer.WriteEndObject();
         }
     }
 }
