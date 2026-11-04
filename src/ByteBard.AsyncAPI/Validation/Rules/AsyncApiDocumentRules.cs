@@ -16,6 +16,8 @@ namespace ByteBard.AsyncAPI.Validation.Rules
         /// </summary>
         private static Regex keyRegex = new Regex(@"^[a-zA-Z0-9\.\-_]+$", RegexOptions.None, RegexTimeout);
 
+        private static Regex serverKeyRegex = new Regex(@"^[a-zA-Z0-9_\-]+$", RegexOptions.None, RegexTimeout);
+
         public static ValidationRule<AsyncApiDocument> DocumentRequiredFields =>
             new ValidationRule<AsyncApiDocument>(
                 (context, document) =>
@@ -67,11 +69,11 @@ namespace ByteBard.AsyncAPI.Validation.Rules
                     context.Enter("servers");
                     foreach (var key in document.Servers?.Keys)
                     {
-                        if (!keyRegex.IsMatch(key))
+                        if (!serverKeyRegex.IsMatch(key))
                         {
                             context.CreateError(
                                 "ServerKeys",
-                                string.Format(Resource.Validation_KeyMustMatchRegularExpr, key, "servers", keyRegex.ToString()));
+                                string.Format(Resource.Validation_KeyMustMatchRegularExpr, key, "servers", serverKeyRegex.ToString()));
                         }
                     }
 

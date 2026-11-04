@@ -4,7 +4,7 @@
 
     public static class AsyncApiExtensions
     {
-        private static Regex channelAddressExpressionRegex = new Regex("{[a-zA-Z1-9_-]*}");
+        private static Regex channelAddressExpressionRegex = new Regex(@"\{[A-Za-z0-9_-]+\}");
 
         public static bool IsChannelAddressExpression(this string address)
         {
