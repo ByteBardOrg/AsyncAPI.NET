@@ -54,9 +54,12 @@ namespace ByteBard.AsyncAPI.Tests.Bindings.MQTT5
             var parsers = ByteBard.AsyncAPI.Bindings.BindingsCollection.MQTT;
             parsers.Add(new MQTT5ServerBinding());
             var reader = new AsyncApiStringReader(new AsyncApiReaderSettings { Bindings = parsers });
-            var yaml = (version == AsyncApiVersion.AsyncApi2_0 ? "url: localhost\nprotocol: mqtt\n" : "host: localhost\nprotocol: mqtt\n") + """
+
+            // AsyncAPI 3 dropped the mqtt5 binding, so a 3.x document carries it as an extension.
+            var key = version == AsyncApiVersion.AsyncApi2_0 ? "mqtt5" : "x-mqtt5";
+            var yaml = (version == AsyncApiVersion.AsyncApi2_0 ? "url: localhost\nprotocol: mqtt\n" : "host: localhost\nprotocol: mqtt\n") + $$"""
                 bindings:
-                  mqtt5:
+                  {{key}}:
                     sessionExpiryInterval:
                       $ref: '#/components/schemas/interval'
                 """;
@@ -72,9 +75,9 @@ namespace ByteBard.AsyncAPI.Tests.Bindings.MQTT5
             roundTripDiagnostics.Errors.Should().BeEmpty();
             (reparsed.Bindings["mqtt5"] as MQTT5ServerBinding).SessionExpiryInterval.Should().BeOfType<MQTTIntegerSchema>().Which.Schema.Should().BeOfType<AsyncApiJsonSchemaReference>();
 
-            var schemaYaml = (version == AsyncApiVersion.AsyncApi2_0 ? "url: localhost\nprotocol: mqtt\n" : "host: localhost\nprotocol: mqtt\n") + """
+            var schemaYaml = (version == AsyncApiVersion.AsyncApi2_0 ? "url: localhost\nprotocol: mqtt\n" : "host: localhost\nprotocol: mqtt\n") + $$"""
                 bindings:
-                  mqtt5:
+                  {{key}}:
                     sessionExpiryInterval:
                       type: integer
                       minimum: 1

@@ -57,7 +57,9 @@ namespace ByteBard.AsyncAPI.Tests.Bindings.Registration
             ros2.RmwImplementation.Should().Be("rmw_fastrtps_cpp");
             ros2.DomainId.Should().Be(7);
 
-            var mqtt5Binding = reader.ReadFragment<AsyncApiServer>(serverAddress + "protocol: mqtt5\nbindings:\n  mqtt5: {}\n", version, out var mqtt5Diagnostics);
+            // AsyncAPI 3 dropped the mqtt5 binding, so a 3.x document carries it as an extension.
+            var mqtt5Key = version == AsyncApiVersion.AsyncApi2_0 ? "mqtt5" : "x-mqtt5";
+            var mqtt5Binding = reader.ReadFragment<AsyncApiServer>(serverAddress + "protocol: mqtt5\nbindings:\n  " + mqtt5Key + ": {}\n", version, out var mqtt5Diagnostics);
             mqtt5Diagnostics.Errors.Should().BeEmpty();
             mqtt5Diagnostics.Warnings.Should().BeEmpty();
             mqtt5Binding.Bindings.Should().ContainSingle(binding => binding.Key == "mqtt5");

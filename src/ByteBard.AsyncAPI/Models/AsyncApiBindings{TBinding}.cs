@@ -3,6 +3,7 @@
     using System;
     using System.Collections;
     using System.Collections.Generic;
+    using ByteBard.AsyncAPI.Bindings;
     using ByteBard.AsyncAPI.Models.Interfaces;
     using ByteBard.AsyncAPI.Writers;
 
@@ -45,12 +46,10 @@
 
             foreach (var binding in this)
             {
-                var bindingType = binding.Key;
-                var bindingValue = binding.Value;
+                // AsyncAPI 3 only allows the specification's binding names, so a custom binding is written as an extension.
+                writer.WritePropertyName(AsyncApiBindingKeys.ToV3Key(binding.Key));
 
-                writer.WritePropertyName(bindingType);
-
-                bindingValue.SerializeV3(writer);
+                binding.Value.SerializeV3(writer);
             }
 
             writer.WriteExtensions(this.Extensions);
