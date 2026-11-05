@@ -11,11 +11,11 @@
         /// <summary>
         /// The key regex.
         /// </summary>
-        public static Regex KeyRegex = new Regex(@"^[\w\d\.\-_]+$");
+        public static Regex KeyRegex = new Regex(@"^[a-zA-Z0-9\.\-_]+$");
 
         /// <summary>
         /// All the fixed fields declared above are objects
-        /// that MUST use keys that match the regular expression: ^[\w\d\.\-_]+$.
+        /// that MUST use keys that match the regular expression: ^[a-zA-Z0-9\.\-_]+$.
         /// </summary>
         public static ValidationRule<AsyncApiComponents> KeyMustBeRegularExpression =>
             new ValidationRule<AsyncApiComponents>(
