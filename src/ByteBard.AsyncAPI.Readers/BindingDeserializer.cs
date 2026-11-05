@@ -1,7 +1,9 @@
 namespace ByteBard.AsyncAPI.Readers
 {
+    using System;
     using System.Collections.Generic;
     using System.Linq;
+    using ByteBard.AsyncAPI.Bindings;
     using ByteBard.AsyncAPI.Exceptions;
     using ByteBard.AsyncAPI.Extensions;
     using ByteBard.AsyncAPI.Models;
@@ -25,27 +27,49 @@ namespace ByteBard.AsyncAPI.Readers
         internal static AsyncApiBindings<TBinding> LoadBindings<TBinding>(
             MapNode mapNode,
             IDictionary<string, IBindingParser<TBinding>> parsers,
-            PatternFieldMap<AsyncApiBindings<TBinding>> patternFields)
+            PatternFieldMap<AsyncApiBindings<TBinding>> patternFields,
+            AsyncApiVersion version = AsyncApiVersion.AsyncApi2_0)
             where TBinding : IBinding
         {
             var context = mapNode.Context;
             var bindings = new AsyncApiBindings<TBinding>();
+
+            // TBinding is the binding interface (e.g. IChannelBinding), so drop the leading "I" for the diagnostics.
+            var bindingType = typeof(TBinding).Name.Substring(1);
             foreach (var property in mapNode)
             {
-                if (patternFields.Keys.Any(isMatch => isMatch(property.Name)))
+                // A registered key is read as that binding, even when it carries the x- prefix itself.
+                var key = property.Name;
+                if (!parsers.ContainsKey(key))
                 {
+                    if (version == AsyncApiVersion.AsyncApi3_0 && TryGetCustomBindingKey(key, parsers, out var customKey))
+                    {
+                        // AsyncAPI 3 writes a custom binding as an extension (x-<key>); read it back as the binding.
+                        key = customKey;
+                    }
+                    else if (patternFields.Keys.Any(isMatch => isMatch(key)))
+                    {
+                        property.ParseField(bindings, patternFields);
+                        continue;
+                    }
+                }
+
+                if (!parsers.TryGetValue(key, out var parser))
+                {
+                    // Reported as an error because the binding is dropped from the model and cannot be written back.
+                    context.Diagnostic.Errors.Add(
+                        new AsyncApiError(context.GetLocation(), $"{bindingType} {key} is not found"));
                     continue;
                 }
 
-                if (!parsers.TryGetValue(property.Name, out var parser))
+                if (version == AsyncApiVersion.AsyncApi3_0 && AsyncApiBindingKeys.ToV3Key(key) != property.Name)
                 {
-                    // TBinding is the binding interface (e.g. IChannelBinding), so drop the leading "I" for the diagnostic.
-                    var bindingType = typeof(TBinding).Name.Substring(1);
-
-                    // Reported as an error because the binding is dropped from the model and cannot be written back.
+                    // AsyncAPI 3 bindings objects only allow the specification's binding names and extensions. The binding
+                    // is still read, and written back as x-<key>.
                     context.Diagnostic.Errors.Add(
-                        new AsyncApiError(context.GetLocation(), $"{bindingType} {property.Name} is not found"));
-                    continue;
+                        new AsyncApiError(
+                            context.GetLocation(),
+                            $"{bindingType} {key} is not an AsyncAPI 3 binding name; write a custom binding as {AsyncApiBindingKeys.ToV3Key(key)}"));
                 }
 
                 try
@@ -63,9 +87,29 @@ namespace ByteBard.AsyncAPI.Readers
                 }
             }
 
-            mapNode.ParseFields(bindings, patternFields);
-
             return bindings;
+        }
+
+        private static bool TryGetCustomBindingKey<TBinding>(
+            string propertyName,
+            IDictionary<string, IBindingParser<TBinding>> parsers,
+            out string key)
+            where TBinding : IBinding
+        {
+            key = null;
+            if (!propertyName.StartsWith(AsyncApiConstants.ExtensionFieldNamePrefix, StringComparison.Ordinal))
+            {
+                return false;
+            }
+
+            var candidate = propertyName.Substring(AsyncApiConstants.ExtensionFieldNamePrefix.Length);
+            if (AsyncApiBindingKeys.IsSpecificationKey(candidate) || !parsers.ContainsKey(candidate))
+            {
+                return false;
+            }
+
+            key = candidate;
+            return true;
         }
 
         private static PatternFieldMap<T> BindingPatternExtensionFields<T>()
