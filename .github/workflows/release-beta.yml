@@ -56,8 +56,6 @@ jobs:
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: |
-            8.0.x
-            9.0.x
             10.0.x
 
       - run: echo ${{ env.GITHUB_RUN_NUMBER_WITH_OFFSET }}
