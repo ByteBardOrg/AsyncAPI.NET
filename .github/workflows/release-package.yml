@@ -65,6 +65,7 @@ jobs:
             8.0.x
             9.0.x
             10.0.x
+            11.0.x
 
       - name: Build ${{ matrix.package-name }} project and pack NuGet package
         if: needs.prereleaseCheck.outputs.trigger_release == 'true'
