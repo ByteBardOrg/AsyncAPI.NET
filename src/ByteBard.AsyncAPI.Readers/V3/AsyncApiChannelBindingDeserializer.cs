@@ -22,7 +22,7 @@ namespace ByteBard.AsyncAPI.Readers
                 return new AsyncApiBindingsReference<IChannelBinding>(pointer);
             }
 
-            return BindingDeserializer.LoadBindings(mapNode, node.Context.ChannelBindingParsers, channelBindingPatternFields);
+            return BindingDeserializer.LoadBindings(mapNode, node.Context.ChannelBindingParsers, channelBindingPatternFields, AsyncApiVersion.AsyncApi3_0);
         }
     }
 }

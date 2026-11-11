@@ -3,6 +3,7 @@
     using System;
     using System.Collections;
     using System.Collections.Generic;
+    using ByteBard.AsyncAPI.Bindings;
     using ByteBard.AsyncAPI.Models.Interfaces;
     using ByteBard.AsyncAPI.Writers;
 
@@ -41,16 +42,34 @@
                 throw new ArgumentNullException(nameof(writer));
             }
 
+            // AsyncAPI 3 only allows the specification's binding names, so a custom binding is written as an extension.
+            // Its x- name can then clash with an extension (or another binding) of the same name; refuse to write a
+            // document with a duplicate property rather than silently dropping one of them.
+            var names = new Dictionary<string, string>(StringComparer.Ordinal);
+            foreach (var extension in this.Extensions.Keys)
+            {
+                names[extension] = $"extension '{extension}'";
+            }
+
+            foreach (var binding in this)
+            {
+                var name = AsyncApiBindingKeys.ToV3Key(binding.Key);
+                if (names.TryGetValue(name, out var existing))
+                {
+                    throw new AsyncApiWriterException(
+                        $"Binding '{binding.Key}' is written as '{name}' in AsyncAPI 3, which clashes with {existing}.");
+                }
+
+                names[name] = $"binding '{binding.Key}'";
+            }
+
             writer.WriteStartObject();
 
             foreach (var binding in this)
             {
-                var bindingType = binding.Key;
-                var bindingValue = binding.Value;
+                writer.WritePropertyName(AsyncApiBindingKeys.ToV3Key(binding.Key));
 
-                writer.WritePropertyName(bindingType);
-
-                bindingValue.SerializeV3(writer);
+                binding.Value.SerializeV3(writer);
             }
 
             writer.WriteExtensions(this.Extensions);
