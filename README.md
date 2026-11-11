@@ -1,6 +1,8 @@
 # AsyncAPI.NET
 
 [![Build & Test](https://github.com/ByteBardOrg/AsyncAPI.NET/actions/workflows/ci.yml/badge.svg)](https://github.com/ByteBardOrg/AsyncAPI.NET/actions/workflows/ci.yml)
+[![NuGet](https://img.shields.io/nuget/v/ByteBard.AsyncAPI.NET.svg?label=NuGet)](https://www.nuget.org/packages/ByteBard.AsyncAPI.NET)
+[![NuGet downloads](https://img.shields.io/nuget/dt/ByteBard.AsyncAPI.NET.svg?label=downloads)](https://www.nuget.org/packages/ByteBard.AsyncAPI.NET)
 
 AsyncAPI.NET provides a .NET object model for AsyncAPI documents, JSON/YAML readers and writers, and protocol bindings.
 
@@ -9,6 +11,12 @@ It supports AsyncAPI 2.x and 3.x. V2 documents are upgraded to the V3-shaped mod
 See the **[documentation site](https://bytebard.org/AsyncAPI.NET/)** for guides and examples, or the [changelog](CHANGELOG.md) for release notes.
 
 ## Install
+
+| Package | Version |
+| --- | --- |
+| [ByteBard.AsyncAPI.NET](https://www.nuget.org/packages/ByteBard.AsyncAPI.NET) | [![NuGet](https://img.shields.io/nuget/v/ByteBard.AsyncAPI.NET.svg)](https://www.nuget.org/packages/ByteBard.AsyncAPI.NET) |
+| [ByteBard.AsyncAPI.NET.Readers](https://www.nuget.org/packages/ByteBard.AsyncAPI.NET.Readers) | [![NuGet](https://img.shields.io/nuget/v/ByteBard.AsyncAPI.NET.Readers.svg)](https://www.nuget.org/packages/ByteBard.AsyncAPI.NET.Readers) |
+| [ByteBard.AsyncAPI.NET.Bindings](https://www.nuget.org/packages/ByteBard.AsyncAPI.NET.Bindings) | [![NuGet](https://img.shields.io/nuget/v/ByteBard.AsyncAPI.NET.Bindings.svg)](https://www.nuget.org/packages/ByteBard.AsyncAPI.NET.Bindings) |
 
 Install the core model and serializers, plus the readers for JSON/YAML input:
 
